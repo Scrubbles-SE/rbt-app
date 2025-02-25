@@ -373,5 +373,4 @@ export {
     addTagToEntry,
     addTagObject,
     updateTagObject
-    //deleteEntriesByEntryId
 };

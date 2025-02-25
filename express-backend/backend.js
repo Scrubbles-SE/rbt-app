@@ -26,8 +26,7 @@ import {
     updateUser,
     getAllTagsByUserId,
     addTagObject,
-    addTagToEntry,
-    deleteEntriesByEntryId
+    addTagToEntry
 } from "./models/user-services.js";
 
 // Services
@@ -412,10 +411,12 @@ app.patch(
                 );
 
             // UPDATE TAG TABLE
-
             const updatedTags = req.body.tags;
 
-            await deleteEntriesByEntryId(entryId);
+            // Clear existing tags instead of using deleteEntriesByEntryId
+            await EntryModel.findByIdAndUpdate(entryId, {
+                tags: []
+            });
 
             // Compare each tag and see if it already exists in the database
             const tagIdArray = [];
@@ -877,8 +878,9 @@ app.post("/api/logout", authMiddleware, async (req, res) => {
         res.status(200).json({
             message: "Logged out successfully"
         });
-    } catch (error) {
+    } catch (_error) {
         res.status(500).json({ message: "Error logging out" });
+        console.error("Error logging out:", _error);
     }
 });
 
@@ -1035,8 +1037,8 @@ app.delete(
             res.status(200).json({
                 message: "Successfully left group"
             });
-        } catch (error) {
-            console.error("Error leaving group:", error);
+        } catch (_error) {
+            console.error("Error leaving group:", _error);
             res.status(500).json({
                 message: "Error leaving group"
             });
