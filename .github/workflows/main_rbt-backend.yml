@@ -65,5 +65,5 @@ jobs:
               with:
                   app-name: "rbt-backend"
                   slot-name: "Production"
-                  publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX }}
+                  publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_BD318EB69BE847CBB35027C4343D2A37 }}
                   package: .
