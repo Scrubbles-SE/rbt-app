@@ -15,6 +15,7 @@ import {
     clearDB,
     membersDB
 } from "../utils/db";
+import { API_BASE_URL } from "../utils/config.js";
 
 export const GlobalStyle = createGlobalStyle`
     @keyframes spin {
@@ -57,7 +58,7 @@ function Settings({ setIsLoggedIn }) {
                 }
                 //fetch latest data from api (always)
                 const response = await fetch(
-                    "http://localhost:8000/api/user/details",
+                    `${API_BASE_URL}/api/user/details`,
                     {
                         credentials: "include"
                     }
@@ -115,7 +116,7 @@ function Settings({ setIsLoggedIn }) {
             });
             // update server
             const response = await fetch(
-                "http://localhost:8000/api/user",
+                `${API_BASE_URL}/api/user`,
                 {
                     method: "PUT",
                     headers: {
@@ -176,7 +177,7 @@ function Settings({ setIsLoggedIn }) {
 
                 // always fetch from api
                 const response = await fetch(
-                    "http://localhost:8000/api/groups",
+                    `${API_BASE_URL}/api/groups`,
                     {
                         credentials: "include"
                     }
@@ -277,7 +278,7 @@ function Settings({ setIsLoggedIn }) {
 
             // Then call logout endpoint
             const response = await fetch(
-                "http://localhost:8000/api/logout",
+                `${API_BASE_URL}/api/logout`,
                 {
                     method: "POST",
                     credentials: "include"
@@ -319,7 +320,7 @@ function Settings({ setIsLoggedIn }) {
         try {
             // First call the server
             const response = await fetch(
-                `http://localhost:8000/api/groups/${groupId}/leave`,
+                `${API_BASE_URL}/api/groups/${groupId}/leave`,
                 {
                     method: "DELETE",
                     credentials: "include"

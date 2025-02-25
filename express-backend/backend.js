@@ -59,7 +59,10 @@ dotenv.config({ path: path.join(__dirname, ".env") });
 
 // Express App
 const app = express();
-const port = process.env.PORT || 8000;
+const port =
+    process.env.NODE_ENV === "production"
+        ? 8080
+        : process.env.PORT || 8000;
 
 // CORS Configuration
 const allowedOrigins = [
@@ -1043,5 +1046,5 @@ app.delete(
 
 // LISTEN
 app.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}`);
+    console.log(`Server running on port ${port}`);
 });

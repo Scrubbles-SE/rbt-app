@@ -200,7 +200,7 @@ function GroupEntries({ userId }) {
             try {
                 // post new reaction with credentials
                 const response = await axios.put(
-                    `http://localhost:8000/entries/reaction`,
+                    `${API_BASE_URL}/entries/reaction`,
                     reactionData,
                     {
                         withCredentials: true
@@ -260,7 +260,7 @@ function GroupEntries({ userId }) {
                         try {
                             const resp = await fetch(
                                 // get most recent entry for each user
-                                `http://localhost:8000/users/${user}/recent`
+                                `${API_BASE_URL}/users/${user}/recent`
                             );
 
                             if (!resp.ok) {
