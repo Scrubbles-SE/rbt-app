@@ -61,11 +61,31 @@ dotenv.config({ path: path.join(__dirname, ".env") });
 const app = express();
 const port = process.env.PORT || 8000;
 
+// CORS Configuration
+const allowedOrigins = [
+    process.env.FRONTEND_URL, // Production frontend URL
+    "http://localhost:3000", // Local development
+    "https://rbt-frontend.azurewebsites.net" // Future Azure static web app URL (update this)
+].filter(Boolean); // Filter out undefined values
+
+console.log("Allowed CORS origins:", allowedOrigins);
+
 // Middleware
 app.use(
     cors({
-        origin:
-            process.env.FRONTEND_URL || "http://localhost:3000",
+        origin: function (origin, callback) {
+            // Allow requests with no origin (like mobile apps, curl, etc.)
+            if (!origin) return callback(null, true);
+
+            // Check if the origin is in our allowed list
+            if (allowedOrigins.indexOf(origin) === -1) {
+                console.log(
+                    `CORS blocked request from: ${origin}`
+                );
+                return callback(null, false);
+            }
+            return callback(null, true);
+        },
         credentials: true
     })
 );
@@ -854,7 +874,6 @@ app.post("/api/logout", authMiddleware, async (req, res) => {
         res.status(200).json({
             message: "Logged out successfully"
         });
-        // eslint-disable-next-line no-unused-vars
     } catch (error) {
         res.status(500).json({ message: "Error logging out" });
     }
