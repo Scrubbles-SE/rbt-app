@@ -45,6 +45,7 @@ const NewEntryPage = ({ userId }) => {
     // Fetch today's entry on mount
     useEffect(() => {
         loadTodaysEntry();
+        // eslint-disable-next-line
     }, []);
 
     /* 

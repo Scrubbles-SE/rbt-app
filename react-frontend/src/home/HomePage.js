@@ -27,7 +27,7 @@ import {
 
 function HomePage({ userId }) {
     const [date, setDate] = useState(new Date());
-    const [selectedEntry, setSelectedEntry] = useState(null);
+    const [selectedEntry] = useState(null);
     const [recentEntry, setRecentEntry] = useState(null);
     const [entryDates, setEntryDates] = useState([]);
     const [streakCount, setStreakCount] = useState(0);

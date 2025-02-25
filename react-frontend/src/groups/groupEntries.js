@@ -140,7 +140,7 @@ function GroupEntries({ userId }) {
         }
 
         try {
-            const currentUser = userId;
+            //const currentUser = userId;
             const response = await fetch(
                 `${API_BASE_URL}/api/groups/${groupId}/entries`,
                 {
@@ -171,6 +171,7 @@ function GroupEntries({ userId }) {
         if (groupId && userId) {
             fetchEntries();
         }
+        // eslint-disable-next-line
     }, [groupId, userId]);
 
     // add new reaction

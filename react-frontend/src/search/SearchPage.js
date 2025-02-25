@@ -156,6 +156,7 @@ function SearchPage({ userId }) {
         if (userId) {
             fetchTags();
         }
+        // eslint-disable-next-line
     }, [userId]);
 
     // navigates to the tag's folder and passes in tag id and entries

@@ -131,6 +131,7 @@ function GroupsPage({ userId }) {
 
     useEffect(() => {
         fetchGroups();
+        // eslint-disable-next-line
     }, []);
 
     // Navigates to the group's entries page
