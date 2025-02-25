@@ -67,7 +67,8 @@ const port =
 const allowedOrigins = [
     process.env.FRONTEND_URL, // Production frontend URL
     "http://localhost:3000", // Local development
-    "https://rbt-frontend.azurewebsites.net" // Future Azure static web app URL (update this)
+    "https://rbt-frontend.azurewebsites.net", // Azure static web app URL
+    "https://lemon-bush-09e7af61e.6.azurestaticapps.net" // Your actual Azure Static Web App URL
 ].filter(Boolean); // Filter out undefined values
 
 console.log("Allowed CORS origins:", allowedOrigins);
@@ -76,6 +77,11 @@ console.log("Allowed CORS origins:", allowedOrigins);
 app.use(
     cors({
         origin: function (origin, callback) {
+            console.log(
+                "Incoming request from origin:",
+                origin
+            );
+
             // Allow requests with no origin (like mobile apps, curl, etc.)
             if (!origin) return callback(null, true);
 
@@ -86,6 +92,9 @@ app.use(
                 );
                 return callback(null, false);
             }
+            console.log(
+                `CORS allowing request from: ${origin}`
+            );
             return callback(null, true);
         },
         credentials: true
@@ -169,21 +178,26 @@ app.post("/api/register", async (req, res) => {
  */
 app.get("/api/user-exists/:email", async (req, res) => {
     const { email } = req.params;
+    console.log("User existence check for:", email);
+    console.log("Request headers:", req.headers);
 
     try {
         const users = await findUserByUsername(email);
         if (users.length === 0) {
+            console.log("User does not exist:", email);
             return res.status(200).json({
                 exists: false
             });
         }
 
+        console.log("User exists:", email);
         res.status(200).json({
             exists: true,
             firstName: users[0].first_name
         });
         // eslint-disable-next-line no-unused-vars
     } catch (error) {
+        console.error("Error checking user existence:", error);
         res.status(500).json({
             message:
                 "Error checking user existence. Please try again."

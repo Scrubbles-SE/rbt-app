@@ -5,6 +5,11 @@ const API_AUTH_URL = `${API_BASE_URL}/api`;
 // CHECK IF USER EXISTS
 export const checkIfUserExists = async (email) => {
     try {
+        console.log(`Checking if user exists: ${email}`);
+        console.log(
+            `Using API URL: ${API_AUTH_URL}/user-exists/${email}`
+        );
+
         const response = await fetch(
             `${API_AUTH_URL}/user-exists/${email}`,
             {
