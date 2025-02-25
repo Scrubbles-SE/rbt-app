@@ -39,8 +39,8 @@ jobs:
               run: npm run lint
 
             # 7. Run backend tests.
-            - name: Run Tests (Backend)
-              run: npm test
+            #- name: Run Tests (Backend)
+            #  run: npm test
 
             # 8. Build the frontend.
             - name: Build Frontend

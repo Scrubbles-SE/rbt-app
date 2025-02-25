@@ -16,8 +16,7 @@ import {
     EntryNumber
 } from "./search.styles";
 import { entriesDB, tagsDB } from "../utils/db";
-
-const API_BASE_URL = "http://localhost:8000";
+import { API_BASE_URL } from "../utils/config.js";
 
 // import styled from "styled-components";
 
@@ -179,6 +178,10 @@ function SearchPage({ userId }) {
             }
         );
     };
+
+    if (isLoading) {
+        return <div></div>;
+    }
 
     return (
         <ThemeProvider theme={theme}>

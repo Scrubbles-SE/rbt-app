@@ -2,31 +2,25 @@
 IMPORTS
  */
 import React, { useState, useEffect } from "react";
-import { BiLoaderAlt } from "react-icons/bi";
 import { useNavigate } from "react-router-dom";
 import { ThemeProvider } from "styled-components";
 import { IoChevronForward } from "react-icons/io5";
 import { groupsDB, membersDB } from "../utils/db";
+import { API_BASE_URL } from "../utils/config.js";
 
 // Styles
 import {
     PageContainer,
-    Title,
     Subtitle,
     GroupCard,
     getGradient,
     GroupCardContent,
-    ChevronIcon,
-    LoadingContainer,
-    LoadingSpinner,
-    LoadingText
+    ChevronIcon
 } from "./group.styles";
 
 // Components
 import CreateGroup from "./CreateGroup";
 import JoinGroup from "./JoinGroup";
-
-const API_BASE_URL = "http://localhost:8000";
 
 /*
 RENDER

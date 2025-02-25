@@ -2,10 +2,7 @@
 IMPORTS
 */
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import {
-    FaMoon,
-    FaSun,
     FaSignOutAlt,
     FaSync,
     FaSignOutAlt as FaLeaveGroup
@@ -27,7 +24,6 @@ export const GlobalStyle = createGlobalStyle`
 `;
 
 function Settings({ setIsLoggedIn }) {
-    const navigate = useNavigate();
     const [theme, setTheme] = useState("light-mode");
 
     // Track both current and edited values

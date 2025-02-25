@@ -1,7 +1,11 @@
 /*
 IMPORTS
 */
-import React, { useState, useEffect, useLayoutEffect } from "react";
+import React, {
+    useState,
+    useEffect,
+    useLayoutEffect
+} from "react";
 import axios from "axios";
 import {
     useParams,
@@ -16,7 +20,8 @@ import {
 } from "react-icons/fi";
 import { ThemeProvider } from "styled-components";
 
-import {groupsDB, membersDB, entriesDB} from "../utils/db";
+import { membersDB, entriesDB } from "../utils/db";
+import { API_BASE_URL } from "../utils/config.js";
 
 // Styles
 import {
@@ -59,8 +64,6 @@ function GroupEntries({ userId }) {
     const [reactionCounts, setReactionCounts] = useState({});
     const [reactionNumbers, setReactionNumbers] = useState({});
     const groupUsers = location.state?.users;
-
-    const API_BASE_URL = "http://localhost:8000";
 
     useLayoutEffect(() => {
         const currentTheme = localStorage.getItem("theme");
@@ -110,31 +113,31 @@ function GroupEntries({ userId }) {
     // Backend function instructions
     // 1. get all users of the group
     // 2. get the most recent public entry of each user (this shouldn't be hard with IndexedDb)
-    // 
-
+    //
 
     const fetchEntries = async () => {
-
         // get cached info
 
-        const cachedMemberObjects = await membersDB.getUserIds(groupId);
+        const cachedMemberObjects =
+            await membersDB.getUserIds(groupId);
 
         const groupsPageEntries = [];
-        for (let i = 0; i<cachedMemberObjects.length; i++) {
-            const newEntry = await entriesDB.getMostRecentByUserId(cachedMemberObjects[0].user_id);
+        for (let i = 0; i < cachedMemberObjects.length; i++) {
+            const newEntry =
+                await entriesDB.getMostRecentByUserId(
+                    cachedMemberObjects[0].user_id
+                );
             groupsPageEntries.push(newEntry);
         }
 
-
-
         // Filter out nulls
-        const finalCachedPageEntries = groupsPageEntries.filter((entry) => entry!=null);
+        const finalCachedPageEntries = groupsPageEntries.filter(
+            (entry) => entry != null
+        );
 
         if (finalCachedPageEntries) {
             setEntries(finalCachedPageEntries);
         }
-
-
 
         try {
             const currentUser = userId;
@@ -153,16 +156,11 @@ function GroupEntries({ userId }) {
 
             setEntries(entries);
 
-
-
             // Update indexed db - add entries to DB if they are not already in it
 
-            for (let i = 0; i<entries.length; i++) {
+            for (let i = 0; i < entries.length; i++) {
                 await entriesDB.addIfNotPresent(entries[i]);
             }
-
-
-
         } catch (error) {
             console.error("Error fetching entries:", error);
         }

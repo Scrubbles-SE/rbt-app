@@ -24,11 +24,9 @@ import {
     EntryModel,
     addReactionToEntry,
     updateUser,
-    removeGroupFromUser,
     getAllTagsByUserId,
     addTagObject,
     addTagToEntry,
-    updateTagObject,
     deleteEntriesByEntryId
 } from "./models/user-services.js";
 
@@ -61,12 +59,13 @@ dotenv.config({ path: path.join(__dirname, ".env") });
 
 // Express App
 const app = express();
-const port = 8000;
+const port = process.env.PORT || 8000;
 
 // Middleware
 app.use(
     cors({
-        origin: "http://localhost:3000",
+        origin:
+            process.env.FRONTEND_URL || "http://localhost:3000",
         credentials: true
     })
 );
@@ -131,6 +130,7 @@ app.post("/api/register", async (req, res) => {
         res.status(201).json({
             message: "Success!"
         });
+        // eslint-disable-next-line no-unused-vars
     } catch (error) {
         res.status(500).json({
             message:
@@ -160,6 +160,7 @@ app.get("/api/user-exists/:email", async (req, res) => {
             exists: true,
             firstName: users[0].first_name
         });
+        // eslint-disable-next-line no-unused-vars
     } catch (error) {
         res.status(500).json({
             message:
@@ -205,6 +206,7 @@ app.post("/api/login", async (req, res) => {
         res.status(200).json({
             message: "Success"
         });
+        // eslint-disable-next-line no-unused-vars
     } catch (error) {
         res.status(500).json({
             message: "Error logging you in. Please try again"
@@ -462,7 +464,6 @@ app.put(
             const userId = new mongoose.Types.ObjectId(
                 req.userId
             );
-            const { groupCode } = req.params;
 
             console.log("Join group attempt:", {
                 groupCode: req.params.groupCode,
@@ -843,13 +844,17 @@ app.post("/api/logout", authMiddleware, async (req, res) => {
         res.cookie("jwt", "", {
             httpOnly: true,
             expires: new Date(0), // Expire immediately
-            sameSite: "strict",
+            sameSite:
+                process.env.NODE_ENV === "production"
+                    ? "none"
+                    : "strict",
             secure: process.env.NODE_ENV === "production"
         });
 
         res.status(200).json({
             message: "Logged out successfully"
         });
+        // eslint-disable-next-line no-unused-vars
     } catch (error) {
         res.status(500).json({ message: "Error logging out" });
     }
