@@ -82,7 +82,7 @@ async function joinGroup(userId, groupId) {
 }
 */
 
-async function joinGroup(userId, groupId) {
+async function joinGroup(userId, groupId, isAdmin) {
     const memberModel = getDbConnection().model(
         "members",
         MemberSchema
@@ -91,7 +91,8 @@ async function joinGroup(userId, groupId) {
     try {
         const memberObject = new memberModel({
             user_id: userId,
-            group_id: groupId
+            group_id: groupId,
+            isAdmin: isAdmin,
         });
         const savedMember = await memberObject.save();
         return savedMember;

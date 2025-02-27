@@ -603,7 +603,7 @@ app.post("/api/groups", authMiddleware, async (req, res) => {
         };
 
         const newGroup = await createGroup(group);
-        const newMember = await joinGroup(userId, newGroup._id);
+        const newMember = await joinGroup(userId, newGroup._id, true);
         console.log("Group created successfully:", newGroup);
         console.log("Owner has joined group:", newMember);
 
