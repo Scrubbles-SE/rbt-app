@@ -669,6 +669,44 @@ app.get("/api/groups", authMiddleware, async (req, res) => {
     }
 });
 
+
+// GET ALL USERS FROM A GROUP
+app.get("/api/groups/:groupId/members", authMiddleware, async (req, res) => {
+
+    try {
+
+        console.log("Fetching all users in group:", req.params.groupId);
+
+        const groupId = req.params.groupId;
+
+        const allUsers = await getAllUsers(groupId);
+
+
+        if (allUsers) {
+            console.log("Retrieved members:", allUsers);
+            res.json(allUsers);
+        } else {
+            return res
+                .status(404)
+                .json({ error: "User not found" });
+        }
+
+
+    } catch (err) {
+        console.log("Error in api/groups/:groupId/members:", err);
+        res.status(500).json({
+            error: "Error fetching group members"
+        })
+    }
+
+
+
+
+});
+
+
+
+
 // GET USER'S MOST RECENT PUBLIC POST
 /*
  * Need user_id
