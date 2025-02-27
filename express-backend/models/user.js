@@ -48,6 +48,7 @@ const GroupSchema = new mongoose.Schema({
 const MemberSchema = new mongoose.Schema({
     user_id: mongoose.Types.ObjectId,
     group_id: mongoose.Types.ObjectId,
+    isAdmin: Boolean,
 }) 
 
 // TAG SCHEMA
