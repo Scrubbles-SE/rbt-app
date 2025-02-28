@@ -36,6 +36,19 @@ function getDbConnection() {
 async function addUser(user) {
     const userModel = getDbConnection().model("users", uSchema);
     try {
+        // check for valid entries format
+        if (
+            user.entries &&
+            (!Array.isArray(user.entries) ||
+                !user.entries.every((id) =>
+                    mongoose.Types.ObjectId.isValid(id)
+                ))
+        ) {
+            throw new Error(
+                "Entry(s) format not valid or contains an invalid ObjectId"
+            );
+        }
+
         const userToAdd = new userModel(user);
         userToAdd.entries = await addUserEntries(userToAdd._id);
         const savedUser = await userToAdd.save();
