@@ -145,17 +145,15 @@ describe("Group Schema Validation", () => {
 describe("User Services", () => {
     test("Find user by username", async () => {
         const username = "testUser";
-        const user = await UserServices.findUserByUsername(
-            username
-        );
+        const user =
+            await UserServices.findUserByUsername(username);
         expect(user).toBeTruthy();
         expect(user[0].username).toBe(username);
     });
 
     test("Find user by id", async () => {
-        const foundUser = await UserServices.findUserById(
-            testUserId
-        );
+        const foundUser =
+            await UserServices.findUserById(testUserId);
         expect(foundUser).toBeTruthy();
         expect(foundUser[0]._id.toString()).toEqual(
             testUserId.toString()
@@ -187,16 +185,14 @@ describe("User Services", () => {
         const invalidEntry = {
             user_id: "invalid_id" // This should cause an error
         };
-        const result = await UserServices.addEntry(
-            invalidEntry
-        );
+        const result =
+            await UserServices.addEntry(invalidEntry);
         expect(result).toBe(false);
     });
 
     test("Get all entries", async () => {
-        const entries = await UserServices.getAllEntries(
-            testUserId
-        );
+        const entries =
+            await UserServices.getAllEntries(testUserId);
         expect(entries).toBeTruthy();
         expect(Array.isArray(entries)).toBe(true);
     });
@@ -220,13 +216,14 @@ describe("User Services", () => {
         expect(Array.isArray(foundEntry)).toBe(true);
     });
 
-    test("Add group to user error handling", async () => {
-        const result = await UserServices.addGroupToUser(
-            "invalid_id", // This should cause an error
-            new mongoose.Types.ObjectId()
-        );
-        expect(result).toBe(false);
-    });
+    // addGroupToUser no longer a function
+    // test("Add group to user error handling", async () => {
+    //     const result = await UserServices.addGroupToUser(
+    //         "invalid_id", // This should cause an error
+    //         new mongoose.Types.ObjectId()
+    //     );
+    //     expect(result).toBe(false);
+    // });
 
     test("Add and verify reaction to entry", async () => {
         const entry = {
@@ -289,8 +286,8 @@ describe("User Services Error Handling", () => {
             username: "testUser",
             password: "testPass",
             first_name: "Test",
-            entries: "invalid_id", // Invalid ObjectId
-            groups: ["invalid_id"] // Invalid ObjectId array
+            entries: "invalid_id" // Invalid ObjectId
+            // groups: ["invalid_id"] // Invalid ObjectId array
         };
         const result = await UserServices.addUser(invalidUser);
         expect(result).toBe(false);
@@ -305,9 +302,8 @@ describe("User Services Error Handling", () => {
             bud_text: "",
             thorn_text: ""
         };
-        const result = await UserServices.addEntry(
-            invalidEntry
-        );
+        const result =
+            await UserServices.addEntry(invalidEntry);
         expect(result).toBe(false);
     });
 
@@ -337,28 +333,36 @@ describe("Group Services", () => {
             users: [testUserId]
         };
 
-        const result = await GroupServices.createGroup(
-            newGroup
-        );
+        const result =
+            await GroupServices.createGroup(newGroup);
         testGroupId = result._id;
         expect(result).toBeTruthy();
         expect(result.group_code).toBe(newGroup.group_code);
     });
 
+    // test("Create group error handling", async () => {
+    //     const invalidGroup = {
+    //         users: ["invalid_id"] // This should cause an error
+    //     };
+    //     const result =
+    //         await GroupServices.createGroup(invalidGroup);
+    //     expect(result).toBe(false);
+    // });
+
     test("Create group error handling", async () => {
+        // this should cause an error due to type
         const invalidGroup = {
-            users: ["invalid_id"] // This should cause an error
+            group_code: 123,
+            name: 123
         };
-        const result = await GroupServices.createGroup(
-            invalidGroup
-        );
+        const result =
+            await GroupServices.createGroup(invalidGroup);
         expect(result).toBe(false);
     });
 
     test("Find group by id", async () => {
-        const group = await GroupServices.findGroupById(
-            testGroupId
-        );
+        const group =
+            await GroupServices.findGroupById(testGroupId);
         expect(group).toBeTruthy();
         expect(Array.isArray(group)).toBe(true);
         expect(group[0]._id.toString()).toBe(
@@ -367,18 +371,16 @@ describe("Group Services", () => {
     });
 
     test("Find group by code", async () => {
-        const groups = await GroupServices.findGroupByCode(
-            "TEST123"
-        );
+        const groups =
+            await GroupServices.findGroupByCode("TEST123");
         expect(groups).toBeTruthy();
         expect(groups.length).toBeGreaterThan(0);
         expect(groups[0].group_code).toBe("TEST123");
     });
 
     test("Join group", async () => {
-        const groups = await GroupServices.findGroupByCode(
-            "TEST123"
-        );
+        const groups =
+            await GroupServices.findGroupByCode("TEST123");
         const result = await GroupServices.joinGroup(
             testUserId,
             groups[0]._id
@@ -407,10 +409,12 @@ describe("Group Services", () => {
             new mongoose.Types.ObjectId();
         const result = await GroupServices.joinGroup(
             testUserId,
-            nonExistentGroupId
+            nonExistentGroupId,
+            false
         );
-        expect(result.groups).not.toContain(
-            nonExistentGroupId.toString()
-        );
+        // expect(result.groups).not.toContain(
+        //     nonExistentGroupId.toString()
+        // );
+        expect(result).toBe(false);
     });
 });

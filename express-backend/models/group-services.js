@@ -29,6 +29,16 @@ async function createGroup(group) {
         GroupSchema
     );
     try {
+        // check data type of code and name before creation
+        if (
+            typeof group.name !== "string" ||
+            typeof group.group_code !== "string"
+        ) {
+            throw new Error(
+                "Group code and name need to be strings"
+            );
+        }
+
         const groupToAdd = new groupModel(group);
         const savedGroup = await groupToAdd.save();
         return savedGroup;
@@ -82,16 +92,27 @@ async function joinGroup(userId, groupId) {
 }
 */
 
-async function joinGroup(userId, groupId) {
+async function joinGroup(userId, groupId, isAdmin) {
+    const groupModel = getDbConnection().model(
+        "groups",
+        GroupSchema
+    );
     const memberModel = getDbConnection().model(
         "members",
         MemberSchema
     );
 
     try {
+        // check for group existence before adding
+        const group = await groupModel.findById(groupId);
+        if (!group) {
+            return false;
+        }
+
         const memberObject = new memberModel({
             user_id: userId,
-            group_id: groupId
+            group_id: groupId,
+            isAdmin: isAdmin
         });
         const savedMember = await memberObject.save();
         return savedMember;
