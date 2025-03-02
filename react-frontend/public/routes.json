@@ -1,0 +1,36 @@
+{
+    "routes": [
+        {
+            "route": "/api/*",
+            "allowedRoles": ["anonymous"]
+        },
+        {
+            "route": "/manifest.json",
+            "serve": "/manifest.json",
+            "headers": {
+                "Content-Type": "application/manifest+json"
+            }
+        },
+        {
+            "route": "/service-worker.js",
+            "serve": "/service-worker.js",
+            "headers": {
+                "Content-Type": "application/javascript",
+                "Cache-Control": "no-cache, no-store, must-revalidate"
+            }
+        },
+        {
+            "route": "/*",
+            "serve": "/index.html",
+            "headers": {
+                "Cache-Control": "no-cache, no-store, must-revalidate"
+            }
+        }
+    ],
+    "platformErrorOverrides": [
+        {
+            "errorType": "NotFound",
+            "serve": "/index.html"
+        }
+    ]
+}

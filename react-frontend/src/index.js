@@ -40,25 +40,32 @@ import TagEntries from "./search/TagEntries.js";
 SERVICE WORKER & INDEXED-DB REGISTRATION
  */
 // Register Service Worker (FOR PWA)
-if (
-    "serviceWorker" in navigator &&
-    process.env.NODE_ENV === "production"
-) {
+if ("serviceWorker" in navigator) {
     window.addEventListener("load", async () => {
         try {
+            console.log(
+                "Attempting to register service worker..."
+            );
             // First check if there's already a service worker
             const registration =
                 await navigator.serviceWorker.getRegistration();
             if (!registration) {
                 // Only register if one doesn't exist
-                await navigator.serviceWorker.register(
-                    "/service-worker.js",
-                    {
-                        scope: "/"
-                    }
-                );
+                const swReg =
+                    await navigator.serviceWorker.register(
+                        "/service-worker.js",
+                        {
+                            scope: "/"
+                        }
+                    );
                 console.log(
-                    "ServiceWorker registration successful"
+                    "ServiceWorker registration successful with scope:",
+                    swReg.scope
+                );
+            } else {
+                console.log(
+                    "Service worker already registered:",
+                    registration
                 );
             }
         } catch (err) {
@@ -121,7 +128,10 @@ const MainAppRoutes = ({
                 path="/new-entry"
                 element={<NewEntryPage userId={userId} />}
             />
-            <Route path="/groups" element={<GroupsPage userId={userId}/>} />
+            <Route
+                path="/groups"
+                element={<GroupsPage userId={userId} />}
+            />
             <Route
                 path="/settings"
                 element={
