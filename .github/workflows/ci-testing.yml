@@ -38,9 +38,14 @@ jobs:
             - name: Run Lint Checks
               run: npm run lint
 
+            # Create .env file to pass in for testing
+            - name: Make .env Test File
+              run: |
+                  echo "MONGODB_URI=${{ secrets.MONGODB_URI }}" >> express-backend/.env
+
             # 7. Run backend tests.
-            #- name: Run Tests (Backend)
-            #  run: npm test
+            - name: Run Tests (Backend)
+              run: npm test
 
             # 8. Build the frontend.
             - name: Build Frontend

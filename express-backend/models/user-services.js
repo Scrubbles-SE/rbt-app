@@ -16,7 +16,6 @@ const ueSchema = userEntriesSchema;
 let dbConnection;
 
 // Helper function to connect to the database
-// Helper function to connect to the database
 
 function getDbConnection() {
     if (!dbConnection) {
@@ -59,7 +58,7 @@ async function addUser(user) {
     }
 }
 
-//Adding an entry to the database
+// Adding an entry to the database
 
 async function addEntry(entry) {
     const entryModel = getDbConnection().model(
@@ -193,6 +192,7 @@ async function addReactionToEntry(entryId, reactionObject) {
 }
 
 // Create a tag object and add to tags list
+
 async function addTagObject(tagObject) {
     const tagModel = getDbConnection().model("tags", TagSchema);
 
