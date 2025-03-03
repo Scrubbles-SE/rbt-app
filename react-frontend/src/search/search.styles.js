@@ -96,8 +96,10 @@ export const TagFolder = styled.div`
               ? "linear-gradient(to right, #7CA9D6, #B8D3EB)" // blue
               : props.theme.mode === "min-theme"
                 ? "linear-gradient(to right, #ffffff, #e6e6e6)"
-                : // light
-                  "linear-gradient(to right, #fadadd, #f2c4bb)"};
+                : props.theme.mode === "green-theme"
+                  ? "linear-gradient(to right, #a5b994, #e6e6e6)"
+                  : // light
+                    "linear-gradient(to right, #fadadd, #f2c4bb)"};
     color: white;
     display: flex;
     align-items: center;

@@ -430,6 +430,14 @@ function Settings({ setIsLoggedIn }) {
                         <S.Circle color="#d3d3d3" />
                         Minimalist
                     </S.ThemeSelection>
+                    <S.ThemeSelection
+                        active={theme === "green-theme"}
+                        onClick={() => setTheme("green-theme")}
+                        selected={theme === "green-theme"}
+                    >
+                        <S.Circle color="#afbf9f" />
+                        Sage
+                    </S.ThemeSelection>
                 </S.ContentCard>
             </S.SectionContainer>
 
