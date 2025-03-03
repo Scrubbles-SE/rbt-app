@@ -323,16 +323,6 @@ export const CreateButton = styled.button`
     z-index: 10;
     position: relative;
 
-    @media (max-width: 480px) {
-        padding: 0.9rem 1.8rem;
-        font-size: 1rem;
-    }
-
-    @media (max-width: 380px) {
-        padding: 0.8rem 1.5rem;
-        font-size: 0.95rem;
-    }
-
     &:hover:not(:disabled) {
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(56, 161, 105, 0.2);
@@ -351,17 +341,6 @@ export const ShareHeader = styled.h3`
     font-weight: 700;
     letter-spacing: -0.02em;
     padding: 0 2rem;
-
-    @media (max-width: 480px) {
-        font-size: 1.3rem;
-        padding: 0 1rem;
-        margin-bottom: 16px;
-    }
-
-    @media (max-width: 380px) {
-        font-size: 1.2rem;
-        padding: 0 0.5rem;
-    }
 `;
 
 export const CodeContainer = styled.div`
@@ -475,12 +454,6 @@ export const Toast = styled.div`
 
 export const JoinContainer = styled(CreateContainer)`
     border: 2px dashed #4299e1;
-    max-width: 480px;
-    width: 100%;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
 
     &:hover {
         border-color: #4299e1;
@@ -494,16 +467,7 @@ export const JoinContainer = styled(CreateContainer)`
         border: 2px solid #4299e1;
         background: var(--background-color);
         box-shadow: 0 4px 20px rgba(66, 153, 225, 0.2);
-        padding: 1.8rem 0.8rem;
-        
-        @media (max-width: 380px) {
-            padding: 1.5rem 0.5rem;
-        }
     `}
-
-    @media (max-width: 480px) {
-        padding: 1.5rem;
-    }
 `;
 
 export const JoinIcon = styled(PlusIcon)`
@@ -523,12 +487,6 @@ export const CodeInput = styled.div`
     margin: 1.5rem 0;
     position: relative;
     z-index: 20;
-    width: 100%;
-    max-width: 400px;
-
-    @media (max-width: 480px) {
-        gap: 0.3rem;
-    }
 `;
 
 export const Digit = styled.input`
@@ -545,24 +503,6 @@ export const Digit = styled.input`
     position: relative;
     z-index: 30;
     pointer-events: all;
-
-    @media (max-width: 480px) {
-        width: 2.5rem;
-        height: 3.5rem;
-        font-size: 1.3rem;
-    }
-
-    @media (max-width: 380px) {
-        width: 2rem;
-        height: 3rem;
-        font-size: 1.1rem;
-    }
-
-    @media (max-width: 320px) {
-        width: 1.7rem;
-        height: 2.7rem;
-        font-size: 1rem;
-    }
 
     &:focus {
         outline: none;

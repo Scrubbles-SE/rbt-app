@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { lightTheme, darkTheme } from "../layout/themes.js";
+import { darkTheme } from "../layout/themes.js";
 
 export const Title = styled.h1`
     font-size: 1.8rem;
