@@ -19,6 +19,14 @@ import AppLayout from "./layout/AppLayout";
 // Styles
 import "./index.css";
 
+// Themes
+import {
+    lightTheme,
+    darkTheme,
+    blueTheme,
+    minTheme
+} from "./layout/themes";
+
 /* 
 PAGE IMPORTS
  */
