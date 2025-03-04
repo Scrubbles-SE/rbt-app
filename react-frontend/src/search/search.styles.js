@@ -1,24 +1,24 @@
 import styled from "styled-components";
-import { lightTheme, darkTheme } from "../layout/themes.js";
+import { darkTheme } from "../layout/themes.js";
 
 export const Title = styled.h1`
-    font-size: 2.4rem;
-    font-weight: 800;
+    font-size: 1.8rem;
+    font-weight: 600;
     color: var(--text-primary);
-    margin-bottom: 1.2rem;
+    margin: 2rem 0;
     position: relative;
-    padding-left: 1rem;
-    flex: 1;
     text-align: center;
+    opacity: 0.8;
+    font-family: var(--font-header);
 
-    &::before {
+    &::after {
         content: "";
         position: absolute;
-        left: 0;
-        top: 50%;
-        transform: translateY(-50%);
-        height: 70%;
-        width: 4px;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100px;
+        height: 2px;
         background: var(--fill-color);
         border-radius: 2px;
     }
@@ -64,9 +64,9 @@ export const Subtitle = styled.h2`
 `;
 
 export const TagName = styled.h1`
-    font-size: 2rem;
+    font-size: 1.8rem;
     font-weight: 700;
-    color: var(--text);
+    color: var(--text-primary);
     margin-bottom: 5px;
     margin-top: 5px;
     position: relative;
@@ -75,11 +75,13 @@ export const TagName = styled.h1`
 `;
 
 export const PageContainer = styled.div`
-    margin-horizontal: 5px;
-    margin-top: 20px;
-    margin-bottom: 50px;
+    width: 100%;
+    min-height: 100%;
+    margin: 20px 0 50px 0;
+    padding: 0 20px;
     background-color: var(--background-color);
     color: var(--text-primary);
+    box-sizing: border-box;
 `;
 
 export const TagFolder = styled.div`
@@ -89,22 +91,15 @@ export const TagFolder = styled.div`
     border-radius: 16px;
     cursor: pointer;
     transition: all 0.3s ease;
-    background: ${(props) =>
-        props.theme.mode === "dark-mode"
-            ? "linear-gradient(to right, rgb(197, 141, 170), rgb(152, 34, 83))" // dark
-            : props.theme.mode === "blue-theme"
-              ? "linear-gradient(to right, #7CA9D6, #B8D3EB)" // blue
-              : props.theme.mode === "min-theme"
-                ? "linear-gradient(to right, #ffffff, #e6e6e6)"
-                : // light
-                  "linear-gradient(to right, #fadadd, #f2c4bb)"};
-    color: white;
+    background: linear-gradient(
+        135deg,
+        var(--fill-color),
+        var(--button-color)
+    );
+    color: var(--text-primary);
     display: flex;
     align-items: center;
-    box-shadow: ${(props) =>
-        props.theme.mode === "dark-mode"
-            ? "0 4px 15px rgba(0, 0, 0, 0.4)"
-            : "0 4px 15px rgba(214, 108, 132, 0.2)"};
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
     position: relative;
     overflow: hidden;
 
@@ -125,7 +120,7 @@ export const TagFolder = styled.div`
 
     &:hover {
         transform: translateY(-3px);
-        box-shadow: 0 8px 20px rgba(214, 108, 132, 0.3);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
 
         &::before {
             opacity: 1;
@@ -149,7 +144,7 @@ export const TagContent = styled.div`
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    color: black;
+    color: var(--text-primary);
 `;
 
 export const Container = styled.div`
@@ -248,19 +243,12 @@ export const EntryHeader = styled.div`
 `;
 
 export const EntryCard = styled.div`
-    background: ${(props) =>
-        props.theme.mode === "dark-mode"
-            ? "#363636"
-            : lightTheme.cardBackground};
+    background: var(--card-background);
     border-radius: 16px;
     padding: 24px;
     margin-bottom: 20px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    border: 1px solid
-        ${(props) =>
-            props.theme.mode === "dark-mode"
-                ? "rgba(255, 255, 255, 0.1)"
-                : "rgba(0, 0, 0, 0.05)"};
+    border: 1px solid var(--border-color);
 
     &:hover {
         transform: translateY(-2px);
@@ -276,28 +264,19 @@ export const EntryDate = styled.div`
     align-items: center;
     gap: 6px;
     font-size: 1rem;
-    color: #64748b;
+    color: var(--text-secondary);
     font-weight: 600;
     padding: 6px 12px;
-    background: #f8fafc;
+    background: var(--card-background);
     border-radius: 20px;
     transition: all 0.2s ease;
-    background: ${(props) =>
-        props.theme.mode === "dark-mode" ? "#222" : "#f8fafc"};
-
-    /* Change text color based on theme */
-    color: ${(props) =>
-        props.theme.mode === "dark-mode"
-            ? "#ffffff"
-            : "#64748b"};
 
     &:hover {
         transform: translateY(-1px);
-        background: ${(props) =>
-            props.theme.mode === "dark-mode"
-                ? "#4a4a4a"
-                : "#f1f5f9"};
+        background: var(--fill-color);
+        opacity: 0.9;
     }
+
     span {
         font-size: 1.2rem;
     }
@@ -309,20 +288,13 @@ export const EntrySection = styled.div`
     margin-bottom: 16px;
     border-radius: 12px;
     background: ${(props) => {
-        const isDark = props.theme.mode === "dark-mode";
         switch (props.type) {
             case "rose":
-                return isDark
-                    ? "rgba(255, 143, 177, 0.05)"
-                    : "rgba(255, 143, 177, 0.1)";
+                return "rgba(255, 143, 177, 0.1)";
             case "thorn":
-                return isDark
-                    ? "rgba(184, 58, 58, 0.05)"
-                    : "rgba(184, 58, 58, 0.1)";
+                return "rgba(184, 58, 58, 0.1)";
             case "bud":
-                return isDark
-                    ? "rgba(152, 206, 0, 0.05)"
-                    : "rgba(152, 206, 0, 0.1)";
+                return "rgba(152, 206, 0, 0.1)";
             default:
                 return "transparent";
         }
@@ -348,10 +320,7 @@ export const EntrySection = styled.div`
         font-weight: 600;
         padding: 2px 8px;
         border-radius: 6px;
-        background: ${(props) =>
-            props.theme.mode === "dark-mode"
-                ? darkTheme.cardBackground
-                : "white"};
+        background: var(--card-background);
         color: ${(props) => {
             switch (props.type) {
                 case "rose":
@@ -361,7 +330,7 @@ export const EntrySection = styled.div`
                 case "bud":
                     return "#98CE00";
                 default:
-                    return "#2c3e50";
+                    return "var(--text-primary)";
             }
         }};
     }
@@ -370,10 +339,7 @@ export const EntrySection = styled.div`
 export const EntryText = styled.p`
     font-size: 1rem;
     line-height: 1.6;
-    color: ${(props) =>
-        props.theme.mode === "dark-mode"
-            ? "#ffffff"
-            : "#2c3e50"};
+    color: var(--text-primary);
     margin: 0;
     white-space: pre-wrap;
 `;
@@ -399,13 +365,13 @@ export const Folder = styled.div`
     align-items: center;
     font-size: 3rem;
     opacity: 0.9;
-    color: black;
+    color: var(--text-primary);
 `;
 
 export const EntryNumber = styled.h4`
-    font-size: 0.7rem;
-    font-weight: 700;
-    color: var(--text);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-primary);
     margin-bottom: 5px;
     margin-top: 5px;
     text-align: right;

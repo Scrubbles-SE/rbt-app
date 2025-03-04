@@ -3,8 +3,8 @@ IMPORTS
  */
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ThemeProvider } from "styled-components";
 import { IoFolderOutline } from "react-icons/io5";
+import { MdTagFaces } from "react-icons/md";
 import {
     Title,
     PageContainer,
@@ -40,14 +40,8 @@ import { API_BASE_URL } from "../utils/config.js";
 
 function SearchPage({ userId }) {
     const [tags, setTags] = useState([]);
-    const [theme, setTheme] = useState({ mode: "light-mode" });
     const [isLoading, setIsLoading] = useState(true);
     const navigate = useNavigate();
-
-    useEffect(() => {
-        const currentTheme = localStorage.getItem("theme");
-        setTheme({ mode: currentTheme || "light-mode" });
-    }, []);
 
     const fetchEntry = async (entryId) => {
         setIsLoading(true);
@@ -185,45 +179,63 @@ function SearchPage({ userId }) {
     }
 
     return (
-        <ThemeProvider theme={theme}>
-            <PageContainer>
-                {/* no tags view */}
-                {tags.length === 0 ? (
-                    <>
-                        <Title>No Tags Yet!</Title>
-                    </>
-                ) : (
-                    // display tags
-                    <>
-                        <Subtitle>Your Tags</Subtitle>
-                        {tags.map((tag) => (
-                            <TagFolder
-                                key={tag._id}
-                                onClick={() =>
-                                    navigateToTag(tag)
-                                }
-                            >
-                                <Folder>
-                                    <IoFolderOutline />
-                                </Folder>
-                                <TagContent>
-                                    <TagName>
-                                        {tag.tag_name}
-                                    </TagName>
-                                    <EntryNumber>
-                                        {tag.entries.length}{" "}
-                                        {tag.entries.length ===
-                                        1
-                                            ? "entry"
-                                            : "entries"}
-                                    </EntryNumber>
-                                </TagContent>
-                            </TagFolder>
-                        ))}
-                    </>
-                )}
-            </PageContainer>
-        </ThemeProvider>
+        <PageContainer>
+            {/* no tags view */}
+            {tags.length === 0 ? (
+                <div
+                    style={{
+                        textAlign: "center",
+                        padding: "2rem 1rem"
+                    }}
+                >
+                    <MdTagFaces
+                        style={{
+                            fontSize: "5rem",
+                            color: "var(--fill-color)",
+                            marginBottom: "0.2rem"
+                        }}
+                    />
+                    <Title>No Tags Yet!</Title>
+                    <p
+                        style={{
+                            color: "var(--text-secondary)",
+                            fontSize: "1rem",
+                            maxWidth: "300px",
+                            margin: "0 auto"
+                        }}
+                    >
+                        Add tags to your reflections to organize
+                        and find them easier.
+                    </p>
+                </div>
+            ) : (
+                // display tags
+                <>
+                    <Subtitle>Your Tags</Subtitle>
+                    {tags.map((tag) => (
+                        <TagFolder
+                            key={tag._id}
+                            onClick={() => navigateToTag(tag)}
+                        >
+                            <Folder>
+                                <IoFolderOutline />
+                            </Folder>
+                            <TagContent>
+                                <TagName>
+                                    {tag.tag_name}
+                                </TagName>
+                                <EntryNumber>
+                                    {tag.entries.length}{" "}
+                                    {tag.entries.length === 1
+                                        ? "entry"
+                                        : "entries"}
+                                </EntryNumber>
+                            </TagContent>
+                        </TagFolder>
+                    ))}
+                </>
+            )}
+        </PageContainer>
     );
 }
 

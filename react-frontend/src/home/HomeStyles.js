@@ -9,7 +9,7 @@ export const HomeContainer = styled.div`
     padding: 20px;
     max-width: 800px;
     margin: 0 auto;
-    gap: 2.5rem;
+    gap: 1.75rem;
 `;
 
 export const WelcomeSection = styled.div`
@@ -17,16 +17,16 @@ export const WelcomeSection = styled.div`
     text-align: center;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 1.25rem;
     margin-bottom: ${(props) =>
-        props.children.length > 1 ? "0.5rem" : "0"};
+        props.children.length > 1 ? "1rem" : "0"};
+    padding: 0.5rem 0 1rem;
 `;
 
 export const WelcomeHeader = styled.h1`
     font-size: 2rem;
     font-weight: 800;
-    color: ${(props) =>
-        props.theme.mode === "dark-mode" ? "#fff" : "#2c3e50"};
+    color: var(--text-primary);
     text-shadow: 2px 2px 4px var(--fill-color);
     letter-spacing: -0.5px;
     position: relative;
@@ -68,10 +68,7 @@ export const StreakCounter = styled.div`
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 
     h2 {
-        color: ${(props) =>
-            props.theme.mode === "dark-mode"
-                ? "#fff"
-                : "#2c3e50"};
+        color: var(--text-primary);
     }
 
     &:hover {
@@ -94,10 +91,7 @@ export const NoEntryMessage = styled.div`
     border: 1px solid var(--button-color);
 
     h3 {
-        color: ${(props) =>
-            props.theme.mode === "dark-mode"
-                ? "#fff"
-                : "#2c3e50"};
+        color: var(--text-primary);
     }
 
     @keyframes pulse {
@@ -114,14 +108,15 @@ export const NoEntryMessage = styled.div`
 `;
 
 export const SectionTitle = styled.h2`
-    font-size: 1.4rem;
+    font-size: 22px;
     font-weight: 600;
     color: var(--text-primary);
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
     text-align: left;
     width: 100%;
-    padding-left: 0.5rem;
+    padding-left: 0.75rem;
     position: relative;
+    font-family: var(--font-header);
 
     &::before {
         content: "";
@@ -129,10 +124,11 @@ export const SectionTitle = styled.h2`
         left: 0;
         top: 50%;
         transform: translateY(-50%);
-        width: 3px;
-        height: 1.2rem;
+        width: 4px;
+        height: 1.4rem;
         background: var(--fill-color);
         border-radius: 2px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
 `;
 
@@ -141,6 +137,7 @@ export const Section = styled.div`
     display: flex;
     flex-direction: column;
     align-items: center;
+    margin-bottom: 1.5rem;
 `;
 
 export const CalendarContainer = styled.div`
@@ -205,18 +202,12 @@ export const StyledCalendar = styled(Calendar)`
 
     .react-calendar__tile--active {
         background: var(--fill-color) !important;
-        color: ${(props) =>
-            props.theme.mode === "dark-mode"
-                ? "#fff"
-                : "#2c3e50"} !important;
+        color: var(--text-primary) !important;
     }
 
     .react-calendar__tile--now {
         background: var(--button-color) !important;
-        color: ${(props) =>
-            props.theme.mode === "dark-mode"
-                ? "#fff"
-                : "#2c3e50"} !important;
+        color: var(--text-primary) !important;
         font-weight: 600;
     }
 
@@ -248,30 +239,54 @@ export const EntryDisplay = styled.div`
     max-width: 600px;
     background: var(--card-background);
     border-radius: 16px;
-    padding: 1.5rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    padding: 0.75rem;
+    padding-horizontal: 1rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     border: 1px solid var(--border-color);
+    transition: all 0.2s ease;
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+    }
 `;
 
 export const EntryItem = styled.div`
     padding: 1rem 0;
     border-bottom: 1px solid var(--border-color);
+    margin-bottom: 0.25rem;
 
     &:last-child {
         border-bottom: none;
+        margin-bottom: 0;
     }
 
     h3 {
         color: var(--text-secondary);
         font-size: 1.1rem;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.75rem;
         font-weight: 600;
+        display: inline-block;
+        position: relative;
+
+        &::after {
+            content: "";
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: var(--fill-color);
+            opacity: 0.7;
+            border-radius: 1px;
+        }
     }
 
     p {
         color: var(--text-primary);
         font-size: 1rem;
-        line-height: 1.6;
+        line-height: 1.7;
+        padding: 0.25rem 0.5rem;
     }
 `;
 

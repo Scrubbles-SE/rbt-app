@@ -16,6 +16,12 @@ import {
     membersDB
 } from "../utils/db";
 import { API_BASE_URL } from "../utils/config.js";
+import {
+    lightTheme,
+    darkTheme,
+    blueTheme,
+    minTheme
+} from "../layout/themes";
 
 export const GlobalStyle = createGlobalStyle`
     @keyframes spin {
@@ -23,6 +29,51 @@ export const GlobalStyle = createGlobalStyle`
         to { transform: rotate(360deg); }
     }
 `;
+
+// Add the updateManifestColors function here too for consistency
+const updateManifestColors = (themeName) => {
+    const themeMap = {
+        "light-mode": lightTheme,
+        "dark-mode": darkTheme,
+        "blue-theme": blueTheme,
+        "min-theme": minTheme
+    };
+
+    const theme = themeMap[themeName];
+    if (!theme) return;
+
+    // Get the manifest link
+    const manifestLink = document.querySelector(
+        'link[rel="manifest"]'
+    );
+    if (!manifestLink) return;
+
+    // Fetch and update the manifest
+    fetch(manifestLink.href)
+        .then((res) => res.json())
+        .then((manifest) => {
+            manifest.background_color = theme.background;
+            manifest.theme_color = theme.background;
+
+            // Create a blob URL with the updated manifest
+            const blob = new Blob([JSON.stringify(manifest)], {
+                type: "application/json"
+            });
+            const newManifestURL = URL.createObjectURL(blob);
+
+            // Update the manifest link
+            manifestLink.href = newManifestURL;
+
+            // Update theme-color meta tag
+            const themeColorMeta = document.querySelector(
+                'meta[name="theme-color"]'
+            );
+            if (themeColorMeta) {
+                themeColorMeta.content = theme.background;
+            }
+        })
+        .catch(console.error);
+};
 
 function Settings({ setIsLoggedIn }) {
     const [theme, setTheme] = useState("light-mode");
@@ -301,8 +352,22 @@ function Settings({ setIsLoggedIn }) {
     };
 
     // theme switching logic
-    const toggleTheme = (theme) => {
-        setTheme(theme);
+    const handleThemeChange = (newTheme) => {
+        setTheme(newTheme);
+        localStorage.setItem("theme", newTheme);
+
+        // Remove existing theme classes
+        document.body.classList.remove(
+            "dark-mode",
+            "min-theme",
+            "blue-theme"
+        );
+
+        // Add new theme class
+        document.body.classList.add(newTheme);
+
+        // Update manifest colors
+        updateManifestColors(newTheme);
     };
 
     // handle logout adn clear indexedDB
@@ -396,7 +461,7 @@ function Settings({ setIsLoggedIn }) {
                         </S.ToggleWrapper> */}
                     <S.ThemeSelection
                         onClick={() =>
-                            toggleTheme("light-mode")
+                            handleThemeChange("light-mode")
                         }
                         active={"light-mode"}
                         selected={theme === "light-mode"}
@@ -407,7 +472,9 @@ function Settings({ setIsLoggedIn }) {
                         Classic
                     </S.ThemeSelection>
                     <S.ThemeSelection
-                        onClick={() => toggleTheme("dark-mode")}
+                        onClick={() =>
+                            handleThemeChange("dark-mode")
+                        }
                         active={"dark-mode"}
                         selected={theme === "dark-mode"}
                     >
@@ -416,7 +483,9 @@ function Settings({ setIsLoggedIn }) {
                     </S.ThemeSelection>
                     <S.ThemeSelection
                         active={theme === "blue-theme"}
-                        onClick={() => setTheme("blue-theme")}
+                        onClick={() =>
+                            handleThemeChange("blue-theme")
+                        }
                         selected={theme === "blue-theme"}
                     >
                         <S.Circle color="#9bc4e2" />
@@ -424,7 +493,9 @@ function Settings({ setIsLoggedIn }) {
                     </S.ThemeSelection>
                     <S.ThemeSelection
                         active={theme === "min-theme"}
-                        onClick={() => setTheme("min-theme")}
+                        onClick={() =>
+                            handleThemeChange("min-theme")
+                        }
                         selected={theme === "min-theme"}
                     >
                         <S.Circle color="#d3d3d3" />
