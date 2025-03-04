@@ -9,7 +9,7 @@ const gradients = [
 
 export const getGradient = (groupId) => {
     let hash = 0;
-    console.log(groupId);
+    // console.log(groupId);
     for (let i = 0; i < groupId.length; i++) {
         const char = groupId.charCodeAt(i);
         hash = (hash << 5) - hash + char;

@@ -64,9 +64,7 @@ function GroupEntries({ userId }) {
     const [theme, setTheme] = useState({ mode: "light-mode" });
     const [reactionCounts, setReactionCounts] = useState({});
     const [reactionNumbers, setReactionNumbers] = useState({});
-    const [groupUsers, setGroupUsers] = useState(
-        location.state?.users || []
-    );
+    const [groupUsers] = useState(location.state?.users || []);
 
     useLayoutEffect(() => {
         const currentTheme = localStorage.getItem("theme");
@@ -412,10 +410,7 @@ function GroupEntries({ userId }) {
                             </EntryPageTitle>
                             <CodeButton
                                 onClick={() => {
-                                    console.log(
-                                        "Navigating with users:",
-                                        groupUsers
-                                    );
+                                    console.log(groupUsers);
                                     navigate(
                                         `/groups/${groupId}/admin`,
                                         {
@@ -465,7 +460,6 @@ function GroupEntries({ userId }) {
                     {/* Map through the entries */}
                     <EntriesContainer>
                         {entries.map((entry) => {
-                            console.log("Entry object:", entry);
                             return <></>; // Return an empty fragment for each entry
                         })}
                         {entries.map((entry) => (

@@ -1,4 +1,8 @@
-import React, { useState, useLayoutEffect } from "react";
+import React, {
+    useState,
+    useLayoutEffect,
+    useEffect
+} from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ThemeProvider } from "styled-components";
 
@@ -53,9 +57,7 @@ function AdminView() {
                     <EntriesContainer>
                         {groupUsers?.length > 0 ? (
                             groupUsers.map((user) => (
-                                <EntryCard
-                                    key={user.first_name}
-                                >
+                                <EntryCard key={user._id}>
                                     <EntryPageTitle>
                                         {user.first_name}
                                     </EntryPageTitle>
