@@ -7,6 +7,7 @@ import { useSwipeable } from "react-swipeable";
 import { entriesDB, userDB } from "../utils/db";
 import { API_BASE_URL } from "../utils/config.js";
 
+
 // Styles
 import "react-calendar/dist/Calendar.css";
 import {
@@ -27,7 +28,7 @@ import {
 
 function HomePage({ userId }) {
     const [date, setDate] = useState(new Date());
-    const [selectedEntry] = useState(null);
+    const [selectedEntry, setSelectedEntry] = useState(null);
     const [recentEntry, setRecentEntry] = useState(null);
     const [entryDates, setEntryDates] = useState([]);
     const [streakCount, setStreakCount] = useState(0);
@@ -131,6 +132,42 @@ function HomePage({ userId }) {
             );
         }
     }, [userId]);
+
+    const fetchEntryForDate = async (selectedDate) => {
+        try {
+            const cachedEntry = await entriesDB.getByDate(userId, selectedDate);
+            if (cachedEntry) {
+                setSelectedEntry(cachedEntry);
+                return;
+            }
+
+            const response = await fetch(
+                `${API_BASE_URL}/api/entries`,
+                {
+                    credentials: "include"
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error("Failed to fetch entries");
+            }
+
+            const entries = await response.json();
+
+            const matchingEntry = entries.find((entry) => {
+                const entryDate = new Date(entry.date);
+                return (
+                    entryDate.toDateString() ===
+                    selectedDate.toDateString()
+                );
+            });
+
+            setSelectedEntry(matchingEntry || null);
+        } catch (error) {
+            console.error("Error fetching entry:", error);
+        }
+    };
+
 
     // Fetch all entry dates
     const fetchAllEntryDates = useCallback(async () => {
@@ -244,13 +281,15 @@ function HomePage({ userId }) {
         return null;
     }
 
-    const handleDateChange = (newDate) => {
+    const handleDateChange = async (newDate) => {
         setDate(newDate);
+        await fetchEntryForDate(newDate);
         setModalIsOpen(true);
     };
 
     const closeModal = () => {
         setModalIsOpen(false);
+        setSelectedEntry(null);
     };
 
     const tileClassName = ({ date, view }) => {
@@ -351,25 +390,28 @@ function HomePage({ userId }) {
                 className="pop-up"
                 overlayClassName="overlay"
             >
-                <h2>{date.toDateString()}</h2>
-                {selectedEntry ? (
-                    <EntryDisplay>
-                        <EntryItem>
-                            <h3>Rose</h3>
-                            <p>{selectedEntry.rose_text}</p>
-                        </EntryItem>
-                        <EntryItem>
-                            <h3>Bud</h3>
-                            <p>{selectedEntry.bud_text}</p>
-                        </EntryItem>
-                        <EntryItem>
-                            <h3>Thorn</h3>
-                            <p>{selectedEntry.thorn_text}</p>
-                        </EntryItem>
-                    </EntryDisplay>
-                ) : (
-                    <NoEntry>No entry for this date</NoEntry>
-                )}
+                <div onClick={closeModal}>
+                    <h2>{date.toDateString()}</h2>
+                    {selectedEntry ? (
+                        <EntryDisplay>
+                            <EntryItem>
+                                <h3>Rose</h3>
+                                <p>{selectedEntry.rose_text}</p>
+                            </EntryItem>
+                            <EntryItem>
+                                <h3>Bud</h3>
+                                <p>{selectedEntry.bud_text}</p>
+                            </EntryItem>
+                            <EntryItem>
+                                <h3>Thorn</h3>
+                                <p>{selectedEntry.thorn_text}</p>
+                            </EntryItem>
+                        </EntryDisplay>
+                    ) : (
+                        <NoEntry>No entry for this date</NoEntry>
+                    )}
+
+                </div>
             </StyledModal>
         </HomeContainer>
     );

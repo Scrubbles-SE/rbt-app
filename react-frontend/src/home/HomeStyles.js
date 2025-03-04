@@ -277,12 +277,21 @@ export const EntryItem = styled.div`
 
 export const StyledModal = styled(Modal)`
     &.pop-up {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
         width: 100%;
         max-width: 350px;
-        background: var(--pop-up-background);
-        color: var(--pop-up-text-color);
+        background: ${props => props.theme.mode === "dark-mode" ? "#2c3e50" : "#fff"};
+        color: ${(props) =>
+            props.theme.mode === "dark-mode"
+                ? "#fff"
+                : "#2c3e50"};
         padding: 20px;
         border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 1);
+        z-index: 1000;
     }
 
     h2 {
@@ -299,6 +308,11 @@ export const ModalOverlay = styled.div`
     left: 0;
     width: 100%;
     height: 100%;
+    background: ${props => props.theme.mode === "dark-mode" ? "#2c3e50" : "#fff"};
+    color: ${(props) =>
+        props.theme.mode === "dark-mode"
+            ? "#fff"
+            : "#2c3e50"};
 `;
 
 export const NoEntry = styled.p`
