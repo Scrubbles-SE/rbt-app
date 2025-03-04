@@ -4,7 +4,7 @@
 
 ### Accessing
 
-[To be filled in: How to access the deployed application]
+Our site is hosted on Azure and is available for you to access here: https://lemon-bush-09e7af61e.6.azurestaticapps.net
 
 ### Our Team
 
@@ -22,11 +22,11 @@ A mobile-first progressive web application for creating, saving, and sharing Ros
 
 #### Pages
 
--   Home: See all your past entries, centered around a calendar view
--   Search: Look up past entries and organize them by tag
--   New Entry: Submit your entry for the today or edit it if things change
--   Groups: Join or create a group to share your entries with others
--   Settings: Manage your account and groups
+- Home: See all your past entries, centered around a calendar view
+- Search: Look up past entries and organize them by tag
+- New Entry: Submit your entry for the today or edit it if things change
+- Groups: Join or create a group to share your entries with others
+- Settings: Manage your account and groups
 
 ### Branding
 
@@ -91,25 +91,45 @@ All files        |    100  |    100   |   100   |   100   |
 
 #### Core Technologies
 
--   Frontend: React.js
--   Backend: Node.js/Express.js
--   Database: MongoDB
--   Authentication: JWT
+- Frontend: React.js
+- Backend: Node.js/Express.js
+- Database: MongoDB
+- Authentication: JWT
 
 #### Development Tools
 
--   Concurrently
--   Nodemon
+- Concurrently
+- Nodemon
 
 #### Code Quality
 
--   ESLint
--   Prettier with config file
+- ESLint
+- Prettier with config file
 
 #### Continuous Integration
 
-[To be filled in: CI/CD pipeline information]
+Our CI pipeline uses GitHub Actions to ensure code quality and automated testing:
+
+- Runs automated testing on every push to main and pull requests
+- Sets up Node.js environment and installs dependencies
+- Verifies code quality through linting
+- Runs backend tests with MongoDB test database
+- Ensures frontend builds successfully
 
 #### Deployment
 
-[To be filled in: Production deployment information]
+Our application is deployed using Azure services:
+
+**Frontend**
+
+- Deployed to Azure Static Web Apps
+- Triggered on push to main branch
+- Configures environment variables for backend API connection
+- Handles monorepo structure with proper build settings
+
+**Backend**
+
+- Deployed to Azure App Service
+- Packages and uploads backend code as a zip artifact
+- Sets up database connection and environment variables
+- Runs as a Node.js web service with Express

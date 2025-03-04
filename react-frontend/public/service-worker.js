@@ -1,12 +1,17 @@
 /* eslint-disable no-restricted-globals */
-const CACHE_NAME = "rbt-cache-v1";
+const CACHE_NAME = "rbt-cache-v2";
 const API_CACHE = "rbt-api-cache";
+
+// Add version for better tracking
+const SW_VERSION = "v2.0";
+console.log("Service Worker version:", SW_VERSION);
 
 // Assets that need to be available offline
 const STATIC_ASSETS = ["/", "/index.html", "/manifest.json"];
 
 // Install event - cache static assets
 self.addEventListener("install", (event) => {
+    console.log("Service Worker installing");
     event.waitUntil(
         caches
             .open(CACHE_NAME)
@@ -15,20 +20,39 @@ self.addEventListener("install", (event) => {
     );
 });
 
+// Add message event listener to check for updates
+self.addEventListener("message", (event) => {
+    if (event.data && event.data.type === "CHECK_UPDATE") {
+        console.log("Update check requested by client");
+        self.skipWaiting();
+        self.clients.claim();
+    }
+});
+
 // Activate event - clean up old caches
 self.addEventListener("activate", (event) => {
+    console.log("Service Worker activating");
     event.waitUntil(
-        caches.keys().then((cacheNames) => {
-            return Promise.all(
-                cacheNames
-                    .filter(
-                        (name) =>
-                            name !== CACHE_NAME &&
-                            name !== API_CACHE
-                    )
-                    .map((name) => caches.delete(name))
-            );
-        })
+        caches
+            .keys()
+            .then((cacheNames) => {
+                return Promise.all(
+                    cacheNames
+                        .filter(
+                            (name) =>
+                                name !== CACHE_NAME &&
+                                name !== API_CACHE
+                        )
+                        .map((name) => {
+                            console.log(
+                                "Deleting old cache:",
+                                name
+                            );
+                            return caches.delete(name);
+                        })
+                );
+            })
+            .then(() => self.clients.claim())
     );
 });
 
@@ -101,26 +125,52 @@ self.addEventListener("fetch", (event) => {
         return;
     }
 
-    // Static assets strategy - Cache First, Network Fallback
+    // *** UPDATED STRATEGY: Network First, Cache Fallback ***
+    // This ensures users always get the latest content unless they're offline
     event.respondWith(
-        caches.match(request).then((cachedResponse) => {
-            if (cachedResponse) {
-                return cachedResponse;
-            }
-            return fetch(request).then((response) => {
-                // Only cache successful responses
-                if (!response.ok) {
-                    return response;
+        fetch(request)
+            .then((networkResponse) => {
+                // If we got a good response from the network, cache it for offline use
+                if (networkResponse.ok) {
+                    const responseToCache =
+                        networkResponse.clone();
+                    caches.open(CACHE_NAME).then((cache) => {
+                        cache.put(request, responseToCache);
+                    });
                 }
-                // Cache new successful responses
-                const responseClone = response.clone();
-                caches
-                    .open(CACHE_NAME)
-                    .then((cache) =>
-                        cache.put(request, responseClone)
-                    );
-                return response;
-            });
-        })
+                return networkResponse;
+            })
+            .catch(() => {
+                // If network request fails (user is offline), try to serve from cache
+                console.log(
+                    "Network request failed, falling back to cache for:",
+                    request.url
+                );
+                return caches
+                    .match(request)
+                    .then((cachedResponse) => {
+                        if (cachedResponse) {
+                            return cachedResponse;
+                        }
+
+                        // If the request is for the index.html, return the cached version
+                        if (
+                            request.url.endsWith("/") ||
+                            request.url.includes("index.html")
+                        ) {
+                            return caches.match("/index.html");
+                        }
+
+                        // Otherwise return a simple offline message
+                        return new Response(
+                            "You are offline and this content is not cached.",
+                            {
+                                headers: {
+                                    "Content-Type": "text/plain"
+                                }
+                            }
+                        );
+                    });
+            })
     );
 });

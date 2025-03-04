@@ -35,7 +35,8 @@ function HomePage({ userId }) {
     const [activeStartDate, setActiveStartDate] = useState(
         new Date()
     );
-    const [setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isOffline, setIsOffline] = useState(false);
     const [userName, setUserName] = useState("User");
 
     // Handle calendar month swipe navigation
@@ -79,17 +80,18 @@ function HomePage({ userId }) {
                         ...data,
                         _id: userId
                     });
+                    setIsOffline(false);
                 }
             } catch (networkError) {
                 console.log(
                     "Network error fetching user details:",
                     networkError
                 );
-                // Don't set offline here to prevent UI issues
+                setIsOffline(true);
             }
         } catch (error) {
             console.log("Error fetching user details:", error);
-            // Don't set offline here to prevent UI issues
+            setIsOffline(true);
         }
         // eslint-disable-next-line
     }, [userId]);
@@ -372,6 +374,38 @@ function HomePage({ userId }) {
     // Always render the UI
     return (
         <HomeContainer {...swipeHandlers}>
+            {isLoading && (
+                <div
+                    style={{
+                        textAlign: "center",
+                        padding: "10px",
+                        color: "var(--text-secondary)",
+                        fontSize: "0.9rem"
+                    }}
+                >
+                    {/* This will show briefly while data loads, but won't block the UI */}
+                    Loading your data...
+                </div>
+            )}
+            {isOffline && (
+                <div
+                    style={{
+                        textAlign: "center",
+                        padding: "5px",
+                        fontSize: "0.8rem",
+                        color: "var(--text-secondary)",
+                        opacity: 0.7,
+                        position: "absolute",
+                        bottom: "5px",
+                        right: "5px",
+                        background: "rgba(255,255,255,0.7)",
+                        borderRadius: "4px"
+                    }}
+                >
+                    {/* Small unobtrusive indicator that won't disrupt the UI */}
+                    Limited connectivity
+                </div>
+            )}
             <WelcomeSection>
                 <WelcomeHeader>
                     Welcome back, {userName || "User"}!

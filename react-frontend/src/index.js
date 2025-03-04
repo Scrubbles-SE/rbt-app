@@ -50,6 +50,7 @@ if ("serviceWorker" in navigator) {
             // First check if there's already a service worker
             const registration =
                 await navigator.serviceWorker.getRegistration();
+
             if (!registration) {
                 // Only register if one doesn't exist
                 const swReg =
@@ -68,7 +69,72 @@ if ("serviceWorker" in navigator) {
                     "Service worker already registered:",
                     registration
                 );
+
+                // Check for updates on page load
+                registration.update().then(() => {
+                    console.log(
+                        "Service worker update check triggered"
+                    );
+                });
+
+                // When a new service worker is waiting to activate, notify it to take over
+                if (registration.waiting) {
+                    console.log(
+                        "New service worker waiting - activating"
+                    );
+                    registration.waiting.postMessage({
+                        type: "CHECK_UPDATE"
+                    });
+                }
+
+                // Listen for new service workers
+                registration.addEventListener(
+                    "updatefound",
+                    () => {
+                        const newWorker =
+                            registration.installing;
+                        console.log(
+                            "New service worker found, state:",
+                            newWorker.state
+                        );
+
+                        newWorker.addEventListener(
+                            "statechange",
+                            () => {
+                                console.log(
+                                    "Service worker state changed:",
+                                    newWorker.state
+                                );
+                                if (
+                                    newWorker.state ===
+                                        "installed" &&
+                                    navigator.serviceWorker
+                                        .controller
+                                ) {
+                                    // New service worker is ready to take over
+                                    newWorker.postMessage({
+                                        type: "CHECK_UPDATE"
+                                    });
+                                    console.log(
+                                        "New service worker activated"
+                                    );
+                                }
+                            }
+                        );
+                    }
+                );
             }
+
+            // Listen for controller change which indicates a new service worker has taken over
+            navigator.serviceWorker.addEventListener(
+                "controllerchange",
+                () => {
+                    console.log(
+                        "Service worker controller changed - refreshing page"
+                    );
+                    window.location.reload();
+                }
+            );
         } catch (err) {
             console.log(
                 "ServiceWorker registration failed: ",
@@ -116,7 +182,10 @@ const MainAppRoutes = ({ setIsLoggedIn, userId }) => {
     return (
         <Routes>
             {/* Tab Routes */}
-            <Route path="/" element={<HomePage />} />
+            <Route
+                path="/"
+                element={<HomePage userId={userId} />}
+            />
             <Route
                 path="/search"
                 element={<SearchPage userId={userId} />}
