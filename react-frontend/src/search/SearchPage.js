@@ -128,6 +128,8 @@ function SearchPage({ userId }) {
                 // set tags with entries data
                 const tags = await response.json();
 
+                console.log("TEST");
+
                 if (tags) {
                     console.log("User's tags fetched:", tags);
                     setTags(tags);
