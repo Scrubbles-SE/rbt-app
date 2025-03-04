@@ -119,10 +119,7 @@ function CreateGroup({ onGroupUpdate }) {
         try {
             const code = await generateUniqueCode();
 
-            const newGroup = await createGroup(
-                groupName.trim(),
-                code
-            );
+            await createGroup(groupName.trim(), code);
 
             setGroupCode(code);
             setStage("code");

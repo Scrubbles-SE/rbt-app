@@ -44,10 +44,10 @@ import {
 import {
     createToken,
     setTokenCookie
-} from "./utils/jwt-utils.js";
+} from "./jwt-stuff/jwt-utils.js";
 
 // Auth Middleware
-import { authMiddleware } from "./middleware/auth.js";
+import { authMiddleware } from "./jwt-stuff/auth.js";
 
 // File Paths
 const __filename = fileURLToPath(import.meta.url);
@@ -642,7 +642,11 @@ app.post("/api/groups", authMiddleware, async (req, res) => {
         };
 
         const newGroup = await createGroup(group);
-        const newMember = await joinGroup(userId, newGroup._id, true);
+        const newMember = await joinGroup(
+            userId,
+            newGroup._id,
+            true
+        );
         console.log("Group created successfully:", newGroup);
         console.log("Owner has joined group:", newMember);
 
@@ -708,43 +712,40 @@ app.get("/api/groups", authMiddleware, async (req, res) => {
     }
 });
 
-
 // GET ALL USERS FROM A GROUP
-app.get("/api/groups/:groupId/members", authMiddleware, async (req, res) => {
+app.get(
+    "/api/groups/:groupId/members",
+    authMiddleware,
+    async (req, res) => {
+        try {
+            console.log(
+                "Fetching all users in group:",
+                req.params.groupId
+            );
 
-    try {
+            const groupId = req.params.groupId;
 
-        console.log("Fetching all users in group:", req.params.groupId);
+            const allUsers = await getAllUsers(groupId);
 
-        const groupId = req.params.groupId;
-
-        const allUsers = await getAllUsers(groupId);
-
-
-        if (allUsers) {
-            console.log("Retrieved members:", allUsers);
-            res.json(allUsers);
-        } else {
-            return res
-                .status(404)
-                .json({ error: "User not found" });
+            if (allUsers) {
+                console.log("Retrieved members:", allUsers);
+                res.json(allUsers);
+            } else {
+                return res
+                    .status(404)
+                    .json({ error: "User not found" });
+            }
+        } catch (err) {
+            console.log(
+                "Error in api/groups/:groupId/members:",
+                err
+            );
+            res.status(500).json({
+                error: "Error fetching group members"
+            });
         }
-
-
-    } catch (err) {
-        console.log("Error in api/groups/:groupId/members:", err);
-        res.status(500).json({
-            error: "Error fetching group members"
-        })
     }
-
-
-
-
-});
-
-
-
+);
 
 // GET USER'S MOST RECENT PUBLIC POST
 /*

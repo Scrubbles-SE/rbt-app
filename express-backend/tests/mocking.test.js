@@ -1,12 +1,10 @@
 // example partial testing suite using Mockingoose
 import mongoose from "mongoose";
 import mockingoose from "mockingoose";
-import request from "supertest";
-import app from "../backend.js";
-import * as UserServices from "./user-services.js";
+import * as UserServices from "../models/user-services.js";
 
 // schemas
-import { userSchema, entrySchema } from "./user";
+import { userSchema, entrySchema } from "../models/user.js";
 
 let userModel;
 let entryModel;

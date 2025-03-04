@@ -3,10 +3,10 @@ import {
     userSchema,
     entrySchema,
     userEntriesSchema
-} from "./user.js";
-import { GroupSchema } from "./user.js";
-import * as UserServices from "./user-services.js";
-import * as GroupServices from "./group-services.js";
+} from "../models/user.js";
+import { GroupSchema } from "../models/user.js";
+import * as UserServices from "../models/user-services.js";
+import * as GroupServices from "../models/group-services.js";
 import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";

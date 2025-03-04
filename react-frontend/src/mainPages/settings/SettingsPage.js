@@ -39,9 +39,6 @@ const updateManifestColors = (themeName) => {
     const backgroundColor = styles
         .getPropertyValue("--background-color")
         .trim();
-    const textColor = styles
-        .getPropertyValue("--text-primary")
-        .trim();
 
     // Restore original class
     document.body.className = originalClass;
