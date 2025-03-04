@@ -52,7 +52,7 @@ self.addEventListener("fetch", (event) => {
     // API requests strategy
     if (request.url.includes("/api/")) {
         event.respondWith(
-            fetch(request)
+            fetch(request, { credentials: "include" })
                 .then((response) => {
                     // Only cache successful responses
                     if (!response.ok) {
@@ -67,7 +67,8 @@ self.addEventListener("fetch", (event) => {
                         );
                     return response;
                 })
-                .catch(() => {
+                .catch((error) => {
+                    console.error("API fetch failed:", error);
                     // If offline, try to return cached response
                     return caches
                         .match(request)

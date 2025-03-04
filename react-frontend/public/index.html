@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
     <head>
         <meta charset="utf-8" />
@@ -8,7 +8,7 @@
         />
         <meta
             name="viewport"
-            content="width=device-width, initial-scale=1"
+            content="width=device-width, initial-scale=1, shrink-to-fit=no, user-scalable=no"
         />
         <meta name="theme-color" content="#000000" />
         <meta
@@ -36,6 +36,20 @@
       work correctly both with client-side routing and a non-root public URL.
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
+        <!-- Add this for iOS PWA capabilities -->
+        <meta
+            name="apple-mobile-web-app-capable"
+            content="yes"
+        />
+        <meta
+            name="apple-mobile-web-app-status-bar-style"
+            content="black-translucent"
+        />
+        <!-- For Safari PWA splash screens -->
+        <link
+            rel="apple-touch-startup-image"
+            href="%PUBLIC_URL%/icons/splash.png"
+        />
         <title>Rose, Bud, Thorn</title>
     </head>
     <body>

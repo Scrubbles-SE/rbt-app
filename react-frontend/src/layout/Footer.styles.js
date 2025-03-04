@@ -7,36 +7,35 @@ export const FooterContainer = styled.footer`
     left: 0;
     right: 0;
     width: auto;
-    height: 60px;
+    height: 62px;
     background-color: var(--fill-color);
     padding: 0;
     z-index: 100;
     box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
     position: relative;
+
+    &::after {
+        content: "";
+        position: absolute;
+        bottom: -35px;
+        left: 0;
+        right: 0;
+        height: 35px;
+        background-color: var(--fill-color);
+    }
 `;
 
 export const TabBarContainer = styled.div`
     width: 100%;
     height: 100%;
     position: relative;
-    overflow: hidden;
-`;
-
-export const WhiteCircle = styled.div`
-    position: absolute;
-    bottom: 2px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 90px;
-    height: 90px;
-    background-color: var(--fill-color);
-    border-radius: 50%;
-    margin-bottom: 10px;
+    overflow: visible;
+    padding-bottom: 15px;
 `;
 
 export const ActionButton = styled.div`
     position: absolute;
-    bottom: 4px;
+    bottom: 15px;
     left: 50%;
     transform: translateX(-50%);
     width: 80px;

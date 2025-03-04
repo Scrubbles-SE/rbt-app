@@ -43,9 +43,11 @@ const PhoneContainer = styled.div`
 const MobileLayout = styled.div`
     display: flex;
     flex-direction: column;
+    width: 100%;
     height: 100vh;
     position: relative;
     overflow: hidden;
+    background-color: var(--background-color);
 
     .header {
         position: fixed;
@@ -57,9 +59,11 @@ const MobileLayout = styled.div`
 
     .main-content {
         flex: 1;
+        width: 100%;
         overflow-y: auto;
-        padding: 70px 0 70px;
+        padding: 70px 0 calc(70px + 35px);
         -webkit-overflow-scrolling: touch;
+        background-color: var(--background-color);
     }
 
     .footer {

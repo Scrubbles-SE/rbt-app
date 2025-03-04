@@ -21,7 +21,6 @@ import { IoRose, IoRoseOutline } from "react-icons/io5";
 import {
     FooterContainer,
     TabBarContainer,
-    WhiteCircle,
     ActionButton,
     Nav,
     TabList,
@@ -114,7 +113,6 @@ function Footer() {
                         </TabItem>
                     </TabList>
                 </Nav>
-                <WhiteCircle />
             </TabBarContainer>
             <ActionButton>
                 <NewEntryButton

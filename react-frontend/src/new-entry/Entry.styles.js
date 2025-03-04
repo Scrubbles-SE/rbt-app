@@ -10,40 +10,51 @@ export const EntryContainer = styled.div`
 `;
 
 export const EntryTitle = styled.h1`
-    font-size: 1.8rem;
-    font-weight: 800;
+    font-size: 2rem;
+    font-weight: 700;
     color: var(--text-primary);
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    font-family: var(--font-header);
     position: relative;
-    padding-left: 1.2rem;
-    letter-spacing: -0.5px;
-
-    &::before {
-        content: "";
-        position: absolute;
-        left: 0;
-        top: 50%;
-        transform: translateY(-50%);
-        height: 70%;
-        width: 4px;
-        background: var(--fill-color);
-        border-radius: 2px;
-        box-shadow: 0 2px 8px var(--fill-color);
-    }
+    letter-spacing: 0.03em;
 
     &::after {
         content: "";
         position: absolute;
-        bottom: -8px;
-        left: 1.2rem;
-        width: 100px;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 120px;
         height: 3px;
-        background: linear-gradient(
-            90deg,
-            var(--fill-color) 0%,
-            transparent 100%
-        );
+        background: var(--fill-color);
         border-radius: 2px;
+    }
+`;
+
+export const EditModeIndicator = styled.div`
+    display: inline-block;
+    background-color: var(--fill-color);
+    color: var(--text-primary);
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    margin: 0 auto 1.5rem;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    animation: fadeIn 0.3s ease-in-out;
+    letter-spacing: 0.02em;
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 `;
 
@@ -73,43 +84,33 @@ export const EditIcon = styled.div`
 
 export const EntryInput = styled.input`
     width: 100%;
-    padding: 1rem;
+    padding: 1.1rem;
     border: 1px solid var(--border-color);
     border-radius: 12px;
     font-size: 1rem;
-    background-color: ${(props) =>
-        props.theme.mode === "dark-mode"
-            ? "#2a2a2a"
-            : "var(--background-color)"};
-    color: ${(props) =>
-        props.theme.mode === "dark-mode"
-            ? "#ffffff"
-            : "#000000"};
+    background-color: var(--background-color);
+    color: var(--text-primary);
     transition: all 0.2s;
 
     &::placeholder {
         color: var(--text-secondary);
-        opacity: 0.7;
+        opacity: 0.8;
+        font-style: italic;
+        font-size: 0.95rem;
     }
 
     &:focus {
         outline: none;
         border-color: var(--fill-color);
-        box-shadow: 0 0 0 3px var(--fill-color-transparent);
+        box-shadow: 0 0 0 3px rgba(242, 196, 187, 0.2);
     }
 `;
 
 export const EntryText = styled.div`
     font-size: 1rem;
-    color: ${(props) =>
-        props.theme.mode === "dark-mode"
-            ? "#ffffff"
-            : "#000000"};
-    padding: 1rem;
-    background-color: ${(props) =>
-        props.theme.mode === "dark-mode"
-            ? "#2a2a2a"
-            : "var(--background-color)"};
+    color: var(--text-primary);
+    padding: 1.1rem;
+    background-color: var(--background-color);
     border-radius: 12px;
     cursor: pointer;
     border: 1px solid var(--border-color);
@@ -117,13 +118,30 @@ export const EntryText = styled.div`
     min-height: 3.5rem;
     display: flex;
     align-items: center;
+    position: relative;
 
     &:hover {
-        background-color: ${(props) =>
-            props.theme.mode === "dark-mode"
-                ? "#363636"
-                : "var(--fill-color-transparent)"};
+        background-color: rgba(242, 196, 187, 0.1);
         border-color: var(--fill-color);
+    }
+
+    &::after {
+        content: "Click to edit";
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        background-color: var(--fill-color);
+        padding: 2px 8px;
+        border-radius: 10px;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+    }
+
+    &:hover::after {
+        opacity: 0.9;
     }
 `;
 
@@ -235,9 +253,21 @@ export const ToggleLabel = styled.span`
 `;
 
 export const SubmitContainer = styled.div`
-    margin: 3rem auto 1rem;
+    margin: 2rem auto 1rem;
     max-width: 300px;
     width: 100%;
+    animation: fadeIn 0.3s ease-in-out;
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
 `;
 
 export const SubmitWrapper = styled.div`
@@ -248,20 +278,17 @@ export const SubmitWrapper = styled.div`
     );
     border-radius: 16px;
     padding: 1.2rem 1.2rem 1rem;
-    box-shadow: 0 4px 12px var(--fill-color-transparent);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     display: flex;
     flex-direction: column;
     gap: 0.8rem;
     cursor: pointer;
     transition: all 0.3s;
-    opacity: ${(props) =>
-        props.isEditMode && !props.hasChanges ? 0.6 : 1};
     border: 1px solid var(--button-color);
 
     &:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 16px var(--fill-color-transparent);
-        opacity: 1;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
     }
 
     &:active {
@@ -350,12 +377,12 @@ export const ErrorMessage = styled.div`
 `;
 
 export const FieldLabel = styled.span`
-    text-transform: uppercase;
-    font-size: 0.8rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
+    text-transform: capitalize;
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
     color: var(--text-primary);
-    margin-bottom: 0.6rem;
+    margin-bottom: 0.8rem;
     display: block;
     position: relative;
     padding-left: 0.8rem;
@@ -366,9 +393,20 @@ export const FieldLabel = styled.span`
         left: 0;
         top: 50%;
         transform: translateY(-50%);
-        width: 3px;
-        height: 0.8rem;
-        background: var(--fill-color);
+        width: 4px;
+        height: 1rem;
+        background: ${(props) => {
+            switch (props.children) {
+                case "rose":
+                    return "#FF8FB1";
+                case "bud":
+                    return "#98CE00";
+                case "thorn":
+                    return "#B83A3A";
+                default:
+                    return "var(--fill-color)";
+            }
+        }};
         border-radius: 2px;
     }
 `;
