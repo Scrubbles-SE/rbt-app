@@ -18,6 +18,7 @@ import {
     FiHash,
     FiChevronLeft
 } from "react-icons/fi";
+import { MdOutlinePeopleOutline } from "react-icons/md";
 import { ThemeProvider } from "styled-components";
 
 import { membersDB, entriesDB } from "../utils/db";
@@ -406,6 +407,20 @@ function GroupEntries({ userId }) {
                             <EntryPageTitle gradient={gradient}>
                                 {decodeURIComponent(groupName)}
                             </EntryPageTitle>
+                            <CodeButton
+                                onClick={() => {
+                                    navigate(
+                                        `/groups/${groupId}/admin`,
+                                        {
+                                            state: {
+                                                users: groupUsers
+                                            }
+                                        }
+                                    );
+                                }}
+                            >
+                                <MdOutlinePeopleOutline />
+                            </CodeButton>
                             <CodeButton
                                 onClick={() =>
                                     setShowCode(!showCode)
