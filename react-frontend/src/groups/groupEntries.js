@@ -64,11 +64,14 @@ function GroupEntries({ userId }) {
     const [theme, setTheme] = useState({ mode: "light-mode" });
     const [reactionCounts, setReactionCounts] = useState({});
     const [reactionNumbers, setReactionNumbers] = useState({});
-    const groupUsers = location.state?.users;
+    const [groupUsers, setGroupUsers] = useState(
+        location.state?.users || []
+    );
 
     useLayoutEffect(() => {
         const currentTheme = localStorage.getItem("theme");
         setTheme({ mode: currentTheme || "light-mode" });
+        console.log(groupUsers);
     }, []);
 
     // Get gradient for the group
@@ -409,6 +412,10 @@ function GroupEntries({ userId }) {
                             </EntryPageTitle>
                             <CodeButton
                                 onClick={() => {
+                                    console.log(
+                                        "Navigating with users:",
+                                        groupUsers
+                                    );
                                     navigate(
                                         `/groups/${groupId}/admin`,
                                         {

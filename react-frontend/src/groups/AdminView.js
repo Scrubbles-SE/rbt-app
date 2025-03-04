@@ -22,7 +22,7 @@ import { EntryPageTitle } from "../search/search.styles";
 function AdminView() {
     const navigate = useNavigate();
     const location = useLocation();
-    const groupUsers = location.state.users;
+    const groupUsers = location.state?.users || [];
     const [theme, setTheme] = useState({ mode: "light-mode" });
 
     useLayoutEffect(() => {
@@ -51,15 +51,21 @@ function AdminView() {
 
                     {/* display all entries in the tag */}
                     <EntriesContainer>
-                        {/* {groupUsers.map((user) => {
-                            return (
-                                <EntryCard key={user}>
-                                    <EntryHeader>
-                                        {user}
-                                    </EntryHeader>
+                        {groupUsers?.length > 0 ? (
+                            groupUsers.map((user) => (
+                                <EntryCard
+                                    key={user.first_name}
+                                >
+                                    <EntryPageTitle>
+                                        {user.first_name}
+                                    </EntryPageTitle>
                                 </EntryCard>
-                            );
-                        })} */}
+                            ))
+                        ) : (
+                            <EntryPageTitle>
+                                No users found
+                            </EntryPageTitle>
+                        )}
                     </EntriesContainer>
                 </ContentContainer>
             </Container>
