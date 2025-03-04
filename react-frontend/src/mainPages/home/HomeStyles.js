@@ -305,13 +305,41 @@ export const StyledModal = styled(Modal)`
         background: var(--card-background);
         color: var(--text-primary);
         padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 1);
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
         z-index: 1000;
+        border: 1px solid var(--border-color);
     }
 
     h2 {
         text-align: center;
+        margin-bottom: 15px;
+        color: var(--text-primary);
+        font-weight: 600;
+        border-bottom: 2px solid var(--fill-color);
+        padding-bottom: 8px;
+    }
+
+    p {
+        margin: 12px 0;
+        line-height: 1.5;
+    }
+
+    button {
+        background: var(--button-color);
+        color: var(--text-primary);
+        border: none;
+        padding: 8px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 500;
+        margin-top: 15px;
+        transition: all 0.2s ease;
+
+        &:hover {
+            background: var(--fill-color);
+            transform: translateY(-2px);
+        }
     }
 `;
 
@@ -324,13 +352,143 @@ export const ModalOverlay = styled.div`
     left: 0;
     width: 100%;
     height: 100%;
-    background: var(--card-background);
-    color: var(--text-primary);
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(2px);
+    z-index: 999;
 `;
 
-export const NoEntry = styled.p`
+export const NoEntry = styled.div`
     color: var(--text-secondary);
     text-align: center;
-    margin-top: 20px;
+    margin: 20px 0;
     font-style: italic;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    button {
+        margin-top: 15px;
+        min-width: 100px;
+    }
 `;
+
+export const EntryTag = styled.span`
+    background: var(--fill-color);
+    color: var(--text-primary);
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    margin-right: 5px;
+    margin-bottom: 5px;
+    display: inline-block;
+`;
+
+export const TagsContainer = styled.div`
+    margin-top: 15px;
+    display: flex;
+    flex-wrap: wrap;
+`;
+
+export const EntrySection = styled.div`
+    margin-bottom: 15px;
+
+    strong {
+        color: var(--text-secondary);
+        font-weight: 600;
+    }
+
+    p {
+        padding: 5px 0;
+    }
+`;
+
+export const ModalContent = styled.div`
+    max-height: 70vh;
+    overflow-y: auto;
+    padding-right: 5px;
+
+    &::-webkit-scrollbar {
+        width: 5px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: var(--fill-color);
+        border-radius: 10px;
+    }
+`;
+
+// Add global styles for Modal
+export const ModalStyles = styled.div`
+    /* This is a dummy component just to inject the styles below */
+`;
+
+// Adding global CSS for the modal
+const injectGlobalStyles = `
+  .pop-up {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    max-width: 350px;
+    background: var(--card-background);
+    color: var(--text-primary);
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    border: 1px solid var(--border-color);
+  }
+  
+  .pop-up h2 {
+    text-align: center;
+    margin-bottom: 15px;
+    color: var(--text-primary);
+    font-weight: 600;
+    border-bottom: 2px solid var(--fill-color);
+    padding-bottom: 8px;
+  }
+  
+  .pop-up p {
+    margin: 12px 0;
+    line-height: 1.5;
+  }
+  
+  .pop-up button {
+    background: var(--button-color);
+    color: var(--text-primary);
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    margin-top: 15px;
+    transition: all 0.2s ease;
+  }
+  
+  .pop-up button:hover {
+    background: var(--fill-color);
+    transform: translateY(-2px);
+  }
+  
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(2px);
+    z-index: 999;
+  }
+`;
+
+// Add the styles to the document
+if (typeof document !== "undefined") {
+    const styleElement = document.createElement("style");
+    styleElement.type = "text/css";
+    styleElement.appendChild(
+        document.createTextNode(injectGlobalStyles)
+    );
+    document.head.appendChild(styleElement);
+}

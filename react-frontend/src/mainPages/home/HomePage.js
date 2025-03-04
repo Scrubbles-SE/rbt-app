@@ -4,7 +4,7 @@
  */
 import React, { useState, useEffect, useCallback } from "react";
 import { useSwipeable } from "react-swipeable";
-import { entriesDB, userDB } from "../../utils/db";
+import { entriesDB, userDB, tagsDB } from "../../utils/db";
 import { API_BASE_URL } from "../../utils/config.js";
 
 // Styles
@@ -21,9 +21,14 @@ import {
     StyledCalendar,
     EntryDisplay,
     EntryItem,
-    StyledModal,
-    NoEntry
+    EntryTag,
+    TagsContainer,
+    EntrySection
 } from "./HomeStyles";
+import Modal from "react-modal";
+
+// Modal hard-fix
+Modal.setAppElement("#root");
 
 function HomePage({ userId }) {
     const [date, setDate] = useState(new Date());
@@ -38,6 +43,7 @@ function HomePage({ userId }) {
     const [isLoading, setIsLoading] = useState(true);
     const [isOffline, setIsOffline] = useState(false);
     const [userName, setUserName] = useState("User");
+    const [tagNames, setTagNames] = useState({});
 
     // Handle calendar month swipe navigation
     const handleSwipe = (direction) => {
@@ -152,6 +158,16 @@ function HomePage({ userId }) {
             );
             if (cachedEntry) {
                 setSelectedEntry(cachedEntry);
+
+                // If this entry has tags but no tag_string, try to get tag names
+                if (
+                    cachedEntry.tags &&
+                    cachedEntry.tags.length > 0 &&
+                    !cachedEntry.tag_string
+                ) {
+                    await fetchTagNames(cachedEntry.tags);
+                }
+
                 return;
             }
 
@@ -178,22 +194,96 @@ function HomePage({ userId }) {
                         }
                     );
 
+                    if (matchingEntry) {
+                        // If this entry has tags but no tag_string, try to get tag names
+                        if (
+                            matchingEntry.tags &&
+                            matchingEntry.tags.length > 0 &&
+                            !matchingEntry.tag_string
+                        ) {
+                            await fetchTagNames(
+                                matchingEntry.tags
+                            );
+                        }
+                    }
+
                     setSelectedEntry(matchingEntry || null);
                 }
             } catch (networkError) {
-                console.log(
-                    "Network error fetching entry for date:",
-                    networkError
-                );
+                setIsOffline(true);
                 // Continue with cached data
             }
         } catch (error) {
-            console.log(
-                "Error fetching entry for date:",
-                error
-            );
+            setIsOffline(true);
             // Just show null if we can't find an entry
             setSelectedEntry(null);
+        }
+    };
+
+    // Fetch tag names for given tag IDs
+    const fetchTagNames = async (tagIds) => {
+        if (!tagIds || tagIds.length === 0) return;
+
+        try {
+            // Check if we already have these tag names in state
+            const missingTagIds = tagIds.filter(
+                (id) => !tagNames[id]
+            );
+
+            if (missingTagIds.length === 0) return; // All tag names are already in state
+
+            // Try to get from indexed DB first
+            const cachedTags = await tagsDB.getAll(userId);
+
+            if (cachedTags && cachedTags.length > 0) {
+                const newTagNames = { ...tagNames };
+
+                missingTagIds.forEach((tagId) => {
+                    const matchingTag = cachedTags.find(
+                        (tag) => tag._id === tagId
+                    );
+                    if (matchingTag) {
+                        newTagNames[tagId] =
+                            matchingTag.tag_name;
+                    }
+                });
+
+                setTagNames(newTagNames);
+                return;
+            }
+
+            // If not in cache, fetch from API
+            try {
+                const response = await fetch(
+                    `${API_BASE_URL}/api/entries/tags/${userId}`,
+                    {
+                        credentials: "include"
+                    }
+                );
+
+                if (response.ok) {
+                    const allTags = await response.json();
+
+                    // Create mapping of tag ID to tag name
+                    const newTagNames = { ...tagNames };
+
+                    missingTagIds.forEach((tagId) => {
+                        const matchingTag = allTags.find(
+                            (tag) => tag._id === tagId
+                        );
+                        if (matchingTag) {
+                            newTagNames[tagId] =
+                                matchingTag.tag_name;
+                        }
+                    });
+
+                    setTagNames(newTagNames);
+                }
+            } catch (networkError) {
+                setIsOffline(true);
+            }
+        } catch (error) {
+            setIsOffline(true);
         }
     };
 
@@ -481,14 +571,39 @@ function HomePage({ userId }) {
                 </Section>
             )}
 
-            <StyledModal
+            <Modal
                 isOpen={modalIsOpen}
                 onRequestClose={closeModal}
                 contentLabel="Entry Details"
-                appElement={document.getElementById("root")}
+                className="pop-up"
+                overlayClassName="modal-overlay"
+                style={{
+                    overlay: {
+                        backgroundColor: "rgba(0, 0, 0, 0.5)",
+                        backdropFilter: "blur(2px)",
+                        zIndex: 999
+                    },
+                    content: {
+                        position: "absolute",
+                        top: "50%",
+                        left: "50%",
+                        right: "auto",
+                        bottom: "auto",
+                        marginRight: "-50%",
+                        transform: "translate(-50%, -50%)",
+                        border: "none",
+                        background: "var(--card-background)",
+                        overflow: "auto",
+                        borderRadius: "16px",
+                        outline: "none",
+                        padding: "20px",
+                        maxWidth: "350px",
+                        width: "90%"
+                    }
+                }}
             >
                 {selectedEntry ? (
-                    <>
+                    <div>
                         <h2>
                             {new Date(
                                 selectedEntry.date
@@ -498,31 +613,83 @@ function HomePage({ userId }) {
                                 day: "numeric"
                             })}
                         </h2>
-                        <p>
-                            <strong>Rose:</strong>{" "}
-                            {selectedEntry.rose_text}
-                        </p>
-                        <p>
-                            <strong>Bud:</strong>{" "}
-                            {selectedEntry.bud_text}
-                        </p>
-                        <p>
-                            <strong>Thorn:</strong>{" "}
-                            {selectedEntry.thorn_text}
-                        </p>
+
+                        <EntrySection>
+                            <strong>Rose</strong>
+                            <p>{selectedEntry.rose_text}</p>
+                        </EntrySection>
+
+                        <EntrySection>
+                            <strong>Bud</strong>
+                            <p>{selectedEntry.bud_text}</p>
+                        </EntrySection>
+
+                        <EntrySection>
+                            <strong>Thorn</strong>
+                            <p>{selectedEntry.thorn_text}</p>
+                        </EntrySection>
+
+                        {selectedEntry.tags &&
+                            selectedEntry.tags.length > 0 && (
+                                <>
+                                    <strong>Tags</strong>
+                                    <TagsContainer>
+                                        {selectedEntry.tag_string
+                                            ? selectedEntry.tag_string
+                                                  .split(", ")
+                                                  .map(
+                                                      (
+                                                          tag,
+                                                          index
+                                                      ) => (
+                                                          <EntryTag
+                                                              key={
+                                                                  index
+                                                              }
+                                                          >
+                                                              {
+                                                                  tag
+                                                              }
+                                                          </EntryTag>
+                                                      )
+                                                  )
+                                            : selectedEntry.tags.map(
+                                                  (
+                                                      tagId,
+                                                      index
+                                                  ) => (
+                                                      <EntryTag
+                                                          key={
+                                                              index
+                                                          }
+                                                      >
+                                                          {tagNames[
+                                                              tagId
+                                                          ] ||
+                                                              tagId}
+                                                      </EntryTag>
+                                                  )
+                                              )}
+                                    </TagsContainer>
+                                </>
+                            )}
                         <button onClick={closeModal}>
                             Close
                         </button>
-                    </>
+                    </div>
                 ) : (
-                    <NoEntry>
-                        No entry for this date.{" "}
+                    <div>
+                        <h2>No Entry Found</h2>
+                        <p>
+                            There is no reflection for this
+                            date.
+                        </p>
                         <button onClick={closeModal}>
                             Close
                         </button>
-                    </NoEntry>
+                    </div>
                 )}
-            </StyledModal>
+            </Modal>
         </HomeContainer>
     );
 }
