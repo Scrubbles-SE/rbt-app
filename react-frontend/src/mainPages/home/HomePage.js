@@ -2,7 +2,7 @@
  * Home Page Component
  * Displays user's entry calendar, recent reflections, and streak statistics
  */
-import { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useSwipeable } from "react-swipeable";
 import { entriesDB, userDB } from "../../utils/db";
 import { API_BASE_URL } from "../../utils/config.js";
@@ -35,9 +35,8 @@ function HomePage({ userId }) {
     const [activeStartDate, setActiveStartDate] = useState(
         new Date()
     );
-    const [isLoading, setIsLoading] = useState(true);
-    const [setIsOffline] = useState(false);
-    const [userName, setUserName] = useState("");
+    const [setIsLoading] = useState(true);
+    const [userName, setUserName] = useState("User");
 
     // Handle calendar month swipe navigation
     const handleSwipe = (direction) => {
@@ -61,7 +60,7 @@ function HomePage({ userId }) {
             // First try to get from IndexedDB
             const users = await userDB.getAll();
             if (users && users.length > 0) {
-                setUserName(users[0].name);
+                setUserName(users[0].name || "User");
             }
 
             // Then fetch from API and update IndexedDB
@@ -74,7 +73,7 @@ function HomePage({ userId }) {
                 );
                 if (response.ok) {
                     const data = await response.json();
-                    setUserName(data.name);
+                    setUserName(data.name || "User");
                     // Update user in IndexedDB
                     await userDB.update({
                         ...data,
@@ -82,10 +81,15 @@ function HomePage({ userId }) {
                     });
                 }
             } catch (networkError) {
-                setIsOffline(true);
+                console.log(
+                    "Network error fetching user details:",
+                    networkError
+                );
+                // Don't set offline here to prevent UI issues
             }
         } catch (error) {
-            setIsOffline(true);
+            console.log("Error fetching user details:", error);
+            // Don't set offline here to prevent UI issues
         }
         // eslint-disable-next-line
     }, [userId]);
@@ -98,29 +102,41 @@ function HomePage({ userId }) {
             if (cachedEntry) {
                 setRecentEntry(cachedEntry);
             }
-            const response = await fetch(
-                `${API_BASE_URL}/api/entries`,
-                {
-                    credentials: "include"
+
+            try {
+                const response = await fetch(
+                    `${API_BASE_URL}/api/entries`,
+                    {
+                        credentials: "include"
+                    }
+                );
+
+                if (response.ok) {
+                    const entries = await response.json();
+
+                    // sort entries from newest to oldest
+                    const sortedEntries = entries.sort(
+                        (a, b) =>
+                            new Date(b.date) - new Date(a.date)
+                    );
+
+                    if (sortedEntries.length > 0) {
+                        setRecentEntry(
+                            sortedEntries[0] || null
+                        );
+                        await entriesDB.add(sortedEntries[0]);
+                    }
                 }
-            );
-
-            if (!response.ok) {
-                throw new Error("Failed to fetch entries");
+            } catch (networkError) {
+                console.log(
+                    "Network error fetching recent entry:",
+                    networkError
+                );
+                // Continue with cached data, don't set offline
             }
-
-            const entries = await response.json();
-
-            // sort entries from newest to oldest
-            const sortedEntries = entries.sort(
-                (a, b) => new Date(b.date) - new Date(a.date)
-            );
-
-            setRecentEntry(sortedEntries[0] || null);
-            await entriesDB.add(sortedEntries[0]);
-            setIsOffline(false);
         } catch (error) {
-            setIsOffline(true);
+            console.log("Error fetching recent entry:", error);
+            // Continue with whatever data we have
         }
         // eslint-disable-next-line
     }, [userId]);
@@ -137,30 +153,45 @@ function HomePage({ userId }) {
                 return;
             }
 
-            const response = await fetch(
-                `${API_BASE_URL}/api/entries`,
-                {
-                    credentials: "include"
-                }
-            );
-
-            if (!response.ok) {
-                throw new Error("Failed to fetch entries");
-            }
-
-            const entries = await response.json();
-
-            const matchingEntry = entries.find((entry) => {
-                const entryDate = new Date(entry.date);
-                return (
-                    entryDate.toDateString() ===
-                    selectedDate.toDateString()
+            try {
+                const response = await fetch(
+                    `${API_BASE_URL}/api/entries`,
+                    {
+                        credentials: "include"
+                    }
                 );
-            });
 
-            setSelectedEntry(matchingEntry || null);
+                if (response.ok) {
+                    const entries = await response.json();
+
+                    const matchingEntry = entries.find(
+                        (entry) => {
+                            const entryDate = new Date(
+                                entry.date
+                            );
+                            return (
+                                entryDate.toDateString() ===
+                                selectedDate.toDateString()
+                            );
+                        }
+                    );
+
+                    setSelectedEntry(matchingEntry || null);
+                }
+            } catch (networkError) {
+                console.log(
+                    "Network error fetching entry for date:",
+                    networkError
+                );
+                // Continue with cached data
+            }
         } catch (error) {
-            setIsOffline(true);
+            console.log(
+                "Error fetching entry for date:",
+                error
+            );
+            // Just show null if we can't find an entry
+            setSelectedEntry(null);
         }
     };
 
@@ -174,39 +205,56 @@ function HomePage({ userId }) {
             );
             setEntryDates(cachedDates);
             calculateStreakCount(cachedDates);
-            const response = await fetch(
-                `${API_BASE_URL}/api/entries`,
-                {
-                    credentials: "include"
+
+            try {
+                const response = await fetch(
+                    `${API_BASE_URL}/api/entries`,
+                    {
+                        credentials: "include"
+                    }
+                );
+
+                if (response.ok) {
+                    const entries = await response.json();
+                    const datesWithEntries = entries.map(
+                        (entry) =>
+                            new Date(entry.date).toDateString()
+                    );
+
+                    setEntryDates(datesWithEntries);
+                    calculateStreakCount(datesWithEntries);
+
+                    // Update the cache
+                    for (const entry of entries) {
+                        await entriesDB.update(entry);
+                    }
                 }
-            );
-
-            if (!response.ok) {
-                throw new Error("Failed to fetch entries");
+            } catch (networkError) {
+                console.log(
+                    "Network error fetching all entries:",
+                    networkError
+                );
+                // Continue with cached data
             }
-
-            const entries = await response.json();
-            const datesWithEntries = entries.map((entry) =>
-                new Date(entry.date).toDateString()
-            );
-
-            setEntryDates(datesWithEntries);
-            calculateStreakCount(datesWithEntries);
-            await Promise.all(
-                entries.map(
-                    entries.map((entry) =>
-                        entriesDB.update(entry)
-                    )
-                )
-            );
         } catch (error) {
-            setIsOffline(true);
+            console.log("Error fetching all entries:", error);
+            // Ensure we at least have an empty array
+            setEntryDates([]);
+        } finally {
+            // Always set loading to false when done
+            setIsLoading(false);
         }
         // eslint-disable-next-line
     }, [userId]);
 
     // Calculate user's current streak based on consecutive daily entries
     const calculateStreakCount = (dates) => {
+        // If no dates, set streak to 0
+        if (!dates || dates.length === 0) {
+            setStreakCount(0);
+            return;
+        }
+
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         const yesterday = new Date(today);
@@ -231,21 +279,31 @@ function HomePage({ userId }) {
 
         let streak = 0;
         let currentDate = new Date(sortedDates[0]);
-        let index = 0;
 
-        // Count consecutive days
-        while (index < sortedDates.length) {
-            if (
-                index === 0 ||
-                (currentDate - sortedDates[index]) /
-                    (1000 * 60 * 60 * 24) <=
-                    1
-            ) {
-                streak++;
-                currentDate = sortedDates[index];
-                index++;
-            } else {
-                break;
+        // Check if the most recent entry is from today or yesterday
+        if (
+            currentDate.getTime() === today.getTime() ||
+            currentDate.getTime() === yesterday.getTime()
+        ) {
+            streak = 1;
+            const checkDate = new Date(currentDate);
+
+            // Count backwards from the most recent entry date
+            for (let i = 1; i < 1000; i++) {
+                // Move to the previous day
+                checkDate.setDate(checkDate.getDate() - 1);
+
+                // Check if there's an entry for this day
+                const hasEntryForDate = sortedDates.some(
+                    (date) =>
+                        date.getTime() === checkDate.getTime()
+                );
+
+                if (hasEntryForDate) {
+                    streak++;
+                } else {
+                    break;
+                }
             }
         }
 
@@ -253,27 +311,26 @@ function HomePage({ userId }) {
     };
 
     // Initialize all data on component mount
-    const initializeData = useCallback(async () => {
-        setIsLoading(true);
-        await Promise.all([
-            fetchUserDetails(),
-            fetchMostRecentEntry(),
-            fetchAllEntryDates()
-        ]);
-        setIsLoading(false);
+    useEffect(() => {
+        const initializeData = async () => {
+            try {
+                await fetchUserDetails();
+                await fetchMostRecentEntry();
+                await fetchAllEntryDates();
+            } catch (error) {
+                console.log("Error initializing data:", error);
+                // Ensure loading is set to false even if there's an error
+                setIsLoading(false);
+            }
+        };
+
+        initializeData();
+        // eslint-disable-next-line
     }, [
         fetchUserDetails,
         fetchMostRecentEntry,
         fetchAllEntryDates
     ]);
-
-    useEffect(() => {
-        initializeData();
-    }, [initializeData]);
-
-    if (isLoading) {
-        return null;
-    }
 
     // Handle date selection on calendar
     const handleDateChange = async (newDate) => {
@@ -285,18 +342,17 @@ function HomePage({ userId }) {
     // Close the entry detail modal
     const closeModal = () => {
         setModalIsOpen(false);
-        setSelectedEntry(null);
     };
 
     // Add CSS class to calendar tiles with entries
     const tileClassName = ({ date, view }) => {
         if (view === "month") {
+            date.setHours(0, 0, 0, 0);
             const dateStr = date.toDateString();
-            if (entryDates.includes(dateStr)) {
-                return "entry-date";
-            }
+            return entryDates.includes(dateStr)
+                ? "has-entry"
+                : null;
         }
-        return null;
     };
 
     // Check if user has created an entry for the current day
@@ -304,14 +360,16 @@ function HomePage({ userId }) {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
-        return entryDates.some((dateStr) => {
-            const entryDate = new Date(dateStr);
-            entryDate.setHours(0, 0, 0, 0);
-            return entryDate.getTime() === today.getTime();
-        });
+        return (
+            entryDates.some((dateStr) => {
+                const entryDate = new Date(dateStr);
+                entryDate.setHours(0, 0, 0, 0);
+                return entryDate.getTime() === today.getTime();
+            }) || false
+        ); // Ensure we return false if entryDates is empty
     };
 
-    // Render the UI normally whether online or offline
+    // Always render the UI
     return (
         <HomeContainer {...swipeHandlers}>
             <WelcomeSection>
@@ -359,20 +417,31 @@ function HomePage({ userId }) {
             {recentEntry && (
                 <Section>
                     <SectionTitle>
-                        Most Recent Reflection
+                        Your Latest Entry
                     </SectionTitle>
                     <EntryDisplay>
                         <EntryItem>
-                            <h3>Rose</h3>
-                            <p>{recentEntry.rose_text}</p>
-                        </EntryItem>
-                        <EntryItem>
-                            <h3>Bud</h3>
-                            <p>{recentEntry.bud_text}</p>
-                        </EntryItem>
-                        <EntryItem>
-                            <h3>Thorn</h3>
-                            <p>{recentEntry.thorn_text}</p>
+                            <h3>
+                                {new Date(
+                                    recentEntry.date
+                                ).toLocaleDateString("en-US", {
+                                    weekday: "long",
+                                    month: "long",
+                                    day: "numeric"
+                                })}
+                            </h3>
+                            <p>
+                                <strong>Rose:</strong>{" "}
+                                {recentEntry.rose_text}
+                            </p>
+                            <p>
+                                <strong>Bud:</strong>{" "}
+                                {recentEntry.bud_text}
+                            </p>
+                            <p>
+                                <strong>Thorn:</strong>{" "}
+                                {recentEntry.thorn_text}
+                            </p>
                         </EntryItem>
                     </EntryDisplay>
                 </Section>
@@ -381,34 +450,44 @@ function HomePage({ userId }) {
             <StyledModal
                 isOpen={modalIsOpen}
                 onRequestClose={closeModal}
-                className="pop-up"
-                overlayClassName="overlay"
+                contentLabel="Entry Details"
+                appElement={document.getElementById("root")}
             >
-                <div onClick={closeModal}>
-                    <h2>{date.toDateString()}</h2>
-                    {selectedEntry ? (
-                        <EntryDisplay>
-                            <EntryItem>
-                                <h3>Rose</h3>
-                                <p>{selectedEntry.rose_text}</p>
-                            </EntryItem>
-                            <EntryItem>
-                                <h3>Bud</h3>
-                                <p>{selectedEntry.bud_text}</p>
-                            </EntryItem>
-                            <EntryItem>
-                                <h3>Thorn</h3>
-                                <p>
-                                    {selectedEntry.thorn_text}
-                                </p>
-                            </EntryItem>
-                        </EntryDisplay>
-                    ) : (
-                        <NoEntry>
-                            No entry for this date
-                        </NoEntry>
-                    )}
-                </div>
+                {selectedEntry ? (
+                    <>
+                        <h2>
+                            {new Date(
+                                selectedEntry.date
+                            ).toLocaleDateString("en-US", {
+                                weekday: "long",
+                                month: "long",
+                                day: "numeric"
+                            })}
+                        </h2>
+                        <p>
+                            <strong>Rose:</strong>{" "}
+                            {selectedEntry.rose_text}
+                        </p>
+                        <p>
+                            <strong>Bud:</strong>{" "}
+                            {selectedEntry.bud_text}
+                        </p>
+                        <p>
+                            <strong>Thorn:</strong>{" "}
+                            {selectedEntry.thorn_text}
+                        </p>
+                        <button onClick={closeModal}>
+                            Close
+                        </button>
+                    </>
+                ) : (
+                    <NoEntry>
+                        No entry for this date.{" "}
+                        <button onClick={closeModal}>
+                            Close
+                        </button>
+                    </NoEntry>
+                )}
             </StyledModal>
         </HomeContainer>
     );
