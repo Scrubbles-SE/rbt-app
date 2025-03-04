@@ -36,7 +36,7 @@ function HomePage({ userId }) {
         new Date()
     );
     const [isLoading, setIsLoading] = useState(true);
-    const [isOffline, setIsOffline] = useState(false);
+    const [setIsOffline] = useState(false);
     const [userName, setUserName] = useState("");
 
     // Handle calendar month swipe navigation
@@ -87,6 +87,7 @@ function HomePage({ userId }) {
         } catch (error) {
             setIsOffline(true);
         }
+        // eslint-disable-next-line
     }, [userId]);
 
     // Fetch most recent entry using offline-first approach
@@ -121,6 +122,7 @@ function HomePage({ userId }) {
         } catch (error) {
             setIsOffline(true);
         }
+        // eslint-disable-next-line
     }, [userId]);
 
     // Fetch entry for a specific date
@@ -200,6 +202,7 @@ function HomePage({ userId }) {
         } catch (error) {
             setIsOffline(true);
         }
+        // eslint-disable-next-line
     }, [userId]);
 
     // Calculate user's current streak based on consecutive daily entries
@@ -308,15 +311,12 @@ function HomePage({ userId }) {
         });
     };
 
-    if (isOffline) {
-        return <div>Offline</div>;
-    }
-
+    // Render the UI normally whether online or offline
     return (
         <HomeContainer {...swipeHandlers}>
             <WelcomeSection>
                 <WelcomeHeader>
-                    Welcome back, {userName}!
+                    Welcome back, {userName || "User"}!
                 </WelcomeHeader>
                 {streakCount > 0 && (
                     <StreakCounter>
