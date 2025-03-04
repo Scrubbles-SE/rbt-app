@@ -1,10 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-    FaTimes,
-    FaEye,
-    FaLock,
-    FaPencilAlt
-} from "react-icons/fa";
+import { FaTimes, FaEye, FaLock } from "react-icons/fa";
 import { ThemeProvider } from "styled-components";
 import {
     EntryContainer,
@@ -21,10 +16,10 @@ import {
     VisibilityToggle,
     ToggleOption,
     SubmitWrapper,
-    SubmitText,
-    EditIcon
+    SubmitText
 } from "./Entry.styles";
 import { entriesDB, tagsDB } from "../utils/db";
+import { API_BASE_URL } from "../utils/config";
 
 const theme = {
     lightPink: "rgba(242, 196, 187, 0.5)" // Lighter version of fill-color
@@ -51,6 +46,7 @@ const NewEntryPage = ({ userId }) => {
     // Fetch today's entry on mount
     useEffect(() => {
         loadTodaysEntry();
+        // eslint-disable-next-line
     }, []);
 
     /* 
@@ -73,7 +69,7 @@ const NewEntryPage = ({ userId }) => {
             // Then regardless of what happens, fetch from API - get all entries and find today's
             try {
                 const response = await fetch(
-                    "http://localhost:8000/api/entries",
+                    `${API_BASE_URL}/api/entries`,
                     {
                         credentials: "include"
                     }
@@ -139,7 +135,7 @@ const NewEntryPage = ({ userId }) => {
             // Fetch tag names for each tag ID
             try {
                 const response = await fetch(
-                    `http://localhost:8000/api/entries/tags/${userId}`,
+                    `${API_BASE_URL}/api/entries/tags/${userId}`,
                     {
                         credentials: "include"
                     }
@@ -237,7 +233,7 @@ const NewEntryPage = ({ userId }) => {
                     _id: entry._id
                 });
                 const response = await fetch(
-                    `http://localhost:8000/api/entries/${entry._id}`,
+                    `${API_BASE_URL}/api/entries/${entry._id}`,
                     {
                         method: "PATCH",
                         headers: {
@@ -254,7 +250,7 @@ const NewEntryPage = ({ userId }) => {
             } else {
                 // Create new entry
                 const response = await fetch(
-                    "http://localhost:8000/api/entries",
+                    `${API_BASE_URL}/api/entries`,
                     {
                         method: "POST",
                         headers: {
@@ -279,7 +275,7 @@ const NewEntryPage = ({ userId }) => {
                 // Fetch and update tags in IndexedDB
                 try {
                     const tagsResponse = await fetch(
-                        `http://localhost:8000/api/entries/tags/${userId}`,
+                        `${API_BASE_URL}/api/entries/tags/${userId}`,
                         {
                             credentials: "include"
                         }

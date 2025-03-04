@@ -3,6 +3,7 @@ IMPORTS
 */
 import React, { useState } from "react";
 import { FiUserPlus, FiX } from "react-icons/fi";
+import { API_BASE_URL } from "../utils/config.js";
 
 // Styles
 import {
@@ -28,8 +29,6 @@ function JoinGroup({ onGroupUpdate }) {
     const [toastMessage, setToastMessage] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [toastSuccess, setToastSuccess] = useState(true);
-
-    const API_BASE_URL = "http://localhost:8000";
 
     // Join group API call
     const joinGroup = async (groupCode) => {

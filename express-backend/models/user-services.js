@@ -3,8 +3,7 @@ import {
     userSchema,
     entrySchema,
     userEntriesSchema,
-    TagSchema,
-    GroupSchema
+    TagSchema
 } from "./user.js";
 
 import dotenv from "dotenv";
@@ -16,7 +15,6 @@ const ueSchema = userEntriesSchema;
 
 let dbConnection;
 
-// Helper function to connect to the database
 // Helper function to connect to the database
 
 function getDbConnection() {
@@ -37,6 +35,19 @@ function getDbConnection() {
 async function addUser(user) {
     const userModel = getDbConnection().model("users", uSchema);
     try {
+        // check for valid entries format
+        if (
+            user.entries &&
+            (!Array.isArray(user.entries) ||
+                !user.entries.every((id) =>
+                    mongoose.Types.ObjectId.isValid(id)
+                ))
+        ) {
+            throw new Error(
+                "Entry(s) format not valid or contains an invalid ObjectId"
+            );
+        }
+
         const userToAdd = new userModel(user);
         userToAdd.entries = await addUserEntries(userToAdd._id);
         const savedUser = await userToAdd.save();
@@ -47,7 +58,7 @@ async function addUser(user) {
     }
 }
 
-//Adding an entry to the database
+// Adding an entry to the database
 
 async function addEntry(entry) {
     const entryModel = getDbConnection().model(
@@ -161,11 +172,9 @@ async function getEntryById(entryId) {
 
 async function addReactionToEntry(entryId, reactionObject) {
     const entryModel = getDbConnection().model(
-        
         "rbt_entries",
-       
+
         eSchema
-    
     );
 
     try {
@@ -182,35 +191,35 @@ async function addReactionToEntry(entryId, reactionObject) {
     }
 }
 
-
 // Create a tag object and add to tags list
+
 async function addTagObject(tagObject) {
     const tagModel = getDbConnection().model("tags", TagSchema);
 
     try {
-
         // CHECK IF TAG ALREADY EXISTS
 
-        const existingTag = await tagModel.findOne({user_id: tagObject.user_id, tag_name: tagObject.tag_name});
+        const existingTag = await tagModel.findOne({
+            user_id: tagObject.user_id,
+            tag_name: tagObject.tag_name
+        });
 
         // IF IT DOES, THEN JUST PUSH ENTRY ID
 
         if (existingTag != null) {
-            const updatedTag = await tagModel.findOneAndUpdate({_id: existingTag._id},
+            const updatedTag = await tagModel.findOneAndUpdate(
+                { _id: existingTag._id },
                 {
-                    $push: { entries: tagObject.entries[0]}
-            });
+                    $push: { entries: tagObject.entries[0] }
+                }
+            );
 
             return updatedTag._id;
-
-
         } else {
             const tagToAdd = new tagModel(tagObject);
             const savedTag = await tagToAdd.save();
             return savedTag._id;
         }
-
-
     } catch (error) {
         console.log(error);
         return false;
@@ -220,98 +229,101 @@ async function addTagObject(tagObject) {
 async function updateTagObject(tagObject) {
     const tagModel = getDbConnection().model("tags", TagSchema);
 
-    const existingTag = await tagModel.findOne({user_id: tagObject.user_id, tag_name: tagObject.tag_name});
+    const existingTag = await tagModel.findOne({
+        user_id: tagObject.user_id,
+        tag_name: tagObject.tag_name
+    });
     if (existingTag != null) {
         // IF THE TAG EXISTS AND ALREADY HAS THE ENTRY ID, JUST RETURN
-        if (existingTag.entries.includes(tagObject.entries[0])) {
+        if (
+            existingTag.entries.includes(tagObject.entries[0])
+        ) {
             return;
         }
     }
 
     return await addTagObject(tagObject);
-
-
 }
 
-
 // Get a tag by its Id
-async function findTagById(tagId) {
+/*async function findTagById(tagId) {
     const tagModel = getDbConnection().model(
         "tags",
         TagSchema
     );
     return await tagModel.find({ _id: tagId });
 
-}
+}*/
 
 // Get all tags by userid
 
 async function getAllTagsByUserId(userId) {
-    const tagModel = getDbConnection().model(
-        "tags",
-        TagSchema
-    )
-    return await tagModel.find({user_id: userId});
+    const tagModel = getDbConnection().model("tags", TagSchema);
+    return await tagModel.find({ user_id: userId });
 }
 
-async function getAllTagsByEntryId(entryId) {
+/*async function getAllTagsByEntryId(entryId) {
     const tagModel = getDbConnection().model("tags", TagSchema);
     return await tagModel.find({entries: { $in: [entryId]}});
-}
+}*/
 
-async function deleteEntriesByEntryId(entryId) {
-    const entryModel = getDbConnection().model("rbt_entries", entrySchema);
+/* async function deleteEntriesByEntryId(entryId) {
+    const entryModel = getDbConnection().model(
+        "rbt_entries",
+        entrySchema
+    );
 
-    await entryModel.findOneAndUpdate({_id: entryId}, {tags: []});
-
+    await entryModel.findOneAndUpdate(
+        { _id: entryId },
+        { tags: [] }
+    );
 
     const tagModel = getDbConnection().model("tags", TagSchema);
-    const allTagObjects = await tagModel.find({entries: { $in: [entryId]}});
+    const allTagObjects = await tagModel.find({
+        entries: { $in: [entryId] }
+    });
 
-    for (let i = 0; i<allTagObjects.length; i++) {
+    for (let i = 0; i < allTagObjects.length; i++) {
         if (allTagObjects[i].entries.length == 1) {
             // if the length of all entries is 1, we can delete the Tag Object itself
-            const deletedTag = await tagModel.findOneAndDelete({_id: allTagObjects[i]._id});
-
+            const deletedTag = await tagModel.findOneAndDelete({
+                _id: allTagObjects[i]._id
+            });
         } else {
-            // Otherwise, we can just delete the entry from it 
-            const removedEntryTag = await tagModel.findOneAndUpdate({_id: allTagObjects[i]._id},
-                {$pull: {
-                    entries: entryId
-                }}
-            )
+            // Otherwise, we can just delete the entry from it
+            const removedEntryTag =
+                await tagModel.findOneAndUpdate(
+                    { _id: allTagObjects[i]._id },
+                    {
+                        $pull: {
+                            entries: entryId
+                        }
+                    }
+                );
         }
-
     }
-}
-
-
-
-
-
+} */
 
 // Add tags to entry
-async function addTagToEntry(tagId, entryId){
-
-    const entryModel = getDbConnection().model("rbt_entries", eSchema);
+async function addTagToEntry(tagId, entryId) {
+    const entryModel = getDbConnection().model(
+        "rbt_entries",
+        eSchema
+    );
 
     try {
         // Find the entry object in the database and push the tag
-        return await entryModel.findOneAndUpdate({_id: entryId},
+        return await entryModel.findOneAndUpdate(
+            { _id: entryId },
             {
-                $push: { tags: tagId}
-        });
-
+                $push: { tags: tagId }
+            }
+        );
     } catch (error) {
         console.log(error);
         return false;
     }
-
 }
-
-
-
-
 
 async function updateUser(userId, updates) {
     const userModel = getDbConnection().model("users", uSchema);
@@ -358,9 +370,6 @@ async function removeGroupFromUser(userId, groupId) {
     }
 }
 
-
-
-
 export {
     addUser,
     findUserByUsername,
@@ -376,6 +385,5 @@ export {
     getAllTagsByUserId,
     addTagToEntry,
     addTagObject,
-    updateTagObject,
-    deleteEntriesByEntryId
+    updateTagObject
 };

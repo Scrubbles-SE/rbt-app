@@ -35,6 +35,7 @@ import Settings from "./settings/SettingsPage.js";
 // Full Screen Pages
 import GroupEntries from "./groups/groupEntries.js";
 import TagEntries from "./search/TagEntries.js";
+import AdminView from "./groups/AdminView.js";
 
 /* 
 SERVICE WORKER & INDEXED-DB REGISTRATION
@@ -121,7 +122,10 @@ const MainAppRoutes = ({
                 path="/new-entry"
                 element={<NewEntryPage userId={userId} />}
             />
-            <Route path="/groups" element={<GroupsPage userId={userId}/>} />
+            <Route
+                path="/groups"
+                element={<GroupsPage userId={userId} />}
+            />
             <Route
                 path="/settings"
                 element={
@@ -137,6 +141,10 @@ const MainAppRoutes = ({
             <Route
                 path="/search/:tagId/:tagName"
                 element={<TagEntries />}
+            />
+            <Route
+                path="/groups/:groupId/admin"
+                element={<AdminView />}
             />
         </Routes>
     );

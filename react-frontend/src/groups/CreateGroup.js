@@ -3,6 +3,7 @@ IMPORTS
 */
 import React, { useState } from "react";
 import { FiPlus, FiCopy, FiShare, FiX } from "react-icons/fi";
+import { API_BASE_URL } from "../utils/config.js";
 
 // Styles
 import {
@@ -31,8 +32,6 @@ function CreateGroup({ onGroupUpdate }) {
     const [showToast, setShowToast] = useState(false);
     const [toastMessage, setToastMessage] = useState("");
     const [isLoading, setIsLoading] = useState(false);
-
-    const API_BASE_URL = "http://localhost:8000";
 
     // Generates and verifies a unique group code
     const generateUniqueCode = async () => {

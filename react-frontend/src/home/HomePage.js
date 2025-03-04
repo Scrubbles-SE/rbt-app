@@ -1,11 +1,11 @@
 /*
 IMPORTS
 */
+// NEED TO ADD BACK CALENDAR POPUP
 import { useState, useEffect, useCallback } from "react";
 import { useSwipeable } from "react-swipeable";
-import Calendar from "react-calendar";
-import Modal from "react-modal";
 import { entriesDB, userDB } from "../utils/db";
+import { API_BASE_URL } from "../utils/config.js";
 
 // Styles
 import "react-calendar/dist/Calendar.css";
@@ -27,7 +27,7 @@ import {
 
 function HomePage({ userId }) {
     const [date, setDate] = useState(new Date());
-    const [selectedEntry, setSelectedEntry] = useState(null);
+    const [selectedEntry] = useState(null);
     const [recentEntry, setRecentEntry] = useState(null);
     const [entryDates, setEntryDates] = useState([]);
     const [streakCount, setStreakCount] = useState(0);
@@ -38,8 +38,6 @@ function HomePage({ userId }) {
     const [isLoading, setIsLoading] = useState(true);
     const [isOffline, setIsOffline] = useState(false);
     const [userName, setUserName] = useState("");
-
-    const API_BASE_URL = "http://localhost:8000";
 
     // add swipe function
     const handleSwipe = (direction) => {
@@ -276,6 +274,10 @@ function HomePage({ userId }) {
             return entryDate.getTime() === today.getTime();
         });
     };
+
+    if (isOffline) {
+        return <div>Offline</div>;
+    }
 
     return (
         <HomeContainer {...swipeHandlers}>

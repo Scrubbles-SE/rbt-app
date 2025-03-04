@@ -7,6 +7,7 @@
 /react-frontend/build
 /express-backend/node_modules
 /express-backend/.env
+/react-frontend/.env
 /.pnpnp
 .pnp.js
 
@@ -27,3 +28,4 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+.assignment

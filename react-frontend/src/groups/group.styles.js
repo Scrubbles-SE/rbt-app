@@ -20,11 +20,11 @@ export const getGradient = (groupId) => {
 };
 
 export const Container = styled.div`
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
-    right: 0;
-    bottom: 0;
+    width: 100vw;
+    height: 100vh;
     background: white;
     z-index: 2000;
     display: flex;
@@ -34,16 +34,13 @@ export const Container = styled.div`
 
 export const ContentContainer = styled.div`
     width: 100%;
+    max-width: 480px;
     height: 100%;
-    background: ${(props) =>
-        props.theme.mode === "dark-mode"
-            ? "#2d1f1f"
-            : "#fdf2f1"};
-    padding: 20px 20px 0 20px;
+    background: var(--container-background);
+    padding: 20px;
     position: relative;
     display: flex;
     flex-direction: column;
-    overflow-y: auto;
 `;
 
 export const Title = styled.h1`

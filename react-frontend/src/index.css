@@ -102,6 +102,27 @@ body.min-theme {
     --container-background: rgb(236, 236, 236);
 }
 
+body.green-theme {
+    --background-color: #e1eee063;
+    --card-background: #ffffff;
+    --border-color: #ccd7c2;
+    --text-primary: #2c3e50;
+    --text-secondary: #666666;
+    --header-text: #2c3e50;
+    --header-icon: #2c3e50;
+    --header-border: rgba(0, 0, 0, 0.08);
+
+    --text-color: #2c3e50;
+    --fill-color: #ccd7c2;
+    --button-color: #b8c2ae;
+    --input-color: #e4e4e4;
+    --past-background: white;
+
+    /* search/groups */
+    --top-background: white;
+    --container-background: #e1eee063;
+}
+
 body {
     margin: 0;
     padding: 0;

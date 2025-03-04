@@ -24,12 +24,9 @@ import {
     EntryModel,
     addReactionToEntry,
     updateUser,
-    removeGroupFromUser,
     getAllTagsByUserId,
     addTagObject,
-    addTagToEntry,
-    updateTagObject,
-    deleteEntriesByEntryId
+    addTagToEntry
 } from "./models/user-services.js";
 
 // Services
@@ -61,12 +58,45 @@ dotenv.config({ path: path.join(__dirname, ".env") });
 
 // Express App
 const app = express();
-const port = 8000;
+const port =
+    process.env.NODE_ENV === "production"
+        ? 8080
+        : process.env.PORT || 8000;
+
+// CORS Configuration
+const allowedOrigins = [
+    process.env.FRONTEND_URL, // Production frontend URL
+    "http://localhost:3000", // Local development
+    "https://rbt-frontend.azurewebsites.net", // Azure static web app URL
+    "https://lemon-bush-09e7af61e.6.azurestaticapps.net" // Your actual Azure Static Web App URL
+].filter(Boolean); // Filter out undefined values
+
+console.log("Allowed CORS origins:", allowedOrigins);
 
 // Middleware
 app.use(
     cors({
-        origin: "http://localhost:3000",
+        origin: function (origin, callback) {
+            console.log(
+                "Incoming request from origin:",
+                origin
+            );
+
+            // Allow requests with no origin (like mobile apps, curl, etc.)
+            if (!origin) return callback(null, true);
+
+            // Check if the origin is in our allowed list
+            if (allowedOrigins.indexOf(origin) === -1) {
+                console.log(
+                    `CORS blocked request from: ${origin}`
+                );
+                return callback(null, false);
+            }
+            console.log(
+                `CORS allowing request from: ${origin}`
+            );
+            return callback(null, true);
+        },
         credentials: true
     })
 );
@@ -131,6 +161,7 @@ app.post("/api/register", async (req, res) => {
         res.status(201).json({
             message: "Success!"
         });
+        // eslint-disable-next-line no-unused-vars
     } catch (error) {
         res.status(500).json({
             message:
@@ -147,20 +178,26 @@ app.post("/api/register", async (req, res) => {
  */
 app.get("/api/user-exists/:email", async (req, res) => {
     const { email } = req.params;
+    console.log("User existence check for:", email);
+    console.log("Request headers:", req.headers);
 
     try {
         const users = await findUserByUsername(email);
         if (users.length === 0) {
+            console.log("User does not exist:", email);
             return res.status(200).json({
                 exists: false
             });
         }
 
+        console.log("User exists:", email);
         res.status(200).json({
             exists: true,
             firstName: users[0].first_name
         });
+        // eslint-disable-next-line no-unused-vars
     } catch (error) {
+        console.error("Error checking user existence:", error);
         res.status(500).json({
             message:
                 "Error checking user existence. Please try again."
@@ -205,6 +242,7 @@ app.post("/api/login", async (req, res) => {
         res.status(200).json({
             message: "Success"
         });
+        // eslint-disable-next-line no-unused-vars
     } catch (error) {
         res.status(500).json({
             message: "Error logging you in. Please try again"
@@ -387,10 +425,12 @@ app.patch(
                 );
 
             // UPDATE TAG TABLE
-
             const updatedTags = req.body.tags;
 
-            await deleteEntriesByEntryId(entryId);
+            // Clear existing tags instead of using deleteEntriesByEntryId
+            await EntryModel.findByIdAndUpdate(entryId, {
+                tags: []
+            });
 
             // Compare each tag and see if it already exists in the database
             const tagIdArray = [];
@@ -462,7 +502,6 @@ app.put(
             const userId = new mongoose.Types.ObjectId(
                 req.userId
             );
-            const { groupCode } = req.params;
 
             console.log("Join group attempt:", {
                 groupCode: req.params.groupCode,
@@ -881,15 +920,19 @@ app.post("/api/logout", authMiddleware, async (req, res) => {
         res.cookie("jwt", "", {
             httpOnly: true,
             expires: new Date(0), // Expire immediately
-            sameSite: "strict",
+            sameSite:
+                process.env.NODE_ENV === "production"
+                    ? "none"
+                    : "strict",
             secure: process.env.NODE_ENV === "production"
         });
 
         res.status(200).json({
             message: "Logged out successfully"
         });
-    } catch (error) {
+    } catch (_error) {
         res.status(500).json({ message: "Error logging out" });
+        console.error("Error logging out:", _error);
     }
 });
 
@@ -1046,8 +1089,8 @@ app.delete(
             res.status(200).json({
                 message: "Successfully left group"
             });
-        } catch (error) {
-            console.error("Error leaving group:", error);
+        } catch (_error) {
+            console.error("Error leaving group:", _error);
             res.status(500).json({
                 message: "Error leaving group"
             });
@@ -1057,5 +1100,7 @@ app.delete(
 
 // LISTEN
 app.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}`);
+    console.log(`Server running on port ${port}`);
 });
+
+export default app;

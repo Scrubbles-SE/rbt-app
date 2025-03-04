@@ -2,10 +2,7 @@
 IMPORTS
 */
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import {
-    FaMoon,
-    FaSun,
     FaSignOutAlt,
     FaSync,
     FaSignOutAlt as FaLeaveGroup
@@ -18,6 +15,7 @@ import {
     clearDB,
     membersDB
 } from "../utils/db";
+import { API_BASE_URL } from "../utils/config.js";
 
 export const GlobalStyle = createGlobalStyle`
     @keyframes spin {
@@ -27,7 +25,6 @@ export const GlobalStyle = createGlobalStyle`
 `;
 
 function Settings({ setIsLoggedIn }) {
-    const navigate = useNavigate();
     const [theme, setTheme] = useState("light-mode");
 
     // Track both current and edited values
@@ -61,7 +58,7 @@ function Settings({ setIsLoggedIn }) {
                 }
                 //fetch latest data from api (always)
                 const response = await fetch(
-                    "http://localhost:8000/api/user/details",
+                    `${API_BASE_URL}/api/user/details`,
                     {
                         credentials: "include"
                     }
@@ -119,7 +116,7 @@ function Settings({ setIsLoggedIn }) {
             });
             // update server
             const response = await fetch(
-                "http://localhost:8000/api/user",
+                `${API_BASE_URL}/api/user`,
                 {
                     method: "PUT",
                     headers: {
@@ -180,7 +177,7 @@ function Settings({ setIsLoggedIn }) {
 
                 // always fetch from api
                 const response = await fetch(
-                    "http://localhost:8000/api/groups",
+                    `${API_BASE_URL}/api/groups`,
                     {
                         credentials: "include"
                     }
@@ -281,7 +278,7 @@ function Settings({ setIsLoggedIn }) {
 
             // Then call logout endpoint
             const response = await fetch(
-                "http://localhost:8000/api/logout",
+                `${API_BASE_URL}/api/logout`,
                 {
                     method: "POST",
                     credentials: "include"
@@ -323,7 +320,7 @@ function Settings({ setIsLoggedIn }) {
         try {
             // First call the server
             const response = await fetch(
-                `http://localhost:8000/api/groups/${groupId}/leave`,
+                `${API_BASE_URL}/api/groups/${groupId}/leave`,
                 {
                     method: "DELETE",
                     credentials: "include"
@@ -432,6 +429,14 @@ function Settings({ setIsLoggedIn }) {
                     >
                         <S.Circle color="#d3d3d3" />
                         Minimalist
+                    </S.ThemeSelection>
+                    <S.ThemeSelection
+                        active={theme === "green-theme"}
+                        onClick={() => setTheme("green-theme")}
+                        selected={theme === "green-theme"}
+                    >
+                        <S.Circle color="#afbf9f" />
+                        Sage
                     </S.ThemeSelection>
                 </S.ContentCard>
             </S.SectionContainer>
