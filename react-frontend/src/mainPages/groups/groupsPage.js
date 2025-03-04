@@ -1,11 +1,15 @@
-/* 
-IMPORTS
+/**
+ * Groups Page Component
+ *
+ * This component displays a user's groups and provides options to create or join new groups.
+ * It implements an offline-first approach using IndexedDB for local storage with API synchronization.
+ * Users can navigate to individual groups, create new groups, or join existing ones with group codes.
  */
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { IoChevronForward } from "react-icons/io5";
-import { groupsDB, membersDB } from "../utils/db";
-import { API_BASE_URL } from "../utils/config.js";
+import { groupsDB, membersDB } from "../../utils/db";
+import { API_BASE_URL } from "../../utils/config.js";
 
 // Styles
 import {
@@ -30,11 +34,16 @@ function GroupsPage({ userId }) {
     const [error, setError] = useState(null);
     const navigate = useNavigate();
 
-    // Fetch groups for the user - INDEXED DB STUFF
+    /**
+     * Fetch groups for the current user
+     * Uses an offline-first approach by first retrieving cached groups from IndexedDB,
+     * then syncing with the API to get the latest data.
+     */
     const fetchGroups = async () => {
         setIsLoading(true);
 
         try {
+            // First try to get data from local IndexedDB
             const cachedMemberObjects =
                 await membersDB.getGroupIds(userId);
 
@@ -51,14 +60,11 @@ function GroupsPage({ userId }) {
                 cachedGroups.push(groupToAdd);
             }
 
-            console.log("Cached Groups: " + cachedGroups);
-
             if (cachedGroups) {
                 setUserGroups(cachedGroups);
             }
 
-            // Now, fetch from API
-
+            // Then fetch from API to ensure data is current
             try {
                 const response = await fetch(
                     `${API_BASE_URL}/api/groups`,
@@ -78,6 +84,7 @@ function GroupsPage({ userId }) {
 
                 setUserGroups(groups);
 
+                // Sync fetched groups with IndexedDB for offline access
                 if (groups) {
                     for (let i = 0; i < groups.length; i++) {
                         const newGroupObject = {
@@ -99,14 +106,12 @@ function GroupsPage({ userId }) {
                             )
                         ) {
                             await groupsDB.add(newGroupObject);
-                            console.log(newMembersObject);
                             await membersDB.add(
                                 newMembersObject
                             );
                         }
                     }
                 }
-                console.log("Fetched groups:", groups);
             } catch (networkError) {
                 console.log(
                     "Network request failed, using cached data" +
@@ -121,12 +126,16 @@ function GroupsPage({ userId }) {
         }
     };
 
+    // Fetch groups on component mount
     useEffect(() => {
         fetchGroups();
         // eslint-disable-next-line
     }, []);
 
-    // Navigates to the group's entries page
+    /**
+     * Navigates to the selected group's entries page
+     * Passes group ID, name, and additional state (group code and users)
+     */
     const handleGroupClick = (group) => {
         navigate(
             `/groups/${group._id}/${encodeURIComponent(
@@ -141,7 +150,10 @@ function GroupsPage({ userId }) {
         );
     };
 
-    // Shown if the user is not in any groups
+    /**
+     * Component displayed when user has no groups
+     * Shows options to create or join a group
+     */
     const NoGroupsView = () => (
         <>
             <Subtitle>Join a Group!</Subtitle>
@@ -150,7 +162,10 @@ function GroupsPage({ userId }) {
         </>
     );
 
-    // Shown if the user is in at least one group
+    /**
+     * Component displayed when user has at least one group
+     * Shows existing groups and options to create or join additional groups
+     */
     const GroupsView = () => (
         <>
             <Subtitle>Your Groups</Subtitle>

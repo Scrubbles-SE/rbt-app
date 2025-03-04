@@ -1,6 +1,7 @@
 /* 
-IMPORTS
- */
+Search page component for displaying and navigating user tags
+Handles fetching tag data and entries with offline-first approach
+*/
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { IoFolderOutline } from "react-icons/io5";
@@ -15,8 +16,8 @@ import {
     TagName,
     EntryNumber
 } from "./search.styles";
-import { entriesDB, tagsDB } from "../utils/db";
-import { API_BASE_URL } from "../utils/config.js";
+import { entriesDB, tagsDB } from "../../utils/db";
+import { API_BASE_URL } from "../../utils/config.js";
 
 // import styled from "styled-components";
 
@@ -43,6 +44,7 @@ function SearchPage({ userId }) {
     const [isLoading, setIsLoading] = useState(true);
     const navigate = useNavigate();
 
+    // Fetch a single entry by ID with offline-first approach
     const fetchEntry = async (entryId) => {
         setIsLoading(true);
 
@@ -92,7 +94,7 @@ function SearchPage({ userId }) {
         setIsLoading(false);
     };
 
-    // fetch user's tags
+    // Fetch all tags with associated entries using offline-first approach
     const fetchTags = async () => {
         setIsLoading(true);
 
@@ -118,16 +120,13 @@ function SearchPage({ userId }) {
                     );
                 }
 
-                // set tags with entries data
                 const tags = await response.json();
-
-                console.log("TEST");
 
                 if (tags) {
                     console.log("User's tags fetched:", tags);
                     setTags(tags);
 
-                    // Update each tag individually in IndexedDB
+                    // Update local cache with latest tag data
                     for (const tag of tags) {
                         await tagsDB.update({
                             ...tag,
@@ -155,7 +154,7 @@ function SearchPage({ userId }) {
         // eslint-disable-next-line
     }, [userId]);
 
-    // navigates to the tag's folder and passes in tag id and entries
+    // Navigate to tag detail view and preload entries
     const navigateToTag = async (tag) => {
         const entryObjects = [];
         for (let i = 0; i < tag.entries.length; i++) {

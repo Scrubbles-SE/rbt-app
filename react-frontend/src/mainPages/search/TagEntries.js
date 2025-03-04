@@ -1,3 +1,7 @@
+/*
+Tag entry detail view component
+Displays all entries associated with a specific tag
+*/
 import React, { useState, useLayoutEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ThemeProvider } from "styled-components";
@@ -15,23 +19,22 @@ import {
     EntryDate,
     EntryText,
     EntryPageTitle
-} from "./search.styles"
+} from "./search.styles";
 
 function TagEntries() {
     const navigate = useNavigate();
-    // to access the state
     const location = useLocation();
-    // use location.state or none if no entries
     const tagEntries = location.state.entries;
     const tagName = location.state.tag_name;
     const [theme, setTheme] = useState({ mode: "light-mode" });
 
-    // set theme
+    // Synchronize with the app theme from localStorage
     useLayoutEffect(() => {
         const currentTheme = localStorage.getItem("theme");
         setTheme({ mode: currentTheme || "light-mode" });
     }, []);
 
+    // Format date for display in entry cards
     const getDate = (dateString) => {
         const entryDate = new Date(dateString);
         return {
@@ -40,7 +43,7 @@ function TagEntries() {
                 day: "numeric"
             })
         };
-    }
+    };
 
     return (
         <ThemeProvider theme={theme}>
@@ -64,7 +67,6 @@ function TagEntries() {
                             </HeaderRow>
                         </HeaderContainer>
 
-                        {/* display all entries in the tag */}
                         <EntriesContainer>
                             {tagEntries.map((entry) => {
                                 return (
@@ -80,7 +82,9 @@ function TagEntries() {
                                         </EntryHeader>
                                         <EntrySection type="rose">
                                             <EntryText>
-                                                {entry.rose_text}
+                                                {
+                                                    entry.rose_text
+                                                }
                                             </EntryText>
                                         </EntrySection>
                                         <EntrySection type="bud">
@@ -90,13 +94,14 @@ function TagEntries() {
                                         </EntrySection>
                                         <EntrySection type="thorn">
                                             <EntryText>
-                                                {entry.thorn_text}
+                                                {
+                                                    entry.thorn_text
+                                                }
                                             </EntryText>
                                         </EntrySection>
                                     </EntryCard>
-                                )
-                            }
-                            )}
+                                );
+                            })}
                         </EntriesContainer>
                     </ContentContainer>
                 </Container>

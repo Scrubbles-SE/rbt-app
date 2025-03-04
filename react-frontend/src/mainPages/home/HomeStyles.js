@@ -1,3 +1,7 @@
+/**
+ * Home Page Styled Components
+ * Styling for calendar, entry displays, and UI elements on the home page
+ */
 import styled from "styled-components";
 import Calendar from "react-calendar";
 import Modal from "react-modal";
@@ -298,11 +302,8 @@ export const StyledModal = styled(Modal)`
         transform: translate(-50%, -50%);
         width: 100%;
         max-width: 350px;
-        background: ${props => props.theme.mode === "dark-mode" ? "#2c3e50" : "#fff"};
-        color: ${(props) =>
-            props.theme.mode === "dark-mode"
-                ? "#fff"
-                : "#2c3e50"};
+        background: var(--card-background);
+        color: var(--text-primary);
         padding: 20px;
         border-radius: 8px;
         box-shadow: 0 2px 10px rgba(0, 0, 0, 1);
@@ -323,15 +324,12 @@ export const ModalOverlay = styled.div`
     left: 0;
     width: 100%;
     height: 100%;
-    background: ${props => props.theme.mode === "dark-mode" ? "#2c3e50" : "#fff"};
-    color: ${(props) =>
-        props.theme.mode === "dark-mode"
-            ? "#fff"
-            : "#2c3e50"};
+    background: var(--card-background);
+    color: var(--text-primary);
 `;
 
 export const NoEntry = styled.p`
-    color: #666;
+    color: var(--text-secondary);
     text-align: center;
     margin-top: 20px;
     font-style: italic;

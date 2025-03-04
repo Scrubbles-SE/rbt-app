@@ -1,19 +1,30 @@
+/*
+ * Application Layout Component
+ * Provides responsive layout structure with different views for mobile and desktop
+ * Desktop view simulates a mobile phone to maintain consistent mobile-first UX
+ */
 import React from "react";
 import styled from "styled-components";
 import Header from "./Header";
 import Footer from "./Footer";
 
-// Better device detection that considers both screen size and user agent
+/**
+ * Detects if the current device is mobile based on user agent and screen width
+ * This hybrid approach ensures proper detection across various devices
+ */
 const isMobileDevice = () => {
     const userAgent =
         /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
             navigator.userAgent
         );
-    return userAgent || window.innerWidth <= 768; // Use 768px as mobile breakpoint
+    return userAgent || window.innerWidth <= 768;
 };
 
+/**
+ * Container that wraps desktop view to simulate a mobile phone
+ * Only applied in desktop mode to maintain consistent UX
+ */
 const PhoneContainer = styled.div`
-    // Desktop styles - force mobile container
     @media (min-width: 769px) {
         width: 100%;
         max-width: 450px;
@@ -29,7 +40,6 @@ const PhoneContainer = styled.div`
         overflow: hidden;
     }
 
-    // Mobile styles - full width
     @media (max-width: 768px) {
         width: 100%;
         height: 100vh;
@@ -40,6 +50,10 @@ const PhoneContainer = styled.div`
     }
 `;
 
+/**
+ * Layout for true mobile devices with fixed header and footer
+ * Main content scrolls independently between fixed elements
+ */
 const MobileLayout = styled.div`
     display: flex;
     flex-direction: column;
@@ -61,7 +75,7 @@ const MobileLayout = styled.div`
         flex: 1;
         width: 100%;
         overflow-y: auto;
-        padding: 70px 0 calc(70px + 35px);
+        padding: 70px 0 70px;
         -webkit-overflow-scrolling: touch;
         background-color: var(--background-color);
     }
@@ -72,9 +86,14 @@ const MobileLayout = styled.div`
         left: 0;
         right: 0;
         z-index: 1000;
+        height: 62px;
     }
 `;
 
+/**
+ * Layout for desktop view inside the phone container
+ * Simpler structure as it's already contained within PhoneContainer
+ */
 const DesktopLayout = styled.div`
     display: flex;
     flex-direction: column;
@@ -87,6 +106,11 @@ const DesktopLayout = styled.div`
     }
 `;
 
+/**
+ * Main application layout component that handles responsive design
+ * Renders different layouts for mobile and desktop environments
+ * For desktop, wraps the content in a phone-like container for consistent UX
+ */
 export const AppLayout = ({ children }) => {
     const isMobile = isMobileDevice();
 

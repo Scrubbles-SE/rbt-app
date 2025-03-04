@@ -23,19 +23,19 @@ import "./index.css";
 PAGE IMPORTS
  */
 // Account Flow
-import AccountFlow from "./login/accountFlow.js";
+import AccountFlow from "./account/accountFlow.js";
 
 // Main Tab Pages
-import HomePage from "./home/HomePage.js";
-import SearchPage from "./search/SearchPage.js";
-import NewEntryPage from "./new-entry/EntryPage.js";
-import GroupsPage from "./groups/groupsPage.js";
-import Settings from "./settings/SettingsPage.js";
+import HomePage from "./mainPages/home/HomePage.js";
+import SearchPage from "./mainPages/search/SearchPage.js";
+import NewEntryPage from "./mainPages/new-entry/EntryPage.js";
+import GroupsPage from "./mainPages/groups/groupsPage.js";
+import Settings from "./mainPages/settings/SettingsPage.js";
 
 // Full Screen Pages
-import GroupEntries from "./groups/groupEntries.js";
-import TagEntries from "./search/TagEntries.js";
-import AdminView from "./groups/AdminView.js";
+import GroupEntries from "./mainPages/groups/groupEntries.js";
+import TagEntries from "./mainPages/search/TagEntries.js";
+import AdminView from "./mainPages/groups/AdminView.js";
 
 /* 
 SERVICE WORKER & INDEXED-DB REGISTRATION
@@ -96,11 +96,7 @@ window.addEventListener("load", () => {
 MAIN APP ROUTES
 (Tab and full screen routes)
  */
-const MainAppRoutes = ({
-    setIsLoggedIn,
-    setUserId,
-    userId
-}) => {
+const MainAppRoutes = ({ setIsLoggedIn, userId }) => {
     // Check for dark mode and pass through
     useEffect(() => {
         const currentTheme =
@@ -166,6 +162,7 @@ const App = () => {
     const [userId, setUserId] = useState(null);
 
     useEffect(() => {
+        // Verify JWT token validity with server
         const checkAuth = async () => {
             try {
                 const response = await fetch(
@@ -180,6 +177,7 @@ const App = () => {
                     setIsLoggedIn(true);
                     setUserId(data.userId);
                 } else {
+                    // Clear authentication state if token invalid
                     setIsLoggedIn(false);
                     setUserId(null);
                 }
@@ -197,6 +195,7 @@ const App = () => {
                 path="/account"
                 element={
                     isLoggedIn ? (
+                        // Redirect already logged in users to home
                         <Navigate to="/" />
                     ) : (
                         <AccountFlow
@@ -210,6 +209,7 @@ const App = () => {
                 path="/*"
                 element={
                     isLoggedIn ? (
+                        // Protected routes - only accessible when authenticated
                         <AppLayout>
                             <MainAppRoutes
                                 setIsLoggedIn={setIsLoggedIn}
@@ -218,6 +218,7 @@ const App = () => {
                             />
                         </AppLayout>
                     ) : (
+                        // Redirect unauthenticated users to login
                         <Navigate to="/account" />
                     )
                 }

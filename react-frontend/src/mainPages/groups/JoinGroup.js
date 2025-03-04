@@ -1,9 +1,10 @@
-/*
-IMPORTS
-*/
+/**
+ * Join Group Component
+ * Allows users to join existing groups using a 6-digit code
+ */
 import React, { useState } from "react";
 import { FiUserPlus, FiX } from "react-icons/fi";
-import { API_BASE_URL } from "../utils/config.js";
+import { API_BASE_URL } from "../../utils/config.js";
 
 // Styles
 import {
@@ -30,11 +31,8 @@ function JoinGroup({ onGroupUpdate }) {
     const [isLoading, setIsLoading] = useState(false);
     const [toastSuccess, setToastSuccess] = useState(true);
 
-    // Join group API call
+    // API call to join a group with the provided code
     const joinGroup = async (groupCode) => {
-        console.log("Joining group:", { groupCode });
-
-        // API call to join group
         try {
             const response = await fetch(
                 `${API_BASE_URL}/api/groups/${groupCode}`,
@@ -46,8 +44,6 @@ function JoinGroup({ onGroupUpdate }) {
                     credentials: "include"
                 }
             );
-
-            console.log("Join group response:", response);
 
             if (!response.ok) {
                 const error = await response.json();

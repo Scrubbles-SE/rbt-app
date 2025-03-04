@@ -20,11 +20,22 @@ import {
     ViewTitle
 } from "./Header.styles";
 
-// Header component render
+/*
+COMPONENT
+*/
+
+/**
+ * Application header component
+ * Displays the current section title and icon based on navigation path
+ */
 function Header() {
     const location = useLocation();
     const path = location.pathname;
 
+    /**
+     * Configuration map for section titles and icons
+     * Used to determine what to display in the header for each route
+     */
     const viewConfigs = {
         "/": { icon: <MdHome />, title: "Home" },
         "/search": { icon: <MdSearch />, title: "Search" },
@@ -36,7 +47,7 @@ function Header() {
         "/settings": { icon: <MdSettings />, title: "Settings" }
     };
 
-    // Hide for full screen view
+    // For nested routes like /groups/123, use the parent route's config
     const currentView = path.startsWith("/groups/")
         ? viewConfigs["/groups"]
         : viewConfigs[path] || viewConfigs["/"];

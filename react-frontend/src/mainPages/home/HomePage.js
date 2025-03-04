@@ -1,12 +1,11 @@
-/*
-IMPORTS
-*/
-// NEED TO ADD BACK CALENDAR POPUP
+/**
+ * Home Page Component
+ * Displays user's entry calendar, recent reflections, and streak statistics
+ */
 import { useState, useEffect, useCallback } from "react";
 import { useSwipeable } from "react-swipeable";
-import { entriesDB, userDB } from "../utils/db";
-import { API_BASE_URL } from "../utils/config.js";
-
+import { entriesDB, userDB } from "../../utils/db";
+import { API_BASE_URL } from "../../utils/config.js";
 
 // Styles
 import "react-calendar/dist/Calendar.css";
@@ -40,7 +39,7 @@ function HomePage({ userId }) {
     const [isOffline, setIsOffline] = useState(false);
     const [userName, setUserName] = useState("");
 
-    // add swipe function
+    // Handle calendar month swipe navigation
     const handleSwipe = (direction) => {
         const newDate = new Date(activeStartDate);
         if (direction === "left") {
@@ -56,7 +55,7 @@ function HomePage({ userId }) {
         onSwipedRight: () => handleSwipe("right")
     });
 
-    // Fetch user details
+    // Fetch user details using offline-first approach
     const fetchUserDetails = useCallback(async () => {
         try {
             // First try to get from IndexedDB
@@ -83,20 +82,14 @@ function HomePage({ userId }) {
                     });
                 }
             } catch (networkError) {
-                console.error(
-                    "Network request failed, using cached data:",
-                    networkError
-                );
+                setIsOffline(true);
             }
         } catch (error) {
-            console.error(
-                "Error fetching user details:",
-                error
-            );
+            setIsOffline(true);
         }
     }, [userId]);
 
-    // fetch most recent entry
+    // Fetch most recent entry using offline-first approach
     const fetchMostRecentEntry = useCallback(async () => {
         try {
             const cachedEntry =
@@ -126,16 +119,17 @@ function HomePage({ userId }) {
             await entriesDB.add(sortedEntries[0]);
             setIsOffline(false);
         } catch (error) {
-            console.error(
-                "Error fetching most recent entry:",
-                error
-            );
+            setIsOffline(true);
         }
     }, [userId]);
 
+    // Fetch entry for a specific date
     const fetchEntryForDate = async (selectedDate) => {
         try {
-            const cachedEntry = await entriesDB.getByDate(userId, selectedDate);
+            const cachedEntry = await entriesDB.getByDate(
+                userId,
+                selectedDate
+            );
             if (cachedEntry) {
                 setSelectedEntry(cachedEntry);
                 return;
@@ -164,12 +158,11 @@ function HomePage({ userId }) {
 
             setSelectedEntry(matchingEntry || null);
         } catch (error) {
-            console.error("Error fetching entry:", error);
+            setIsOffline(true);
         }
     };
 
-
-    // Fetch all entry dates
+    // Fetch all entry dates for calendar highlighting and streak calculation
     const fetchAllEntryDates = useCallback(async () => {
         try {
             const cachedEntries =
@@ -195,9 +188,7 @@ function HomePage({ userId }) {
                 new Date(entry.date).toDateString()
             );
 
-            // entry dates
             setEntryDates(datesWithEntries);
-            // streak count
             calculateStreakCount(datesWithEntries);
             await Promise.all(
                 entries.map(
@@ -207,11 +198,11 @@ function HomePage({ userId }) {
                 )
             );
         } catch (error) {
-            console.error("Error fetching entry dates:", error);
+            setIsOffline(true);
         }
     }, [userId]);
 
-    // streak tracking
+    // Calculate user's current streak based on consecutive daily entries
     const calculateStreakCount = (dates) => {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -258,7 +249,7 @@ function HomePage({ userId }) {
         setStreakCount(streak);
     };
 
-    // Fetch all entry dates and initialize everything
+    // Initialize all data on component mount
     const initializeData = useCallback(async () => {
         setIsLoading(true);
         await Promise.all([
@@ -281,17 +272,20 @@ function HomePage({ userId }) {
         return null;
     }
 
+    // Handle date selection on calendar
     const handleDateChange = async (newDate) => {
         setDate(newDate);
         await fetchEntryForDate(newDate);
         setModalIsOpen(true);
     };
 
+    // Close the entry detail modal
     const closeModal = () => {
         setModalIsOpen(false);
         setSelectedEntry(null);
     };
 
+    // Add CSS class to calendar tiles with entries
     const tileClassName = ({ date, view }) => {
         if (view === "month") {
             const dateStr = date.toDateString();
@@ -302,7 +296,7 @@ function HomePage({ userId }) {
         return null;
     };
 
-    // check if entry for today
+    // Check if user has created an entry for the current day
     const hasEntryForToday = () => {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -404,13 +398,16 @@ function HomePage({ userId }) {
                             </EntryItem>
                             <EntryItem>
                                 <h3>Thorn</h3>
-                                <p>{selectedEntry.thorn_text}</p>
+                                <p>
+                                    {selectedEntry.thorn_text}
+                                </p>
                             </EntryItem>
                         </EntryDisplay>
                     ) : (
-                        <NoEntry>No entry for this date</NoEntry>
+                        <NoEntry>
+                            No entry for this date
+                        </NoEntry>
                     )}
-
                 </div>
             </StyledModal>
         </HomeContainer>

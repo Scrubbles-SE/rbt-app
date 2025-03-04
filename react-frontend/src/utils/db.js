@@ -1,14 +1,17 @@
-// -=- Where you need to put everything for the IndexedDB
+/*
+ * IndexedDB Interface for RBT App
+ * Provides offline-first data access and synchronization capabilities
+ */
 import { openDB } from "idb";
 
-// Do not change these for now
+// Database configuration
 const DB_NAME = "rbtApp";
 const DB_VERSION = 5;
 
-// Database initialization
-/*
-I did my best to make this include everything. It is possible that you may need to add something. This runs once when the app is loaded intiially, and basiclaly just creates the database. So if you're trying to access a field, or add a field, it needs to be in here or the IndexedDB will not know it exists.
-*/
+/**
+ * Initializes and sets up the IndexedDB database schema
+ * Must include all object stores and indexes required by the application
+ */
 export const initDB = async () => {
     const db = await openDB(DB_NAME, DB_VERSION, {
         upgrade(db) {
@@ -23,7 +26,7 @@ export const initDB = async () => {
                 });
             }
 
-            // Entries store
+            // Entries store - stores Rose/Bud/Thorn entries
             if (!db.objectStoreNames.contains("entries")) {
                 const entryStore = db.createObjectStore(
                     "entries",
@@ -36,7 +39,7 @@ export const initDB = async () => {
                 });
             }
 
-            // Groups store
+            // Groups store - stores group information
             if (!db.objectStoreNames.contains("groups")) {
                 const groupStore = db.createObjectStore(
                     "groups",
@@ -50,7 +53,7 @@ export const initDB = async () => {
                 groupStore.createIndex("name", "name");
             }
 
-            // Tags store
+            // Tags store - stores tag information
             if (!db.objectStoreNames.contains("tags")) {
                 const tagStore = db.createObjectStore("tags", {
                     keyPath: "_id"
@@ -59,7 +62,7 @@ export const initDB = async () => {
                 tagStore.createIndex("tag_name", "tag_name");
             }
 
-            // Members store
+            // Members store - maps users to groups
             if (!db.objectStoreNames.contains("members")) {
                 const memberStore = db.createObjectStore(
                     "members",
@@ -75,7 +78,10 @@ export const initDB = async () => {
     return db;
 };
 
-// Clear all data from IndexedDB (used when a user logs out)
+/**
+ * Clears all application data from IndexedDB
+ * Used during logout to protect user privacy
+ */
 export const clearDB = async () => {
     const db = await initDB();
     const tx = db.transaction(
@@ -95,9 +101,7 @@ export const clearDB = async () => {
     await tx.done;
 };
 
-/*
-Below this are all the operations that can then be performed on the database. I just generated some of the common ones, but you will certainly need to add more. The functions SHOULD match the database calls, because any call you make to the cloud database, should be first made to this, and then the cloud, and then this again.
-*/
+/* Database Access Objects */
 
 // User operations
 export const userDB = {
@@ -190,6 +194,7 @@ export const entriesDB = {
         return maxDateEntry;
     },
 
+    // Adds an entry only if it doesn't already exist (used during sync)
     async addIfNotPresent(entry) {
         const entries = await this.getAllOverall();
         if (!entries.some((e) => e._id === entry._id)) {
@@ -226,6 +231,7 @@ export const groupsDB = {
     }
 };
 
+// Membership relations between users and groups
 export const membersDB = {
     async getGroupIds(userId) {
         const db = await initDB();

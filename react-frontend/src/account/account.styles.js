@@ -1,9 +1,14 @@
 /*
-IMPORTS
+Styled components for the authentication and account flow
 */
 
 // Libraries
 import styled, { keyframes } from "styled-components";
+
+/**
+ * Theme and animation definitions for the account flow
+ * Contains styled components for login/registration forms
+ */
 
 // Animation constants
 const gradientAnimation = keyframes`
@@ -12,6 +17,7 @@ const gradientAnimation = keyframes`
   100% { background-position: 0% 50%; }
 `;
 
+// Color palette used throughout account components
 const themeColors = {
     pink: {
         light: "#f5d8da",
@@ -166,7 +172,9 @@ export const PasswordStrengthContainer = styled.div`
 
 export const PasswordStrengthBar = styled.div`
     height: 100%;
-    transition: width 0.3s, background-color 0.3s;
+    transition:
+        width 0.3s,
+        background-color 0.3s;
     border-radius: 3px;
     background: ${(props) => {
         switch (props.strength) {
@@ -295,7 +303,8 @@ export const AlertText = styled.span`
 `;
 
 export const UserName = styled.span`
-    font-family: "Playfair Display", serif; // Elegant serif font
+    font-family:
+        "Playfair Display", serif; // Elegant serif font
     font-size: 48px;
     font-weight: 700;
     font-style: italic;
@@ -349,7 +358,7 @@ export const NameInput = styled(Input)`
     color: black !important;
 
     &::placeholder {
-        color: #6C6565 !important;
+        color: #6c6565 !important;
     }
     &:focus {
         border-color: #23a6d5;

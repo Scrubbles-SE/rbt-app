@@ -37,6 +37,10 @@ import {
     registerUser
 } from "./authService";
 
+/**
+ * Constants for the multi-stage account flow
+ * Controls which form is displayed to the user
+ */
 const STAGES = {
     EMAIL: "EMAIL",
     LOGIN: "LOGIN",
@@ -46,6 +50,14 @@ const STAGES = {
 /*
 COMPONENT
 */
+
+/**
+ * AccountFlow component handles user authentication
+ * Implements a multi-stage form flow for account creation and login
+ *
+ * @param {Object} props - Component props
+ * @param {Function} props.setIsLoggedIn - Function to update login state in parent component
+ */
 function AccountFlow({ setIsLoggedIn }) {
     // Form States
     const [currentStage, setCurrentStage] = useState(
@@ -63,7 +75,10 @@ function AccountFlow({ setIsLoggedIn }) {
     const [showSuccessAnimation, setShowSuccessAnimation] =
         useState(false);
 
-    // Password Strength Logic (from createAccount.js)
+    /**
+     * Evaluates password strength on a scale of 0-4
+     * Checks for length, case variation, numbers, and special characters
+     */
     const calculatePasswordStrength = (password) => {
         let strength = 0;
         if (password.length >= 8) strength++;
@@ -104,7 +119,10 @@ function AccountFlow({ setIsLoggedIn }) {
         passwordStrength
     ]);
 
-    // Handle Email Submit
+    /**
+     * Handles email form submission and determines next flow stage
+     * Checks if user exists to route to login or account creation
+     */
     const handleEmailSubmit = async (e) => {
         e.preventDefault();
         const result = await checkIfUserExists(email);
@@ -116,7 +134,10 @@ function AccountFlow({ setIsLoggedIn }) {
         }
     };
 
-    // Handle Login Submit
+    /**
+     * Handles login form submission and authentication
+     * Shows success animation on successful login before redirecting
+     */
     const handleLoginSubmit = async (e) => {
         e.preventDefault();
         const result = await loginUser({ email, password });
@@ -133,7 +154,10 @@ function AccountFlow({ setIsLoggedIn }) {
         }
     };
 
-    // Handle Register Submit
+    /**
+     * Handles new account registration form submission
+     * Creates user account and initializes local database on success
+     */
     const handleRegisterSubmit = async (e) => {
         e.preventDefault();
         const result = await registerUser({
@@ -303,9 +327,9 @@ function AccountFlow({ setIsLoggedIn }) {
                                     {passwordStrength < 4
                                         ? "Create a stronger password"
                                         : password !==
-                                          confirmPassword
-                                        ? "Passwords don't match"
-                                        : "Please fill all fields"}
+                                            confirmPassword
+                                          ? "Passwords don't match"
+                                          : "Please fill all fields"}
                                 </Tooltip>
                             )}
                         </div>

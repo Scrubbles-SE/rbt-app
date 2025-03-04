@@ -1,3 +1,7 @@
+/*
+Styled components for the Settings page
+Includes themes, input fields, buttons, and modals
+*/
 import styled from "styled-components";
 
 export const Circle = styled.div`
@@ -194,8 +198,8 @@ export const SaveButton = styled.button`
         props.status === "success"
             ? "#27ae60"
             : props.status === "error"
-            ? "#ff4757"
-            : "#23a6d5"};
+              ? "#ff4757"
+              : "#23a6d5"};
     color: white;
     border: none;
     border-radius: 8px;
@@ -217,8 +221,8 @@ export const SaveButton = styled.button`
             props.status === "success"
                 ? "#219a52"
                 : props.status === "error"
-                ? "#e74c3c"
-                : "#1e95c0"};
+                  ? "#e74c3c"
+                  : "#1e95c0"};
         transform: ${(props) =>
             props.disabled ? "none" : "translateY(-1px)"};
     }

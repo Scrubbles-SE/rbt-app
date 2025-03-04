@@ -1,8 +1,14 @@
+/**
+ * Authentication services for the application
+ * Handles user account operations including login, registration, and user verification
+ */
 import { API_BASE_URL } from "../utils/config.js";
 
 const API_AUTH_URL = `${API_BASE_URL}/api`;
 
-// CHECK IF USER EXISTS
+/**
+ * Verifies if a user account exists with the provided email
+ */
 export const checkIfUserExists = async (email) => {
     try {
         console.log(`Checking if user exists: ${email}`);
@@ -47,7 +53,9 @@ export const checkIfUserExists = async (email) => {
     }
 };
 
-// REGISTER USER
+/**
+ * Creates a new user account with provided information
+ */
 export const registerUser = async (userData) => {
     try {
         const response = await fetch(
@@ -85,7 +93,9 @@ export const registerUser = async (userData) => {
     }
 };
 
-// LOGIN USER
+/**
+ * Authenticates a user with their credentials
+ */
 export const loginUser = async (credentials) => {
     try {
         const response = await fetch(`${API_AUTH_URL}/login`, {

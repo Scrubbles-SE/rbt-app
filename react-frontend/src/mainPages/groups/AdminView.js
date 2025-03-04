@@ -1,7 +1,12 @@
+/**
+ * Admin View Component
+ * Displays a simple admin interface for group management
+ * Shows all users in the current group
+ */
 import React, {
     useState,
-    useLayoutEffect,
-    useEffect
+    useLayoutEffect
+    // useEffect
 } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ThemeProvider } from "styled-components";
@@ -15,11 +20,11 @@ import {
     BackButton,
     HeaderContainer,
     EntriesContainer,
-    EntryCard,
-    EntrySection,
-    EntryText,
-    EntryHeader,
-    EntryDate
+    EntryCard
+    // EntrySection,
+    // EntryText,
+    // EntryHeader,
+    // EntryDate
 } from "./group.styles";
 import { EntryPageTitle } from "../search/search.styles";
 

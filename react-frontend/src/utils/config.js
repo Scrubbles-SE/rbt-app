@@ -1,6 +1,4 @@
-// This file is just something I am using to be able to run the app on my phone for PWA and sizing testing
-
-// Configuration for API endpoints that supports local and Azure deployment
+// This file helps with the configuration of the API endpoints that supports local and Azure deployment
 
 const getApiBaseUrl = () => {
     // Check if running in production environment
@@ -23,10 +21,10 @@ const getApiBaseUrl = () => {
         return ""; // Empty string means use relative paths
     }
 
-    // For local development or ngrok testing
+    // For local development
     if (window.location.hostname.includes("ngrok")) {
         console.log("Using ngrok, setting empty API URL");
-        return ""; // Empty string for ngrok testing
+        return "";
     }
 
     // Default local development
@@ -34,5 +32,6 @@ const getApiBaseUrl = () => {
     return "http://localhost:8000";
 };
 
+// Get the API base URL
 export const API_BASE_URL = getApiBaseUrl();
 console.log("Final API_BASE_URL:", API_BASE_URL);

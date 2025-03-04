@@ -1,6 +1,10 @@
+/**
+ * New Entry Page Component
+ * Allows users to create or edit their daily rose-bud-thorn reflection entry
+ * Includes offline support via IndexedDB and tag management
+ */
 import React, { useState, useEffect } from "react";
 import { FaTimes, FaEye, FaLock, FaEdit } from "react-icons/fa";
-import { ThemeProvider } from "styled-components";
 import {
     EntryContainer,
     EntryTitle,
@@ -19,12 +23,12 @@ import {
     SubmitText,
     EditModeIndicator
 } from "./Entry.styles";
-import { entriesDB, tagsDB } from "../utils/db";
-import { API_BASE_URL } from "../utils/config";
+import { entriesDB, tagsDB } from "../../utils/db";
+import { API_BASE_URL } from "../../utils/config";
 
-const theme = {
-    lightPink: "rgba(242, 196, 187, 0.5)" // Lighter version of fill-color
-};
+/* 
+COMPONENTS
+*/
 
 const NewEntryPage = ({ userId }) => {
     const [isEditMode, setIsEditMode] = useState(false);
@@ -117,12 +121,13 @@ const NewEntryPage = ({ userId }) => {
                     }
                 }
             } catch (networkError) {
+                // Network request failed, using cached data
                 console.log(
                     "Network request failed, using cached data"
                 );
             }
         } catch (error) {
-            console.error("Error loading entry:", error);
+            console.log("Error loading entry");
         }
 
         setIsLoading(false);
@@ -167,9 +172,9 @@ const NewEntryPage = ({ userId }) => {
                         .filter((name) => name !== null); // Remove any null values
                 }
             } catch (error) {
-                console.error(
-                    "Error fetching tag names:",
-                    error
+                // Failed to fetch tag names, using fallback if available
+                console.log(
+                    "Error fetching tag names, using fallback if available"
                 );
             }
         } else if (entryData.tag_string) {
@@ -187,7 +192,10 @@ const NewEntryPage = ({ userId }) => {
         setUserStartedTyping(false);
     };
 
-    // Tag handling
+    /**
+     * Handles adding a tag when user presses Enter or comma
+     * Prevents duplicate tags and updates change detection
+     */
     const handleTagKeyDown = (e) => {
         if (e.key === "Enter" || e.key === ",") {
             e.preventDefault();
@@ -200,6 +208,10 @@ const NewEntryPage = ({ userId }) => {
         }
     };
 
+    /**
+     * Detects if user has made changes to the entry or tags
+     * Updates the hasChanges state to control save button visibility
+     */
     const checkForChanges = (
         currentTags = tags,
         originalTagsList = originalTags
@@ -220,6 +232,10 @@ const NewEntryPage = ({ userId }) => {
         setHasChanges(entryChanged || tagsChanged);
     };
 
+    /**
+     * Removes a tag from the current entry
+     * Updates change detection after removal
+     */
     const removeTag = (tagToRemove) => {
         const newTags = tags.filter(
             (tag) => tag !== tagToRemove
@@ -228,11 +244,17 @@ const NewEntryPage = ({ userId }) => {
         checkForChanges(newTags);
     };
 
-    // Field editing
+    /**
+     * Sets the currently editing field when user clicks on it
+     */
     const handleFieldClick = (field) => {
         setEditingField(field);
     };
 
+    /**
+     * Updates entry field content and tracks changes
+     * Compares with original entry to detect modifications
+     */
     const handleFieldChange = (field, value) => {
         setUserStartedTyping(true);
         setEntry((prev) => {
@@ -254,11 +276,17 @@ const NewEntryPage = ({ userId }) => {
         });
     };
 
+    /**
+     * Clears the editing field state when user clicks away
+     */
     const handleFieldBlur = () => {
         setEditingField(null);
     };
 
-    // You can reference the logic from this one too, but it's more confusing because it's dealing with a post and update call from the same button based on state
+    /**
+     * Saves the entry to both IndexedDB and the server
+     * Handles both creating new entries and updating existing ones
+     */
     const handleSubmit = async () => {
         if (!entry.rose || !entry.bud || !entry.thorn) {
             setError("Please fill in all fields");
@@ -376,7 +404,10 @@ const NewEntryPage = ({ userId }) => {
         ? userStartedTyping
         : hasChanges;
 
-    // Format date for display in edit mode
+    /**
+     * Formats the current date for display in the entry header
+     * Returns a string in the format "Monday, January 1st"
+     */
     const formatDate = () => {
         const today = new Date();
         return today.toLocaleDateString("en-US", {
@@ -387,144 +418,133 @@ const NewEntryPage = ({ userId }) => {
     };
 
     return (
-        <ThemeProvider theme={theme}>
-            <EntryContainer>
-                <EntryTitle>
-                    {isEditMode
-                        ? "Today's Reflection"
-                        : "Reflect on Your Day"}
-                </EntryTitle>
+        <EntryContainer>
+            <EntryTitle>
+                {isEditMode
+                    ? "Today's Reflection"
+                    : "Reflect on Your Day"}
+            </EntryTitle>
 
-                {isEditMode && (
-                    <div
-                        style={{
-                            display: "flex",
-                            justifyContent: "center"
-                        }}
-                    >
-                        <EditModeIndicator>
-                            <FaEdit
-                                style={{ marginRight: "6px" }}
-                            />
-                            Editing entry for {formatDate()}
-                        </EditModeIndicator>
-                    </div>
-                )}
+            {isEditMode && (
+                <div
+                    style={{
+                        display: "flex",
+                        justifyContent: "center"
+                    }}
+                >
+                    <EditModeIndicator>
+                        <FaEdit
+                            style={{ marginRight: "6px" }}
+                        />
+                        Editing entry for {formatDate()}
+                    </EditModeIndicator>
+                </div>
+            )}
 
-                {["rose", "bud", "thorn"].map((field) => (
-                    <EntryField key={field}>
-                        <FieldLabel>{field}</FieldLabel>
-                        {isEditMode && !editingField ? (
-                            <EntryText
-                                onClick={() =>
-                                    handleFieldClick(field)
-                                }
-                            >
-                                {entry[field] ||
-                                    `Click to edit your ${field}`}
-                            </EntryText>
-                        ) : (
-                            <EntryInput
-                                value={entry[field]}
-                                onChange={(e) =>
-                                    handleFieldChange(
-                                        field,
-                                        e.target.value
-                                    )
-                                }
-                                onBlur={
-                                    isEditMode
-                                        ? handleFieldBlur
-                                        : undefined
-                                }
-                                placeholder={
-                                    placeholders[field]
-                                }
-                                autoFocus={
-                                    editingField === field
-                                }
-                            />
-                        )}
-                    </EntryField>
-                ))}
-
-                <EntryField>
-                    <FieldLabel>Tags</FieldLabel>
-                    <EntryInput
-                        value={currentTag}
-                        onChange={(e) => {
-                            setCurrentTag(e.target.value);
-                            if (
-                                !userStartedTyping &&
-                                !isEditMode
-                            ) {
-                                setUserStartedTyping(true);
+            {["rose", "bud", "thorn"].map((field) => (
+                <EntryField key={field}>
+                    <FieldLabel>{field}</FieldLabel>
+                    {isEditMode && !editingField ? (
+                        <EntryText
+                            onClick={() =>
+                                handleFieldClick(field)
                             }
-                        }}
-                        onKeyDown={handleTagKeyDown}
-                        placeholder="Add tags (separate with commas)"
-                    />
-                    <TagsSection hasTags={tags.length > 0}>
-                        <TagsContainer>
-                            {tags.map((tag) => (
-                                <TagPill key={tag}>
-                                    {tag}
-                                    <button
-                                        onClick={() =>
-                                            removeTag(tag)
-                                        }
-                                    >
-                                        <FaTimes />
-                                    </button>
-                                </TagPill>
-                            ))}
-                        </TagsContainer>
-                    </TagsSection>
-                </EntryField>
-
-                {showSubmitButton && (
-                    <SubmitContainer>
-                        <SubmitWrapper
-                            onClick={handleSubmit}
-                            isEditMode={isEditMode}
-                            hasChanges={hasChanges}
                         >
-                            <SubmitText>
-                                {isEditMode
-                                    ? "Save Changes"
-                                    : "Submit Entry"}
-                            </SubmitText>
-                            <VisibilityToggle
-                                onClick={(e) =>
-                                    e.stopPropagation()
+                            {entry[field] ||
+                                `Click to edit your ${field}`}
+                        </EntryText>
+                    ) : (
+                        <EntryInput
+                            value={entry[field]}
+                            onChange={(e) =>
+                                handleFieldChange(
+                                    field,
+                                    e.target.value
+                                )
+                            }
+                            onBlur={
+                                isEditMode
+                                    ? handleFieldBlur
+                                    : undefined
+                            }
+                            placeholder={placeholders[field]}
+                            autoFocus={editingField === field}
+                        />
+                    )}
+                </EntryField>
+            ))}
+
+            <EntryField>
+                <FieldLabel>Tags</FieldLabel>
+                <EntryInput
+                    value={currentTag}
+                    onChange={(e) => {
+                        setCurrentTag(e.target.value);
+                        if (!userStartedTyping && !isEditMode) {
+                            setUserStartedTyping(true);
+                        }
+                    }}
+                    onKeyDown={handleTagKeyDown}
+                    placeholder="Add tags (separate with commas)"
+                />
+                <TagsSection hasTags={tags.length > 0}>
+                    <TagsContainer>
+                        {tags.map((tag) => (
+                            <TagPill key={tag}>
+                                {tag}
+                                <button
+                                    onClick={() =>
+                                        removeTag(tag)
+                                    }
+                                >
+                                    <FaTimes />
+                                </button>
+                            </TagPill>
+                        ))}
+                    </TagsContainer>
+                </TagsSection>
+            </EntryField>
+
+            {showSubmitButton && (
+                <SubmitContainer>
+                    <SubmitWrapper
+                        onClick={handleSubmit}
+                        isEditMode={isEditMode}
+                        hasChanges={hasChanges}
+                    >
+                        <SubmitText>
+                            {isEditMode
+                                ? "Save Changes"
+                                : "Submit Entry"}
+                        </SubmitText>
+                        <VisibilityToggle
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <ToggleOption
+                                selected={isPublic}
+                                onClick={() =>
+                                    setIsPublic(true)
                                 }
                             >
-                                <ToggleOption
-                                    selected={isPublic}
-                                    onClick={() =>
-                                        setIsPublic(true)
-                                    }
-                                >
-                                    <FaEye />
-                                    <span>Public</span>
-                                </ToggleOption>
-                                <ToggleOption
-                                    selected={!isPublic}
-                                    onClick={() =>
-                                        setIsPublic(false)
-                                    }
-                                >
-                                    <FaLock />
-                                    <span>Private</span>
-                                </ToggleOption>
-                            </VisibilityToggle>
-                        </SubmitWrapper>
-                    </SubmitContainer>
-                )}
+                                <FaEye />
+                                <span>Public</span>
+                            </ToggleOption>
+                            <ToggleOption
+                                selected={!isPublic}
+                                onClick={() =>
+                                    setIsPublic(false)
+                                }
+                            >
+                                <FaLock />
+                                <span>Private</span>
+                            </ToggleOption>
+                        </VisibilityToggle>
+                    </SubmitWrapper>
+                </SubmitContainer>
+            )}
 
-                {error && <ErrorMessage>{error}</ErrorMessage>}
-            </EntryContainer>
-        </ThemeProvider>
+            {error && <ErrorMessage>{error}</ErrorMessage>}
+        </EntryContainer>
     );
 };
 

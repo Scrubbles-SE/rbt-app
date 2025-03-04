@@ -1,3 +1,7 @@
+/**
+ * Entry Page Styled Components
+ * Styling for the new entry creation and editing page
+ */
 import styled from "styled-components";
 
 export const EntryContainer = styled.div`

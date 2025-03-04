@@ -1,6 +1,11 @@
-/*
-IMPORTS
-*/
+/**
+ * Group Entries Component
+ *
+ * This component displays entries from all members of a specific group.
+ * It fetches and displays the most recent entries for each user in the group,
+ * shows group information, and allows users to react to entries.
+ * Implements an offline-first approach with IndexedDB and API synchronization.
+ */
 import React, {
     useState,
     useEffect,
@@ -21,8 +26,8 @@ import {
 import { MdOutlinePeopleOutline } from "react-icons/md";
 import { ThemeProvider } from "styled-components";
 
-import { membersDB, entriesDB } from "../utils/db";
-import { API_BASE_URL } from "../utils/config.js";
+import { membersDB, entriesDB } from "../../utils/db";
+import { API_BASE_URL } from "../../utils/config.js";
 
 // Styles
 import {
@@ -66,22 +71,29 @@ function GroupEntries({ userId }) {
     const [reactionNumbers, setReactionNumbers] = useState({});
     const [groupUsers] = useState(location.state?.users || []);
 
+    /**
+     * Set the theme from local storage on component mount
+     */
     useLayoutEffect(() => {
         const currentTheme = localStorage.getItem("theme");
         setTheme({ mode: currentTheme || "light-mode" });
-        console.log(groupUsers);
     }, []);
 
     // Get gradient for the group
     const gradient = getGradient(groupId);
 
-    // Function for copying group code
+    /**
+     * Copy group code to clipboard and show a toast notification
+     */
     const handleCopyCode = () => {
         navigator.clipboard.writeText(groupCode);
         setShowToast(true);
     };
 
-    // Function to get date display
+    /**
+     * Format date for display with appropriate emoji
+     * Shows relative time for recent entries and formatted date for older ones
+     */
     const getDateDisplay = (dateString) => {
         const entryDate = new Date(dateString);
         const today = new Date();
@@ -110,16 +122,13 @@ function GroupEntries({ userId }) {
         }
     };
 
-    // Fetch entries for the group
-
-    // Backend function instructions
-    // 1. get all users of the group
-    // 2. get the most recent public entry of each user (this shouldn't be hard with IndexedDb)
-    //
-
+    /**
+     * Fetch entries for all users in the group
+     * Uses offline-first approach by first retrieving cached entries from IndexedDB,
+     * then syncing with the API to get the latest data
+     */
     const fetchEntries = async () => {
-        // get cached info
-
+        // Get cached information from IndexedDB
         const cachedMemberObjects =
             await membersDB.getUserIds(groupId);
 
@@ -142,7 +151,7 @@ function GroupEntries({ userId }) {
         }
 
         try {
-            //const currentUser = userId;
+            // Fetch latest entries from API
             const response = await fetch(
                 `${API_BASE_URL}/api/groups/${groupId}/entries`,
                 {
@@ -158,8 +167,7 @@ function GroupEntries({ userId }) {
 
             setEntries(entries);
 
-            // Update indexed db - add entries to DB if they are not already in it
-
+            // Update IndexedDB with new entries
             for (let i = 0; i < entries.length; i++) {
                 await entriesDB.addIfNotPresent(entries[i]);
             }
@@ -168,7 +176,7 @@ function GroupEntries({ userId }) {
         }
     };
 
-    // Update useEffect to remove groupUsers dependency
+    // Fetch entries when groupId or userId changes
     useEffect(() => {
         if (groupId && userId) {
             fetchEntries();
@@ -176,7 +184,12 @@ function GroupEntries({ userId }) {
         // eslint-disable-next-line
     }, [groupId, userId]);
 
-    // add new reaction
+    /**
+     * Create a new reaction on an entry
+     * @param {string} emoji - Type of reaction (e.g., 'thumb', 'heart')
+     * @param {string} user - User ID of the entry's owner
+     * @param {string} entry - Entry ID to react to
+     */
     const newReaction = async (emoji, user, entry) => {
         const currentUser = userId;
         if (!currentUser) {
@@ -184,23 +197,21 @@ function GroupEntries({ userId }) {
             return;
         }
 
-        // check if type of reaction already made by that user
+        // Check if same reaction type already made by current user
         if (reactionCounts[entry]?.[currentUser] === emoji) {
             return;
         }
 
         if (user !== currentUser) {
-            // make reaction object
+            // Prepare reaction data
             const reactionData = {
                 entry_id: entry,
                 group_id: groupId,
                 reaction_string: emoji
             };
 
-            console.log("Sending reaction data:", reactionData);
-
             try {
-                // post new reaction with credentials
+                // Post new reaction to API
                 const response = await axios.put(
                     `${API_BASE_URL}/entries/reaction`,
                     reactionData,
@@ -210,11 +221,7 @@ function GroupEntries({ userId }) {
                 );
 
                 if (response && response.status === 201) {
-                    console.log(
-                        "Reaction recorded: ",
-                        response.data
-                    );
-
+                    // Update local state with new reaction
                     setReactionCounts((prev) => {
                         const updated = { ...prev };
                         if (!updated[entry]) {
@@ -245,8 +252,12 @@ function GroupEntries({ userId }) {
         }
     };
 
-    // fetch reaction counts for entries
+    // Fetch all reactions for entries when entries or groupUsers change
     useEffect(() => {
+        /**
+         * Fetch reactions for all entries
+         * Aggregates reactions by type and by user
+         */
         const fetchReactions = async () => {
             try {
                 if (!Array.isArray(groupUsers)) {
@@ -261,7 +272,7 @@ function GroupEntries({ userId }) {
                     groupUsers.map(async (user) => {
                         try {
                             const resp = await fetch(
-                                // get most recent entry for each user
+                                // Get most recent entry for each user
                                 `${API_BASE_URL}/users/${user}/recent`
                             );
 
@@ -273,32 +284,26 @@ function GroupEntries({ userId }) {
 
                             const data = await resp.json();
 
-                            // check for entry and reactions
+                            // Check for entry and reactions
                             if (
                                 data.currentEntry &&
                                 Array.isArray(
                                     data.currentEntry.reactions
                                 )
                             ) {
-                                // extract reactions
+                                // Extract reactions
                                 const reacts =
                                     data.currentEntry.reactions;
-                                console.log(reacts);
 
-                                // initialize to empty
+                                // Initialize to empty
                                 const userReacts = {};
 
-                                // relate reaction type to user
+                                // Relate reaction type to user
                                 reacts.forEach((rxn) => {
-                                    console.log(rxn.reaction);
                                     userReacts[
                                         rxn.user_reacting_id
                                     ] = rxn.reaction;
                                 });
-                                console.log(userReacts);
-                                console.log(
-                                    data.currentEntry._id
-                                );
 
                                 const counts = {
                                     thumb: 0,
@@ -308,9 +313,8 @@ function GroupEntries({ userId }) {
                                     cry: 0
                                 };
 
-                                // get total reaction counts
+                                // Get total reaction counts
                                 reacts.forEach((rxn) => {
-                                    console.log(rxn.reaction);
                                     if (
                                         rxn.reaction === "thumb"
                                     )
@@ -354,19 +358,18 @@ function GroupEntries({ userId }) {
                     (rxns) => rxns !== null
                 );
 
-                // reaction type based on reacting user
+                // Update reaction type based on reacting user
                 setReactionCounts((prev) => {
                     const updated = { ...prev };
 
                     validReactionData.forEach((data) => {
-                        console.log(data.userReacts);
                         updated[data.entryId] = data.userReacts;
                     });
 
                     return updated;
                 });
 
-                // tally of types of reactions
+                // Update tally of reaction types
                 setReactionNumbers((prev) => {
                     const update = { ...prev };
 
@@ -388,7 +391,6 @@ function GroupEntries({ userId }) {
         ) {
             fetchReactions();
         }
-        // fetch numbers on change of:
     }, [entries, groupUsers]);
 
     return (
@@ -410,7 +412,6 @@ function GroupEntries({ userId }) {
                             </EntryPageTitle>
                             <CodeButton
                                 onClick={() => {
-                                    console.log(groupUsers);
                                     navigate(
                                         `/groups/${groupId}/admin`,
                                         {
@@ -498,7 +499,7 @@ function GroupEntries({ userId }) {
                                         {entry.thorn_text}
                                     </EntryText>
                                 </EntrySection>
-                                {/* map through reactions for given entry */}
+                                {/* Reaction buttons for each entry */}
                                 <EntryReactions>
                                     {[
                                         "thumb",
@@ -510,16 +511,6 @@ function GroupEntries({ userId }) {
                                         <Reaction
                                             key={emoji}
                                             onClick={() => {
-                                                console.log(
-                                                    "Reaction click params:",
-                                                    {
-                                                        emoji,
-                                                        userId: entry.userId,
-                                                        entryId:
-                                                            entry._id,
-                                                        entry
-                                                    }
-                                                );
                                                 newReaction(
                                                     emoji,
                                                     entry.userId,
@@ -527,7 +518,7 @@ function GroupEntries({ userId }) {
                                                 );
                                             }}
                                         >
-                                            {/* render emojis */}
+                                            {/* Render emoji icons */}
                                             {emoji ===
                                                 "thumb" && "👍"}
                                             {emoji ===

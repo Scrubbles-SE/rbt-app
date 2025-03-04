@@ -1,5 +1,6 @@
 /*
-IMPORTS
+Main Settings component for user preferences and account management
+Handles theme selection, user profile updates, and group membership
 */
 import React, { useState, useEffect } from "react";
 import {
@@ -14,14 +15,8 @@ import {
     groupsDB,
     clearDB,
     membersDB
-} from "../utils/db";
-import { API_BASE_URL } from "../utils/config.js";
-import {
-    lightTheme,
-    darkTheme,
-    blueTheme,
-    minTheme
-} from "../layout/themes";
+} from "../../utils/db";
+import { API_BASE_URL } from "../../utils/config.js";
 
 export const GlobalStyle = createGlobalStyle`
     @keyframes spin {
@@ -30,55 +25,60 @@ export const GlobalStyle = createGlobalStyle`
     }
 `;
 
-// Add the updateManifestColors function here too for consistency
+/* 
+Updates the PWA manifest colors when the user changes themes
+Uses computed CSS variables from index.css to ensure consistent colors
+*/
 const updateManifestColors = (themeName) => {
-    const themeMap = {
-        "light-mode": lightTheme,
-        "dark-mode": darkTheme,
-        "blue-theme": blueTheme,
-        "min-theme": minTheme
-    };
+    // Apply the theme class temporarily to get computed styles
+    const originalClass = document.body.className;
+    document.body.className = themeName;
 
-    const theme = themeMap[themeName];
-    if (!theme) return;
+    // Get computed CSS variables
+    const styles = getComputedStyle(document.body);
+    const backgroundColor = styles
+        .getPropertyValue("--background-color")
+        .trim();
+    const textColor = styles
+        .getPropertyValue("--text-primary")
+        .trim();
 
-    // Get the manifest link
+    // Restore original class
+    document.body.className = originalClass;
+
     const manifestLink = document.querySelector(
         'link[rel="manifest"]'
     );
     if (!manifestLink) return;
 
-    // Fetch and update the manifest
     fetch(manifestLink.href)
         .then((res) => res.json())
         .then((manifest) => {
-            manifest.background_color = theme.background;
-            manifest.theme_color = theme.background;
+            manifest.background_color = backgroundColor;
+            manifest.theme_color = backgroundColor;
 
-            // Create a blob URL with the updated manifest
             const blob = new Blob([JSON.stringify(manifest)], {
                 type: "application/json"
             });
             const newManifestURL = URL.createObjectURL(blob);
 
-            // Update the manifest link
             manifestLink.href = newManifestURL;
 
-            // Update theme-color meta tag
             const themeColorMeta = document.querySelector(
                 'meta[name="theme-color"]'
             );
             if (themeColorMeta) {
-                themeColorMeta.content = theme.background;
+                themeColorMeta.content = backgroundColor;
             }
         })
         .catch(console.error);
 };
 
 function Settings({ setIsLoggedIn }) {
+    // State for theme and user profile management
     const [theme, setTheme] = useState("light-mode");
 
-    // Track both current and edited values
+    // Track both current and edited user data for form management
     const [currentUser, setCurrentUser] = useState({
         name: "",
         email: ""
@@ -95,11 +95,11 @@ function Settings({ setIsLoggedIn }) {
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedGroup, setSelectedGroup] = useState(null);
 
-    // Fetch user details from indexedDB on mount
+    // Fetch user data on component mount with offline-first approach
     useEffect(() => {
         const fetchUserDetails = async () => {
             try {
-                //checks incexedDB (cached data)
+                // First try to load from IndexedDB for offline support
                 const cachedUser =
                     await userDB.get("current_user");
                 if (cachedUser) {
@@ -107,7 +107,8 @@ function Settings({ setIsLoggedIn }) {
                     setEditedUser(cachedUser);
                     setIsLoading(false);
                 }
-                //fetch latest data from api (always)
+
+                // Then fetch latest data from the server
                 const response = await fetch(
                     `${API_BASE_URL}/api/user/details`,
                     {
@@ -123,17 +124,14 @@ function Settings({ setIsLoggedIn }) {
                 const data = await response.json();
                 setCurrentUser(data);
                 setEditedUser(data);
-                //update indexedDB w latest data
+
+                // Update local cache with the latest data
                 await userDB.update({
                     ...data,
                     _id: "current_user"
                 });
             } catch (error) {
                 setError("Failed to load user information");
-                // console.error(
-                //     "Error fetching user details:",
-                //     error
-                // );
             } finally {
                 setIsLoading(false);
             }
@@ -142,30 +140,33 @@ function Settings({ setIsLoggedIn }) {
         fetchUserDetails();
     }, []);
 
-    // Check if user details have changed
+    // Detect if user has made changes to their profile data
     const hasChanges =
         currentUser.name !== editedUser.name ||
         currentUser.email !== editedUser.email;
 
+    // Handle input changes in the profile form
     const handleInputChange = (e) => {
-        // const { name, value } = e.target;
         setEditedUser({
             ...editedUser,
             [e.target.name]: e.target.value
         });
-        setSaveStatus(""); // Clear any previous status
+        setSaveStatus("");
     };
-    // saved chnages (indexed first, then api)
+
+    // Save user profile changes to both local cache and server
     const handleSave = async () => {
         try {
             setSaveStatus("saving");
             setCurrentUser(editedUser);
-            // const response = await fetch(
+
+            // First update local cache
             await userDB.update({
                 ...editedUser,
                 _id: "current_user"
             });
-            // update server
+
+            // Then update the server
             const response = await fetch(
                 `${API_BASE_URL}/api/user`,
                 {
@@ -192,6 +193,7 @@ function Settings({ setIsLoggedIn }) {
             setCurrentUser(editedUser);
             setSaveStatus("success");
 
+            // Clear success message after delay
             setTimeout(() => setSaveStatus(""), 2000);
         } catch (error) {
             setSaveStatus("error");
@@ -200,15 +202,17 @@ function Settings({ setIsLoggedIn }) {
             setTimeout(() => setSaveStatus(""), 3000);
         }
     };
-    // Add new useEffect to fetch groups
+
+    // Fetch groups with offline-first approach
     useEffect(() => {
         const fetchGroups = async () => {
             try {
-                // check indexedDB using both members and groups
+                // First try local cache
                 const cachedMemberObjects =
                     await membersDB.getGroupIds("current_user");
                 const cachedGroups = [];
 
+                // Build groups array from cached data
                 for (
                     let i = 0;
                     i < cachedMemberObjects.length;
@@ -226,7 +230,7 @@ function Settings({ setIsLoggedIn }) {
                     setGroups(cachedGroups);
                 }
 
-                // always fetch from api
+                // Then fetch from server for latest data
                 const response = await fetch(
                     `${API_BASE_URL}/api/groups`,
                     {
@@ -241,7 +245,7 @@ function Settings({ setIsLoggedIn }) {
                 const fetchedGroups = await response.json();
                 setGroups(fetchedGroups);
 
-                // Update IndexedDB with latest data
+                // Sync fetched data with IndexedDB for offline access
                 if (fetchedGroups) {
                     for (
                         let i = 0;
@@ -255,7 +259,6 @@ function Settings({ setIsLoggedIn }) {
                             name: fetchedGroups[i][0].name
                         };
 
-                        // Try to update first, if it doesn't exist then add
                         try {
                             await groupsDB.update(
                                 newGroupObject
@@ -264,7 +267,7 @@ function Settings({ setIsLoggedIn }) {
                             await groupsDB.add(newGroupObject);
                         }
 
-                        // Check if member relationship exists before adding
+                        // Check if membership relationship exists in cache
                         const memberExists =
                             cachedMemberObjects.some(
                                 (member) =>
@@ -272,9 +275,10 @@ function Settings({ setIsLoggedIn }) {
                                     fetchedGroups[i][0]._id
                             );
 
+                        // Add missing membership records
                         if (!memberExists) {
                             const newMembersObject = {
-                                _id: `${fetchedGroups[i][0]._id}_current_user`, // Create a deterministic ID
+                                _id: `${fetchedGroups[i][0]._id}_current_user`,
                                 user_id: "current_user",
                                 group_id:
                                     fetchedGroups[i][0]._id
@@ -284,7 +288,6 @@ function Settings({ setIsLoggedIn }) {
                                     newMembersObject
                                 );
                             } catch (err) {
-                                // If it already exists, that's fine
                                 console.log(
                                     "Member relationship already exists"
                                 );
@@ -301,6 +304,7 @@ function Settings({ setIsLoggedIn }) {
         fetchGroups();
     }, []);
 
+    // Load saved theme from localStorage on mount
     useEffect(() => {
         const currentTheme = localStorage.getItem("theme");
         if (currentTheme) {
@@ -308,26 +312,20 @@ function Settings({ setIsLoggedIn }) {
         }
     }, []);
 
+    // Apply theme changes to document and save to localStorage
     useEffect(() => {
         localStorage.setItem("theme", theme);
         document.body.className = theme;
         console.log(theme);
-        // if (darkMode) {
-        //     localStorage.setItem("theme", "dark-mode");
-        //     document.body.classList.add("dark-mode");
-        // } else {
-        //     localStorage.setItem("theme", "light-mode");
-        //     document.body.classList.remove("dark-mode");
-        // }
     }, [theme]);
 
-    // Logout logic
+    // Handle user logout - clear cache and server session
     const handleLogout = async () => {
         try {
-            // First clear IndexedDB
+            // Clear all cached data
             await clearDB();
 
-            // Then call logout endpoint
+            // End server session
             const response = await fetch(
                 `${API_BASE_URL}/api/logout`,
                 {
@@ -340,50 +338,51 @@ function Settings({ setIsLoggedIn }) {
                 throw new Error("Failed to logout");
             }
 
-            // Update app state and redirect
+            // Update app state and redirect to login
             setIsLoggedIn(false);
             window.location.href = "/account";
         } catch (error) {
             console.error("Error logging out:", error);
-            // Still try to logout locally even if server fails
+            // Fallback logout even if server request fails
             setIsLoggedIn(false);
             window.location.href = "/account";
         }
     };
 
-    // theme switching logic
+    // Handle theme changes including DOM and manifest updates
     const handleThemeChange = (newTheme) => {
         setTheme(newTheme);
         localStorage.setItem("theme", newTheme);
 
-        // Remove existing theme classes
+        // Remove all theme classes and add the new one
         document.body.classList.remove(
             "dark-mode",
             "min-theme",
             "blue-theme"
         );
 
-        // Add new theme class
         document.body.classList.add(newTheme);
 
-        // Update manifest colors
+        // Update PWA manifest to match selected theme
         updateManifestColors(newTheme);
     };
 
-    // handle logout adn clear indexedDB
+    // Open confirmation modal for leaving a group
     const handleLeaveClick = (group) => {
         setSelectedGroup(group);
         setModalOpen(true);
     };
 
+    // Close the confirmation modal
     const handleCloseModal = () => {
         setModalOpen(false);
         setSelectedGroup(null);
     };
 
+    // Handle the process of leaving a group
     const handleLeaveGroup = async (groupId) => {
         try {
-            // First call the server
+            // First remove user from group on the server
             const response = await fetch(
                 `${API_BASE_URL}/api/groups/${groupId}/leave`,
                 {
@@ -396,9 +395,8 @@ function Settings({ setIsLoggedIn }) {
                 throw new Error("Failed to leave group");
             }
 
-            // Then update IndexedDB
             try {
-                // Find and remove the member relationship
+                // Then update local cache by removing relationship
                 const memberObjects =
                     await membersDB.getGroupIds("current_user");
                 const memberToDelete = memberObjects.find(
@@ -409,7 +407,7 @@ function Settings({ setIsLoggedIn }) {
                     await membersDB.delete(memberToDelete._id);
                 }
 
-                // Update local state to remove the group
+                // Update UI by filtering out the removed group
                 setGroups((prevGroups) =>
                     prevGroups.filter(
                         (g) => g[0]._id !== groupId
@@ -448,17 +446,6 @@ function Settings({ setIsLoggedIn }) {
             <S.SectionContainer>
                 <S.SectionHeader>Appearance</S.SectionHeader>
                 <S.ContentCard>
-                    {/* <S.ToggleWrapper>
-                            <S.IconWrapper active={darkMode}>
-                                {darkMode ? <FaMoon /> : <FaSun />}
-                            </S.IconWrapper>
-                            Dark Mode
-                            <S.Toggle
-                                onClick={toggleTheme}
-                                active={darkMode}
-                                aria-label="Toggle dark mode"
-                            />
-                        </S.ToggleWrapper> */}
                     <S.ThemeSelection
                         onClick={() =>
                             handleThemeChange("light-mode")
@@ -525,11 +512,6 @@ function Settings({ setIsLoggedIn }) {
                             value={editedUser.name}
                             onChange={handleInputChange}
                             placeholder="Enter your name"
-                            // style={{
-                            //     color: darkMode
-                            //         ? "#333"
-                            //         : "inherit"
-                            // }}
                         />
                     </S.InputWrapper>
                     <S.InputWrapper>

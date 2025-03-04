@@ -1,9 +1,11 @@
-/*
-IMPORTS
-*/
+/**
+ * Create Group Component
+ * Allows users to create new groups with custom names
+ * and generates unique 6-digit codes for sharing
+ */
 import React, { useState } from "react";
 import { FiPlus, FiCopy, FiShare, FiX } from "react-icons/fi";
-import { API_BASE_URL } from "../utils/config.js";
+import { API_BASE_URL } from "../../utils/config.js";
 
 // Styles
 import {
@@ -33,15 +35,13 @@ function CreateGroup({ onGroupUpdate }) {
     const [toastMessage, setToastMessage] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 
-    // Generates and verifies a unique group code
+    // Generates a random 6-digit alphanumeric code and verifies it's unique
     const generateUniqueCode = async () => {
-        console.log("Starting code generation");
         const characters =
             "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         let isUnique = false;
         let code;
 
-        // Generates a random code until it is unique
         while (!isUnique) {
             code = "";
             for (let i = 0; i < 6; i++) {
@@ -51,10 +51,8 @@ function CreateGroup({ onGroupUpdate }) {
                     )
                 );
             }
-            console.log("Trying code:", code);
 
             try {
-                // Verifies the code with the backend
                 const response = await fetch(
                     `${API_BASE_URL}/api/groups/verify/${code}`
                 );
@@ -64,32 +62,22 @@ function CreateGroup({ onGroupUpdate }) {
                     );
                 }
                 const data = await response.json();
-                console.log("Verification response:", data);
                 isUnique = data.isAvailable;
             } catch (error) {
-                // Waits for 1 second before trying again
-                console.error("Error verifying code:", error);
                 await new Promise((resolve) =>
                     setTimeout(resolve, 1000)
                 );
                 continue;
             }
         }
-        console.log("Generated unique code:", code);
         return code;
     };
 
     // Creates the group with the backend
     const createGroup = async (name, code) => {
         try {
-            console.log("Making create group request", {
-                name,
-                code
-            });
-
-            // Fix the URL to match backend route
             const response = await fetch(
-                `${API_BASE_URL}/api/groups`, // Changed from /groups to /api/groups
+                `${API_BASE_URL}/api/groups`,
                 {
                     method: "POST",
                     headers: {
@@ -103,8 +91,6 @@ function CreateGroup({ onGroupUpdate }) {
                 }
             );
 
-            console.log("Create group response:", response);
-
             if (!response.ok) {
                 const error = await response.json();
                 throw new Error(
@@ -114,17 +100,12 @@ function CreateGroup({ onGroupUpdate }) {
 
             return await response.json();
         } catch (error) {
-            console.error("Error creating group:", error);
             throw error;
         }
     };
 
     // Handles the initial creation of the group
     const handleCreate = () => {
-        console.log(
-            "Handle create clicked, current stage:",
-            stage
-        );
         if (stage === "initial") {
             setStage("naming");
         }
@@ -132,35 +113,24 @@ function CreateGroup({ onGroupUpdate }) {
 
     // Handles the confirmation of the group name
     const handleConfirmName = async () => {
-        console.log(
-            "Confirm name clicked with name:",
-            groupName
-        );
         if (!groupName.trim()) return;
 
         setIsLoading(true);
         try {
-            // Generates a unique code
-            console.log("Starting group creation process");
             const code = await generateUniqueCode();
-            console.log("Generated code:", code);
 
             const newGroup = await createGroup(
                 groupName.trim(),
                 code
             );
-            console.log("Group created:", newGroup);
 
-            // Sets the group code and stage
             setGroupCode(code);
             setStage("code");
             setToastMessage("Group created successfully!");
             setShowToast(true);
 
-            // Updates the groups
             onGroupUpdate();
         } catch (error) {
-            console.error("Error in handleConfirmName:", error);
             setToastMessage(
                 error.message || "Failed to create group"
             );

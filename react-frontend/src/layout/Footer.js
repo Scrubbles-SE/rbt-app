@@ -29,13 +29,23 @@ import {
     NewEntryButton
 } from "./Footer.styles";
 
-// Footer component render
+/*
+COMPONENT
+*/
+
+/**
+ * Footer navigation component with tabs and floating action button
+ * Contains navigation links to main app sections
+ */
 function Footer() {
     // Used for navigation
     const location = useLocation();
     const currentPath = location.pathname;
 
-    // Change icon based on selected tab
+    /**
+     * Renders either filled or outlined icon based on active route
+     * Creates visual indication of the current active tab
+     */
     const renderIcon = (path, OutlinedIcon, FilledIcon) => {
         return currentPath === path ? (
             <FilledIcon />
@@ -76,6 +86,7 @@ function Footer() {
                                 )}
                             </TabLink>
                         </TabItem>
+                        {/* Hidden placeholder to maintain tab spacing around FAB */}
                         <TabItem
                             style={{ visibility: "hidden" }}
                         >
@@ -114,6 +125,7 @@ function Footer() {
                     </TabList>
                 </Nav>
             </TabBarContainer>
+            {/* Floating action button for new entry creation */}
             <ActionButton>
                 <NewEntryButton
                     to="/new-entry"

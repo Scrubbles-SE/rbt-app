@@ -1,5 +1,8 @@
+/*
+Styled components for the search and tag entries pages
+Includes tag folders, entry displays, and navigation elements
+*/
 import styled from "styled-components";
-import { darkTheme } from "../layout/themes.js";
 
 export const Title = styled.h1`
     font-size: 1.8rem;
@@ -190,7 +193,7 @@ export const HeaderRow = styled.div`
 export const BackButton = styled.button`
     background: ${(props) =>
         props.theme.mode === "dark-mode"
-            ? darkTheme.cardBackground
+            ? "var(--card-background)"
             : "#f8f9fa"};
     border: none;
     border-radius: 12px;
@@ -201,7 +204,7 @@ export const BackButton = styled.button`
     justify-content: center;
     color: ${(props) =>
         props.theme.mode === "dark-mode"
-            ? "#ffffff"
+            ? "var(--text-primary)"
             : "#2c3e50"};
     font-size: 20px;
     transition: all 0.2s ease;

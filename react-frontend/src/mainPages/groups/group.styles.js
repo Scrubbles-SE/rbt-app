@@ -1,5 +1,7 @@
+/**
+ * Group Components Styled Components
+ */
 import styled from "styled-components";
-import { lightTheme, darkTheme } from "../layout/themes";
 
 // Define theme-based gradients that will adapt to the current theme
 export const getGradient = (groupId) => {
@@ -692,10 +694,7 @@ export const LoadingText = styled.p`
 `;
 
 export const BackButton = styled.button`
-    background: ${(props) =>
-        props.theme.mode === "dark-mode"
-            ? darkTheme.cardBackground
-            : "#f8f9fa"};
+    background: var(--card-background);
     border: none;
     border-radius: 12px;
     padding: 12px;
@@ -703,18 +702,12 @@ export const BackButton = styled.button`
     display: flex;
     align-items: center;
     justify-content: center;
-    color: ${(props) =>
-        props.theme.mode === "dark-mode"
-            ? "#ffffff"
-            : "#2c3e50"};
+    color: var(--text-primary);
     font-size: 20px;
     transition: all 0.2s ease;
 
     &:hover {
-        background: ${(props) =>
-            props.theme.mode === "dark-mode"
-                ? "#404040"
-                : "#e9ecef"};
+        background: var(--hover-color);
         transform: translateX(-2px);
     }
 
@@ -747,19 +740,12 @@ export const EntryHeader = styled.div`
 `;
 
 export const EntryCard = styled.div`
-    background: ${(props) =>
-        props.theme.mode === "dark-mode"
-            ? "#363636" // Slightly brighter than the dark theme background
-            : lightTheme.cardBackground};
+    background: var(--card-background);
     border-radius: 16px;
     padding: 24px;
     margin-bottom: 20px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    border: 1px solid
-        ${(props) =>
-            props.theme.mode === "dark-mode"
-                ? "rgba(255, 255, 255, 0.1)"
-                : "rgba(0, 0, 0, 0.05)"};
+    border: 1px solid var(--border-color);
 
     &:hover {
         transform: translateY(-2px);
@@ -773,10 +759,7 @@ export const EntryCard = styled.div`
 export const EntryName = styled.h3`
     font-size: 1.6rem;
     font-weight: 800;
-    color: ${(props) =>
-        props.theme.mode === "dark-mode"
-            ? darkTheme.text
-            : lightTheme.text};
+    color: var(--text-primary);
     margin: 0 0 0 0;
     display: flex;
     align-items: center;
@@ -788,10 +771,8 @@ export const EntryName = styled.h3`
         height: 2px;
         background: linear-gradient(
             to right,
-            ${(props) =>
-                props.theme.mode === "dark-mode"
-                    ? "rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02)"
-                    : "rgba(44, 62, 80, 0.1), rgba(44, 62, 80, 0.02)"}
+            var(--border-color),
+            transparent
         );
     }
 `;
@@ -801,20 +782,16 @@ export const EntryDate = styled.div`
     align-items: center;
     gap: 6px;
     font-size: 1rem;
-    color: #64748b;
+    color: var(--text-secondary);
     font-weight: 600;
     padding: 6px 12px;
-    // background: #f8fafc;
     border-radius: 20px;
     transition: all 0.2s ease;
-    background: ${({ theme }) =>
-        theme.mode === "dark-mode" ? "#222" : "#f8fafc"};
-    color: ${({ theme }) =>
-        theme.mode === "dark-mode" ? "#fff" : "#64748b"};
+    background: var(--background-color);
+
     &:hover {
         transform: translateY(-1px);
-        background: ${({ theme }) =>
-            theme.mode === "dark-mode" ? "4a4a4a" : "#f1f5f9"};
+        background: var(--hover-color);
     }
 
     span {
@@ -828,20 +805,13 @@ export const EntrySection = styled.div`
     margin-bottom: 16px;
     border-radius: 12px;
     background: ${(props) => {
-        const isDark = props.theme.mode === "dark-mode";
         switch (props.type) {
             case "rose":
-                return isDark
-                    ? "rgba(255, 143, 177, 0.05)"
-                    : "rgba(255, 143, 177, 0.1)";
+                return "rgba(255, 143, 177, 0.1)";
             case "thorn":
-                return isDark
-                    ? "rgba(184, 58, 58, 0.05)"
-                    : "rgba(184, 58, 58, 0.1)";
+                return "rgba(184, 58, 58, 0.1)";
             case "bud":
-                return isDark
-                    ? "rgba(152, 206, 0, 0.05)"
-                    : "rgba(152, 206, 0, 0.1)";
+                return "rgba(152, 206, 0, 0.1)";
             default:
                 return "transparent";
         }
@@ -867,10 +837,7 @@ export const EntrySection = styled.div`
         font-weight: 600;
         padding: 2px 8px;
         border-radius: 6px;
-        background: ${(props) =>
-            props.theme.mode === "dark-mode"
-                ? darkTheme.cardBackground
-                : "white"};
+        background: var(--card-background);
         color: ${(props) => {
             switch (props.type) {
                 case "rose":
@@ -880,7 +847,7 @@ export const EntrySection = styled.div`
                 case "bud":
                     return "#98CE00";
                 default:
-                    return "#2c3e50";
+                    return "var(--text-primary)";
             }
         }};
     }
@@ -889,10 +856,7 @@ export const EntrySection = styled.div`
 export const EntryText = styled.p`
     font-size: 1rem;
     line-height: 1.6;
-    color: ${(props) =>
-        props.theme.mode === "dark-mode"
-            ? "#ffffff"
-            : "#2c3e50"};
+    color: var(--text-primary);
     margin: 0;
     white-space: pre-wrap;
 `;
