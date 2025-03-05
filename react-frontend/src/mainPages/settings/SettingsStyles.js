@@ -336,6 +336,10 @@ export const ModalContent = styled.div`
     width: 90%;
     max-width: 320px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    /* Dark mode styles */
+    .dark-mode & {
+        color: rgb(232, 232, 232); /* Change text color to white in dark mode */
+    }
 `;
 
 export const ModalTitle = styled.h3`
