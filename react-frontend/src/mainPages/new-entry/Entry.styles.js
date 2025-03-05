@@ -332,6 +332,16 @@ export const ToggleOption = styled.button`
         props.selected
             ? "rgba(255, 255, 255, 0.9)"
             : "transparent"};
+    /* Dark Mode Styles */
+    .dark-mode & {
+        background: ${(props) =>
+            props.selected
+                ? "rgba(0, 0, 0, 0.9)" /* Black in dark mode */
+                : "transparent"};
+        color: ${(props) =>
+            props.selected ? "white" : "var(--text-primary)"};
+    }
+
     color: var(--text-primary);
     cursor: pointer;
     transition: all 0.2s;
@@ -353,6 +363,13 @@ export const ToggleOption = styled.button`
             props.selected
                 ? "rgba(255, 255, 255, 0.9)"
                 : "rgba(255, 255, 255, 0.1)"};
+                 /* Dark mode hover */
+        .dark-mode & {
+            background: ${(props) =>
+                props.selected
+                    ? "rgba(0, 0, 0, 0.9)"
+                    : "rgba(0, 0, 0, 0.1)"};
+        }
     }
 `;
 
