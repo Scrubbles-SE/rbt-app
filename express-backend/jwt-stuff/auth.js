@@ -2,7 +2,17 @@ import jwt from "jsonwebtoken";
 
 export const authMiddleware = async (req, res, next) => {
     try {
-        const token = req.cookies.jwt;
+        // First try to get token from cookies
+        let token = req.cookies.jwt;
+
+        // If no cookie, check Authorization header (Bearer token)
+        if (!token && req.headers.authorization) {
+            const authHeader = req.headers.authorization;
+            // Check if it's a Bearer token
+            if (authHeader.startsWith("Bearer ")) {
+                token = authHeader.substring(7);
+            }
+        }
 
         if (!token) {
             console.log("No token found in request");

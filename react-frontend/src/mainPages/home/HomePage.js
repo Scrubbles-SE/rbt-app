@@ -464,38 +464,8 @@ function HomePage({ userId }) {
     // Always render the UI
     return (
         <HomeContainer {...swipeHandlers}>
-            {isLoading && (
-                <div
-                    style={{
-                        textAlign: "center",
-                        padding: "10px",
-                        color: "var(--text-secondary)",
-                        fontSize: "0.9rem"
-                    }}
-                >
-                    {/* This will show briefly while data loads, but won't block the UI */}
-                    Loading your data...
-                </div>
-            )}
-            {isOffline && (
-                <div
-                    style={{
-                        textAlign: "center",
-                        padding: "5px",
-                        fontSize: "0.8rem",
-                        color: "var(--text-secondary)",
-                        opacity: 0.7,
-                        position: "absolute",
-                        bottom: "5px",
-                        right: "5px",
-                        background: "rgba(255,255,255,0.7)",
-                        borderRadius: "4px"
-                    }}
-                >
-                    {/* Small unobtrusive indicator that won't disrupt the UI */}
-                    Limited connectivity
-                </div>
-            )}
+            {isLoading}
+            {isOffline}
             <WelcomeSection>
                 <WelcomeHeader>
                     Welcome back, {userName || "User"}!

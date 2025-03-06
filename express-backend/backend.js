@@ -237,10 +237,12 @@ app.post("/api/login", async (req, res) => {
 
         // Create and set JWT token
         const token = createToken(user._id);
-        setTokenCookie(res, token);
+        const tokenData = setTokenCookie(res, token);
 
         res.status(200).json({
-            message: "Success"
+            message: "Success",
+            token: tokenData.token,
+            userId: tokenData.userId
         });
         // eslint-disable-next-line no-unused-vars
     } catch (error) {
@@ -935,6 +937,25 @@ app.post("/api/logout", authMiddleware, async (req, res) => {
         res.status(500).json({ message: "Error logging out" });
         console.error("Error logging out:", _error);
     }
+});
+
+// LOGOUT endpoint
+app.post("/api/auth/logout", (req, res) => {
+    // Clear the JWT cookie
+    res.clearCookie("jwt", {
+        httpOnly: true,
+        secure:
+            process.env.NODE_ENV === "production" ||
+            process.env.HTTPS === "true",
+        sameSite:
+            process.env.NODE_ENV === "production"
+                ? "none"
+                : "lax"
+    });
+
+    res.status(200).json({
+        message: "Logged out successfully"
+    });
 });
 
 // ADD REACTION TO ENTRY
