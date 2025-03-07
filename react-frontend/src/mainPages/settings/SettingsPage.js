@@ -10,13 +10,12 @@ import {
 } from "react-icons/fa";
 import * as S from "./SettingsStyles";
 import { createGlobalStyle } from "styled-components";
-import {
-    userDB,
-    groupsDB,
-    clearDB,
-    membersDB
-} from "../../utils/db";
+import { userDB, groupsDB, membersDB } from "../../utils/db";
 import { API_BASE_URL } from "../../utils/config.js";
+import {
+    authenticatedFetch,
+    logoutUser
+} from "../../account/authService";
 
 export const GlobalStyle = createGlobalStyle`
     @keyframes spin {
@@ -71,7 +70,7 @@ const updateManifestColors = (themeName) => {
         .catch(console.error);
 };
 
-function Settings({ setIsLoggedIn }) {
+function Settings({ setIsLoggedIn, userId }) {
     // State for theme and user profile management
     const [theme, setTheme] = useState("light-mode");
 
@@ -95,39 +94,25 @@ function Settings({ setIsLoggedIn }) {
     // Fetch user data on component mount with offline-first approach
     useEffect(() => {
         const fetchUserDetails = async () => {
+            setIsLoading(true);
             try {
-                // First try to load from IndexedDB for offline support
-                const cachedUser =
-                    await userDB.get("current_user");
-                if (cachedUser) {
-                    setCurrentUser(cachedUser);
-                    setEditedUser(cachedUser);
-                    setIsLoading(false);
-                }
-
-                // Then fetch latest data from the server
-                const response = await fetch(
-                    `${API_BASE_URL}/api/user/details`,
-                    {
-                        credentials: "include"
-                    }
+                const response = await authenticatedFetch(
+                    `${API_BASE_URL}/api/user/details`
                 );
 
-                if (!response.ok)
-                    throw new Error(
-                        "Failed to fetch user details"
-                    );
-
-                const data = await response.json();
-                setCurrentUser(data);
-                setEditedUser(data);
-
-                // Update local cache with the latest data
-                await userDB.update({
-                    ...data,
-                    _id: "current_user"
-                });
+                if (response.ok) {
+                    const data = await response.json();
+                    setCurrentUser(data);
+                    setEditedUser(data);
+                    setIsLoading(false);
+                } else {
+                    setError("Failed to load user information");
+                }
             } catch (error) {
+                console.error(
+                    "Error fetching user details:",
+                    error
+                );
                 setError("Failed to load user information");
             } finally {
                 setIsLoading(false);
@@ -319,30 +304,12 @@ function Settings({ setIsLoggedIn }) {
     // Handle user logout - clear cache and server session
     const handleLogout = async () => {
         try {
-            // Clear all cached data
-            await clearDB();
-
-            // End server session
-            const response = await fetch(
-                `${API_BASE_URL}/api/logout`,
-                {
-                    method: "POST",
-                    credentials: "include"
-                }
-            );
-
-            if (!response.ok) {
-                throw new Error("Failed to logout");
+            const result = await logoutUser();
+            if (result.success) {
+                setIsLoggedIn(false);
             }
-
-            // Update app state and redirect to login
-            setIsLoggedIn(false);
-            window.location.href = "/account";
         } catch (error) {
-            console.error("Error logging out:", error);
-            // Fallback logout even if server request fails
-            setIsLoggedIn(false);
-            window.location.href = "/account";
+            console.error("Error during logout:", error);
         }
     };
 
@@ -447,7 +414,7 @@ function Settings({ setIsLoggedIn }) {
                         onClick={() =>
                             handleThemeChange("light-mode")
                         }
-                        active={"light-mode"}
+                        $active={"light-mode"}
                         selected={theme === "light-mode"}
                     >
                         <S.IconWrapper>
@@ -459,14 +426,14 @@ function Settings({ setIsLoggedIn }) {
                         onClick={() =>
                             handleThemeChange("dark-mode")
                         }
-                        active={"dark-mode"}
+                        $active={"dark-mode"}
                         selected={theme === "dark-mode"}
                     >
                         <S.Circle color="#000000" />
                         Dark
                     </S.ThemeSelection>
                     <S.ThemeSelection
-                        active={theme === "blue-theme"}
+                        $active={theme === "blue-theme"}
                         onClick={() =>
                             handleThemeChange("blue-theme")
                         }
@@ -476,7 +443,7 @@ function Settings({ setIsLoggedIn }) {
                         Sky
                     </S.ThemeSelection>
                     <S.ThemeSelection
-                        active={theme === "min-theme"}
+                        $active={theme === "min-theme"}
                         onClick={() =>
                             handleThemeChange("min-theme")
                         }
@@ -486,7 +453,7 @@ function Settings({ setIsLoggedIn }) {
                         Minimalist
                     </S.ThemeSelection>
                     <S.ThemeSelection
-                        active={theme === "green-theme"}
+                        $active={theme === "green-theme"}
                         onClick={() => setTheme("green-theme")}
                         selected={theme === "green-theme"}
                     >

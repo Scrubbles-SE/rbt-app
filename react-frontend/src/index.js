@@ -200,7 +200,10 @@ const MainAppRoutes = ({ setIsLoggedIn, userId }) => {
             <Route
                 path="/settings"
                 element={
-                    <Settings setIsLoggedIn={setIsLoggedIn} />
+                    <Settings
+                        setIsLoggedIn={setIsLoggedIn}
+                        userId={userId}
+                    />
                 }
             />
 
@@ -229,6 +232,7 @@ const App = () => {
         // Verify JWT token validity with server
         const checkAuth = async () => {
             try {
+                // First try with cookies (normal flow)
                 const response = await fetch(
                     `${API_BASE_URL}/api/auth/verify`,
                     {
@@ -241,15 +245,52 @@ const App = () => {
                     setIsLoggedIn(true);
                     setUserId(data.userId);
                 } else {
-                    // Clear authentication state if token invalid
-                    setIsLoggedIn(false);
-                    setUserId(null);
+                    // If cookies fail, try with localStorage token as fallback
+                    // This helps with iOS devices where httpOnly cookies might not work properly
+                    const token =
+                        localStorage.getItem("authToken");
+                    const storedUserId =
+                        localStorage.getItem("userId");
+
+                    if (token && storedUserId) {
+                        // Verify the token by making an authenticated request
+                        const fallbackResponse = await fetch(
+                            `${API_BASE_URL}/api/user/current`,
+                            {
+                                headers: {
+                                    Authorization: `Bearer ${token}`
+                                }
+                            }
+                        );
+
+                        if (fallbackResponse.ok) {
+                            setIsLoggedIn(true);
+                            setUserId(storedUserId);
+                        } else {
+                            // Token invalid, clear storage
+                            localStorage.removeItem(
+                                "authToken"
+                            );
+                            localStorage.removeItem("userId");
+                            setIsLoggedIn(false);
+                            setUserId(null);
+                        }
+                    } else {
+                        // No token in localStorage either
+                        setIsLoggedIn(false);
+                        setUserId(null);
+                    }
                 }
             } catch (error) {
+                console.error(
+                    "Auth verification error:",
+                    error
+                );
                 setIsLoggedIn(false);
                 setUserId(null);
             }
         };
+
         checkAuth();
     }, []);
 

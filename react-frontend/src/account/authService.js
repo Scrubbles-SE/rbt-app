@@ -3,6 +3,7 @@
  * Handles user account operations including login, registration, and user verification
  */
 import { API_BASE_URL } from "../utils/config.js";
+import { clearDB } from "../utils/db";
 
 const API_AUTH_URL = `${API_BASE_URL}/api`;
 
@@ -116,15 +117,92 @@ export const loginUser = async (credentials) => {
             };
         }
 
+        // Store token in localStorage as fallback for iOS devices
+        // This ensures authentication persists even if cookies don't work
+        if (data.token) {
+            localStorage.setItem("authToken", data.token);
+            localStorage.setItem("userId", data.userId);
+        }
+
         return {
             success: true,
-            message: "Login successful"
+            userId: data.userId
         };
     } catch (error) {
-        console.error("Login error:", error);
         return {
             success: false,
-            message: "Error logging you in. Please try again."
+            message: "Connection error. Please try again."
         };
+    }
+};
+
+// Utility function for authenticated API calls
+// Uses cookies by default but falls back to localStorage token if needed
+export const authenticatedFetch = async (url, options = {}) => {
+    try {
+        const defaultOptions = {
+            credentials: "include", // Include cookies by default
+            ...options
+        };
+
+        // Make initial request with cookies
+        console.log(`Fetching: ${url}`);
+        let response = await fetch(url, defaultOptions);
+
+        // If the request fails with 401 Unauthorized, try with Authorization header
+        if (response.status === 401) {
+            console.log(
+                "Cookie auth failed, trying with token"
+            );
+            const token = localStorage.getItem("authToken");
+            if (token) {
+                // Add Authorization header with token
+                const authOptions = {
+                    ...defaultOptions,
+                    headers: {
+                        ...defaultOptions.headers,
+                        Authorization: `Bearer ${token}`
+                    }
+                };
+
+                // Retry the request with the token
+                response = await fetch(url, authOptions);
+            }
+        }
+
+        return response;
+    } catch (error) {
+        console.error(
+            `Error in authenticatedFetch to ${url}:`,
+            error
+        );
+        throw error;
+    }
+};
+
+// Logout function that clears both cookie and localStorage
+export const logoutUser = async () => {
+    try {
+        // Clear localStorage
+        localStorage.removeItem("authToken");
+        localStorage.removeItem("userId");
+
+        // Clear IndexedDB data
+        await clearDB();
+
+        // Call logout endpoint to clear cookies
+        const response = await fetch(
+            `${API_AUTH_URL}/auth/logout`,
+            {
+                method: "POST",
+                credentials: "include"
+            }
+        );
+
+        return { success: response.ok };
+    } catch (error) {
+        console.error("Logout error:", error);
+        // Even if server request fails, consider logout successful after clearing localStorage
+        return { success: true };
     }
 };

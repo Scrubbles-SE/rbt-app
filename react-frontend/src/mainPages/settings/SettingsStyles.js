@@ -119,7 +119,7 @@ export const IconWrapper = styled.div`
     align-items: center;
     font-size: 18px;
     color: ${(props) =>
-        props.active ? "#23a6d5" : "var(--text-secondary)"};
+        props.$active ? "#23a6d5" : "var(--text-secondary)"};
     transition: color 0.3s ease;
 `;
 
@@ -128,7 +128,7 @@ export const Toggle = styled.button`
     height: 24px;
     border-radius: 24px;
     background: ${(props) =>
-        props.active ? "#23a6d5" : "var(--border-color)"};
+        props.$active ? "#23a6d5" : "var(--border-color)"};
     position: relative;
     border: none;
     cursor: pointer;
@@ -144,7 +144,7 @@ export const Toggle = styled.button`
         border-radius: 50%;
         background: var(--card-background);
         top: 3px;
-        left: ${(props) => (props.active ? "23px" : "3px")};
+        left: ${(props) => (props.$active ? "23px" : "3px")};
         transition: all 0.3s ease;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
@@ -336,6 +336,10 @@ export const ModalContent = styled.div`
     width: 90%;
     max-width: 320px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    /* Dark mode styles */
+    .dark-mode & {
+        color: rgb(232, 232, 232); /* Change text color to white in dark mode */
+    }
 `;
 
 export const ModalTitle = styled.h3`

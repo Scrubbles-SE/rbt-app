@@ -8,11 +8,11 @@ Our site is hosted on Azure and is available for you to access here: https://lem
 
 ### Our Team
 
-**-Class:** CSC-309, Software Engineering II
+- **Class:** CSC-309, Software Engineering II
 
-**-Team:** Scrubbles
+- **Team:** Scrubbles
 
-**-Members:** Ashley, Brady, Giselle, Parker, Xio
+- **Members:** Ashley, Brady, Giselle, Parker, Xio
 
 ### About
 
