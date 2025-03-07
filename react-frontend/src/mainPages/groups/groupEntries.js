@@ -258,7 +258,7 @@ function GroupEntries({ userId }) {
 
     // Fetch all reactions for entries when entries or groupUsers change
     useEffect(() => {
-        /**
+        /*
          * Fetch reactions for all entries
          * Aggregates reactions by type and by user
          */
@@ -415,20 +415,18 @@ function GroupEntries({ userId }) {
                                 {decodeURIComponent(groupName)}
                             </EntryPageTitle>
                             {/* *** */}
-                            {/* {userId?.isAdmin && (
+                            {/* userId?.isAdmin */}
+                            {userId && (
                                 <CodeButton
                                     onClick={() =>
                                         setShowAdmin(!showAdmin)
                                     }
-                                    // onClick={() =>
-                                    //     console.log(groupUsers)
-                                    // }
                                 >
                                     <MdOutlinePeopleOutline />
                                 </CodeButton>
-                            )} */}
-
-                            <CodeButton
+                            )}
+                            {/* *** for testing */}
+                            {/* <CodeButton
                                 onClick={() =>
                                     setShowAdmin(!showAdmin)
                                 }
@@ -437,7 +435,7 @@ function GroupEntries({ userId }) {
                                 // }
                             >
                                 <MdOutlinePeopleOutline />
-                            </CodeButton>
+                            </CodeButton> */}
 
                             <CodeButton
                                 onClick={() =>

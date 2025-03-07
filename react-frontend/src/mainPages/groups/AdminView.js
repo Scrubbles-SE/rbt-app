@@ -11,31 +11,21 @@ import React, {
 import { ThemeProvider } from "styled-components";
 
 import {
-    Container,
-    ContentContainer,
-    HeaderRow,
-    BackButton,
-    HeaderContainer,
     EntriesContainer,
-    EntryCard,
     EntryName,
     ListContainer,
     MemberCard,
     MemberName,
     Remove
-    // EntrySection,
-    // EntryText,
-    // EntryHeader,
-    // EntryDate
 } from "./group.styles";
-import { EntryPageTitle } from "../search/search.styles";
 
-function AdminView({ groupUsers = [] }) {
+function AdminView({ groupUsers = [], groupId }) {
     const [theme, setTheme] = useState({ mode: "light-mode" });
 
     useLayoutEffect(() => {
         const currentTheme = localStorage.getItem("theme");
         setTheme({ mode: currentTheme || "light-mode" });
+        console.log(groupUsers);
     }, []);
 
     const removeFromGroup = async (userToRemove, groupId) => {
@@ -70,32 +60,36 @@ function AdminView({ groupUsers = [] }) {
 
     return (
         <ThemeProvider theme={theme}>
-            {/* <HeaderContainer>
-                <HeaderRow></HeaderRow>
-            </HeaderContainer> */}
             <ListContainer>
                 <EntryName>Users</EntryName>
 
-                {/* display all entries in the tag */}
                 <EntriesContainer>
-                    {/* {groupUsers?.length > 0 ? (
-                    groupUsers.map((user) => (
-                        <EntryCard key={user._id}>
-                            <EntryPageTitle>
-                                {user.first_name}
-                            </EntryPageTitle>
-                        </EntryCard>
-                    ))
-                ) : (
-                    <EntryPageTitle>
-                        No users found
-                    </EntryPageTitle>
-                )} */}
-                    <MemberCard>
+                    {groupUsers?.length > 0 ? (
+                        groupUsers.map((user) => (
+                            <MemberCard key={user._id}>
+                                <MemberName>
+                                    {user.first_name}
+                                </MemberName>
+                                <Remove
+                                    onClick={(user) =>
+                                        removeFromGroup(
+                                            user._id,
+                                            groupId
+                                        )
+                                    }
+                                >
+                                    Remove
+                                </Remove>
+                            </MemberCard>
+                        ))
+                    ) : (
+                        <MemberName>No users found</MemberName>
+                    )}
+                    {/* <MemberCard>
                         <MemberName>James</MemberName>
                         <Remove
                             onClick={(user) =>
-                                removeFromGroup("light-mode")
+                                removeFromGroup()
                             }
                         >
                             Remove
@@ -104,7 +98,7 @@ function AdminView({ groupUsers = [] }) {
                     <MemberCard>
                         <MemberName>Emily</MemberName>
                         <Remove>Remove</Remove>
-                    </MemberCard>
+                    </MemberCard> */}
                 </EntriesContainer>
             </ListContainer>
         </ThemeProvider>
