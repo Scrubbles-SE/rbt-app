@@ -188,6 +188,8 @@ export const HeaderRow = styled.div`
     gap: 10px;
     width: 100%;
     box-sizing: border-box;
+    position: relative;
+    justify-content: center;
 `;
 
 export const BackButton = styled.button`
@@ -201,7 +203,8 @@ export const BackButton = styled.button`
     cursor: pointer;
     display: flex;
     align-items: center;
-    justify-content: center;
+    position: absolute;
+    left: 5px;
     color: ${(props) =>
         props.theme.mode === "dark-mode"
             ? "var(--text-primary)"
@@ -350,14 +353,16 @@ export const EntryText = styled.p`
 export const EntryPageTitle = styled.h1`
     font-size: 2.4rem;
     font-weight: 700;
-    flex: 1;
+    flex-grow: 1;
+    width: 100%;
     text-align: center;
     margin: 0;
-    padding: 0 10px;
+    padding-left: 10px;
+    padding-right: 10px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    background: #fadadd;
+    background: var(--button-color);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
