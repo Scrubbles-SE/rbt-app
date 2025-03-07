@@ -35,7 +35,6 @@ import Settings from "./mainPages/settings/SettingsPage.js";
 // Full Screen Pages
 import GroupEntries from "./mainPages/groups/groupEntries.js";
 import TagEntries from "./mainPages/search/TagEntries.js";
-import AdminView from "./mainPages/groups/AdminView.js";
 
 /* 
 SERVICE WORKER & INDEXED-DB REGISTRATION
@@ -213,10 +212,6 @@ const MainAppRoutes = ({ setIsLoggedIn, userId }) => {
             <Route
                 path="/search/:tagId/:tagName"
                 element={<TagEntries />}
-            />
-            <Route
-                path="/groups/:groupId/admin"
-                element={<AdminView />}
             />
         </Routes>
     );

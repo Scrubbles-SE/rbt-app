@@ -25,6 +25,7 @@ import {
 } from "react-icons/fi";
 import { MdOutlinePeopleOutline } from "react-icons/md";
 import { ThemeProvider } from "styled-components";
+import AdminView from "./AdminView.js";
 
 import { membersDB, entriesDB } from "../../utils/db";
 import { API_BASE_URL } from "../../utils/config.js";
@@ -51,7 +52,8 @@ import {
     EntryDate,
     EntryReactions,
     Reaction,
-    ReactionCount
+    ReactionCount,
+    AdminDisplay
 } from "./group.styles";
 
 /*
@@ -65,6 +67,7 @@ function GroupEntries({ userId }) {
     const groupCode = location.state?.group_code;
     const [showToast, setShowToast] = useState(false);
     const [showCode, setShowCode] = useState(false);
+    const [showAdmin, setShowAdmin] = useState(false);
     const [entries, setEntries] = useState([]);
     const [theme, setTheme] = useState({ mode: "light-mode" });
     const [reactionCounts, setReactionCounts] = useState({});
@@ -77,6 +80,7 @@ function GroupEntries({ userId }) {
     useLayoutEffect(() => {
         const currentTheme = localStorage.getItem("theme");
         setTheme({ mode: currentTheme || "light-mode" });
+        console.log(groupUsers);
     }, []);
 
     // Get gradient for the group
@@ -410,20 +414,31 @@ function GroupEntries({ userId }) {
                             <EntryPageTitle gradient={gradient}>
                                 {decodeURIComponent(groupName)}
                             </EntryPageTitle>
+                            {/* *** */}
+                            {/* {userId?.isAdmin && (
+                                <CodeButton
+                                    onClick={() =>
+                                        setShowAdmin(!showAdmin)
+                                    }
+                                    // onClick={() =>
+                                    //     console.log(groupUsers)
+                                    // }
+                                >
+                                    <MdOutlinePeopleOutline />
+                                </CodeButton>
+                            )} */}
+
                             <CodeButton
-                                onClick={() => {
-                                    navigate(
-                                        `/groups/${groupId}/admin`,
-                                        {
-                                            state: {
-                                                users: groupUsers
-                                            }
-                                        }
-                                    );
-                                }}
+                                onClick={() =>
+                                    setShowAdmin(!showAdmin)
+                                }
+                                // onClick={() =>
+                                //     console.log(groupUsers)
+                                // }
                             >
                                 <MdOutlinePeopleOutline />
                             </CodeButton>
+
                             <CodeButton
                                 onClick={() =>
                                     setShowCode(!showCode)
@@ -457,6 +472,13 @@ function GroupEntries({ userId }) {
                             Code copied to clipboard!
                         </Toast>
                     )}
+                    {/* *** */}
+                    <AdminDisplay isVisible={showAdmin}>
+                        <AdminView
+                            groupUsers={groupUsers}
+                            groupId={groupId}
+                        ></AdminView>
+                    </AdminDisplay>
 
                     {/* Map through the entries */}
                     <EntriesContainer>

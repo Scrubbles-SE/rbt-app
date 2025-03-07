@@ -593,6 +593,78 @@ export const GroupCodeDisplay = styled.div`
     }
 `;
 
+export const AdminDisplay = styled.div`
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: var(--card-background);
+    padding: 0;
+    margin: 0 5px;
+    border-radius: 16px;
+    border: 2px solid rgba(56, 161, 105, 0.3);
+    transition: all 0.8s cubic-bezier(0.25, 0.1, 0.25, 1);
+    max-height: ${(props) => (props.isVisible ? "" : "0")};
+    opacity: ${(props) => (props.isVisible ? 1 : 0)};
+    overflow: hidden;
+    margin-top: ${(props) => (props.isVisible ? "10px" : "0")};
+    border-width: ${(props) => (props.isVisible ? "2px" : "0")};
+    box-shadow: ${(props) =>
+        props.isVisible
+            ? "0 2px 8px rgba(0, 0, 0, 0.1)"
+            : "none"};
+
+    ${(props) =>
+        props.isVisible &&
+        `
+        padding: 1rem 1.2rem;
+    `}
+
+    .code {
+        font-family: "SF Mono", "Fira Code", monospace;
+        font-size: 1.4rem;
+        font-weight: 600;
+        letter-spacing: 0.3rem;
+        color: var(--text-primary);
+        margin-right: auto;
+    }
+`;
+
+export const ListContainer = styled.ul`
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    max-width: 400px;
+`;
+
+export const MemberCard = styled.li`
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+`;
+
+export const MemberName = styled.span`
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text-primary);
+`;
+
+export const Remove = styled.button`
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+
+    &:hover {
+        background-color: #d93636;
+    }
+`;
+
 export const ActionIcons = styled.div`
     display: flex;
     gap: 1rem;
