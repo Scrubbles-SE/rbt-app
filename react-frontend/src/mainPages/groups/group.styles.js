@@ -889,17 +889,7 @@ export const EntrySection = styled.div`
     padding: 16px 20px;
     margin-bottom: 16px;
     border-radius: 12px;
-    background: ${(props) =>
-        props.theme.mode === "dark-mode"
-            ? "linear-gradient(to right, rgb(197, 141, 170), rgb(152, 34, 83))" // dark
-            : props.theme.mode === "blue-theme"
-              ? "linear-gradient(to right, #7CA9D6, #B8D3EB)" // blue
-              : props.theme.mode === "min-theme"
-                ? "linear-gradient(to right, #ffffff, #e6e6e6)"
-                : props.theme.mode === "green-theme"
-                  ? "linear-gradient(to right, #a5b994, #e6e6e6)"
-                  : // light
-                    "linear-gradient(to right, #fadadd, #f2c4bb)"};
+    background: var(--journal-background);
 
     &::before {
         content: "${(props) => {
@@ -925,17 +915,30 @@ export const EntrySection = styled.div`
         color: ${(props) => {
             switch (props.type) {
                 case "rose":
-                    return "#FF8FB1";
+                    return "#EFA3B8";
                 case "thorn":
-                    return "#B83A3A";
+                    return "#D27A7A";
                 case "bud":
-                    return "#98CE00";
+                    return "#C1E475";
                 default:
                     return "var(--text-primary)";
             }
         }};
     }
 `;
+
+// color: ${(props) => {
+//     switch (props.type) {
+//         case "rose":
+//             return "rgba(255, 143, 177, 0.1)";
+//         case "thorn":
+//             return "rgba(184, 58, 58, 0.1)";
+//         case "bud":
+//             return "rgba(152, 206, 0, 0.1)";
+//         default:
+//             return "var(--text-primary)";
+//     }
+// }};
 
 //                 case "rose":
 //                     return "#FF8FB1";
@@ -970,12 +973,9 @@ export const EntryPageTitle = styled.h1`
 
 export const EntryReactions = styled.div`
     width: 100%;
-    max-width: 480px;
+    max-width: 220px;
     height: 100%;
-    background: ${(props) =>
-        props.theme.mode === "dark-mode"
-            ? "#2d1f1f"
-            : "#fdf2f1"};
+    background: var(--reactions-background);
     padding: 0.5em;
     padding-left: 0;
     position: relative;
@@ -990,9 +990,9 @@ export const EntryReactions = styled.div`
 
 export const Reaction = styled.span`
     position: relative;
-    width: 100%;
-    height: 100%;
-    padding: 2px;
+    width: 70%;
+    height: 70%;
+    padding: 1px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -1008,7 +1008,7 @@ export const ReactionCount = styled.div`
     position: absolute;
     top: 0.2em;
     right: 0.05em;
-    background-color: #736f6e;
+    background-color: rgb(130, 126, 125);
     color: white;
     font-size: 5px;
     font-weight: bold;
