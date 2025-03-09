@@ -871,23 +871,35 @@ export const EntryDate = styled.div`
     }
 `;
 
+// background: ${(props) => {
+//     switch (props.type) {
+//         case "rose":
+//             return "rgba(255, 143, 177, 0.1)";
+//         case "thorn":
+//             return "rgba(184, 58, 58, 0.1)";
+//         case "bud":
+//             return "rgba(152, 206, 0, 0.1)";
+//         default:
+//             return "transparent";
+//     }
+// }}
+
 export const EntrySection = styled.div`
     position: relative;
     padding: 16px 20px;
     margin-bottom: 16px;
     border-radius: 12px;
-    background: ${(props) => {
-        switch (props.type) {
-            case "rose":
-                return "rgba(255, 143, 177, 0.1)";
-            case "thorn":
-                return "rgba(184, 58, 58, 0.1)";
-            case "bud":
-                return "rgba(152, 206, 0, 0.1)";
-            default:
-                return "transparent";
-        }
-    }};
+    background: ${(props) =>
+        props.theme.mode === "dark-mode"
+            ? "linear-gradient(to right, rgb(197, 141, 170), rgb(152, 34, 83))" // dark
+            : props.theme.mode === "blue-theme"
+              ? "linear-gradient(to right, #7CA9D6, #B8D3EB)" // blue
+              : props.theme.mode === "min-theme"
+                ? "linear-gradient(to right, #ffffff, #e6e6e6)"
+                : props.theme.mode === "green-theme"
+                  ? "linear-gradient(to right, #a5b994, #e6e6e6)"
+                  : // light
+                    "linear-gradient(to right, #fadadd, #f2c4bb)"};
 
     &::before {
         content: "${(props) => {
@@ -924,6 +936,13 @@ export const EntrySection = styled.div`
         }};
     }
 `;
+
+//                 case "rose":
+//                     return "#FF8FB1";
+//                 case "thorn":
+//                     return "#B83A3A";
+//                 case "bud":
+//                     return "#98CE00";
 
 export const EntryText = styled.p`
     font-size: 1rem;
