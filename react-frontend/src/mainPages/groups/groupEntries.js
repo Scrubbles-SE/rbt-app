@@ -72,7 +72,7 @@ function GroupEntries({ userId }) {
     const [theme, setTheme] = useState({ mode: "light-mode" });
     const [reactionCounts, setReactionCounts] = useState({});
     const [reactionNumbers, setReactionNumbers] = useState({});
-    const [groupUsers] = useState(location.state?.users || []);
+    const [groupUsers, setGroupUsers] = useState([]);
 
     /**
      * Set the theme from local storage on component mount
@@ -80,11 +80,37 @@ function GroupEntries({ userId }) {
     useLayoutEffect(() => {
         const currentTheme = localStorage.getItem("theme");
         setTheme({ mode: currentTheme || "light-mode" });
-        console.log(groupUsers);
+    }, []);
+
+    useEffect(() => {
+        getUsers();
     }, []);
 
     // Get gradient for the group
     const gradient = getGradient(groupId);
+
+    const getUsers = async () => {
+
+            const response = await fetch(
+            `${API_BASE_URL}/api/groups/${groupId}/members`,
+            {
+                credentials: "include" // Important for sending cookies
+            }
+            );
+            if (!response.ok) {
+                const data = await response.json();
+                    throw new Error(
+                        data.message || "Failed to fetch groups"
+                );
+            } 
+
+            const members = await response.json();
+
+            console.log(members);
+
+            setGroupUsers(members);
+
+    }
 
     /**
      * Copy group code to clipboard and show a toast notification

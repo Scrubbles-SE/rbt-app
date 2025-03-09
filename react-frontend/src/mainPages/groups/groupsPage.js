@@ -144,7 +144,6 @@ function GroupsPage({ userId }) {
             {
                 state: {
                     group_code: group.group_code,
-                    users: group.users
                 }
             }
         );
