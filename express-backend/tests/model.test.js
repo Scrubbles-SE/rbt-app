@@ -2,9 +2,9 @@ import mongoose from "mongoose";
 import {
     userSchema,
     entrySchema,
-    userEntriesSchema
+    userEntriesSchema,
+    GroupSchema
 } from "../models/user.js";
-import { GroupSchema } from "../models/user.js";
 import * as UserServices from "../models/user-services.js";
 import * as GroupServices from "../models/group-services.js";
 import dotenv from "dotenv";
@@ -277,6 +277,192 @@ describe("User Services", () => {
             reaction
         );
         expect(result).toBe(false);
+    });
+
+    test("Add new tag", async () => {
+        const entryId = new mongoose.Types.ObjectId(); // Simulate an entry ID
+
+        const tag = {
+            tag_name: "tag",
+            user_id: testUserId,
+            entries: [entryId]
+        };
+
+        const tagId = await UserServices.addTagObject(tag);
+        expect(tagId).toBeTruthy(); // Should return a valid ID
+    });
+
+    test("Add tag error handling - invalid tag", async () => {
+        const tag = {
+            tag_name: "tag",
+            user_id: "invald_id",
+            entries: [new mongoose.Types.ObjectId()]
+        };
+
+        const tagId = await UserServices.addTagObject(tag);
+        expect(tagId).toBe(false);
+    });
+
+    test("Add tag to entry", async () => {
+        const entry = {
+            user_id: testUserId,
+            date: Date.now(),
+            is_public: true,
+            rose_text: "Test rose",
+            bud_text: "Test bud",
+            thorn_text: "Test thorn",
+            tags: []
+        };
+
+        const createdEntry = await UserServices.addEntry(entry);
+        expect(createdEntry).toBeTruthy();
+
+        const tag = {
+            tag_name: "tag",
+            user_id: testUserId,
+            entries: []
+        };
+
+        const tagId = await UserServices.addTagObject(tag);
+        expect(tagId).toBeTruthy();
+
+        const result = await UserServices.addTagToEntry(
+            tagId,
+            createdEntry._id
+        );
+        expect(result).toBeTruthy();
+    });
+
+    test("Add tag to entry error handling - invalid user id", async () => {
+        const tag = {
+            tag_name: "tag",
+            user_id: testUserId,
+            entries: []
+        };
+
+        const tagId = await UserServices.addTagObject(tag);
+        expect(tagId).toBeTruthy();
+
+        const result = await UserServices.addTagToEntry(
+            tagId,
+            "invalid_id"
+        );
+        expect(result).toBe(false);
+    });
+
+    test("Update tag", async () => {
+        const entry = {
+            user_id: testUserId,
+            date: Date.now(),
+            is_public: true,
+            rose_text: "Test rose",
+            bud_text: "Test bud",
+            thorn_text: "Test thorn",
+            tags: []
+        };
+
+        const createdEntry = await UserServices.addEntry(entry);
+        expect(createdEntry).toBeTruthy();
+
+        const tag = {
+            tag_name: "tag",
+            user_id: testUserId,
+            entries: []
+        };
+
+        const tagId = await UserServices.addTagObject(tag);
+        expect(tagId).toBeTruthy();
+
+        const tagObjectToUpdate = {
+            tag_name: "tag",
+            user_id: testUserId,
+            entries: [createdEntry._id]
+        };
+
+        const result = await UserServices.updateTagObject(
+            tagObjectToUpdate
+        );
+        expect(result).toBeTruthy();
+    });
+
+    test("Get tags by user", async () => {
+        const tag_1 = {
+            tag_name: "tag_1",
+            user_id: testUserId,
+            entries: [new mongoose.Types.ObjectId()]
+        };
+
+        const tag_2 = {
+            tag_name: "tag_2",
+            user_id: testUserId,
+            entries: [new mongoose.Types.ObjectId()]
+        };
+
+        await UserServices.addTagObject(tag_1);
+        await UserServices.addTagObject(tag_2);
+
+        const tags =
+            await UserServices.getAllTagsByUserId(testUserId);
+
+        expect(tags).toBeTruthy();
+        expect(Array.isArray(tags)).toBe(true);
+        expect(
+            tags.some((tag) => tag.tag_name === "tag_1")
+        ).toBe(true);
+        expect(
+            tags.some((tag) => tag.tag_name === "tag_2")
+        ).toBe(true);
+    });
+
+    test("Update user info", async () => {
+        const user = {
+            username: "email@email.com",
+            password: "!Q2w3e4r",
+            first_name: "Name"
+        };
+
+        const addedUser = await UserServices.addUser(user);
+        expect(addedUser).toBeTruthy();
+
+        const newInfo = {
+            email: "new_email@example.com",
+            name: "NewName"
+        };
+        const updatedUser = await UserServices.updateUser(
+            addedUser._id,
+            newInfo
+        );
+
+        expect(updatedUser).toBeTruthy();
+        expect(updatedUser.username).toBe(newInfo.email);
+        expect(updatedUser.first_name).toBe(newInfo.name);
+    });
+
+    test("Remove group from user", async () => {
+        const user = {
+            username: "email@email.com",
+            password: "!Q2w3e4r",
+            first_name: "Name"
+        };
+
+        const createdUser = await UserServices.addUser(user);
+        expect(createdUser).toBeTruthy();
+
+        const group =
+            await GroupServices.findGroupByCode("TEST123");
+
+        const result = await GroupServices.joinGroup(
+            createdUser._id,
+            group[0]._id
+        );
+        expect(result).toBeTruthy();
+
+        const res = await UserServices.removeGroupFromUser(
+            createdUser._id,
+            group[0]._id
+        );
+        expect(res).toBeTruthy();
+        expect(user.groups).toBe(undefined);
     });
 });
 
