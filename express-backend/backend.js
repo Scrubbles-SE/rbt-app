@@ -535,11 +535,11 @@ app.put(
 
             const group = foundGroup[0];
 
+            const groupUsers = await getAllUsers(group.group_id);
+
             // Check if user is already in group (using toString() for comparison)
             if (
-                group.users.some(
-                    (id) => id.toString() === userId.toString()
-                )
+                await groupUsers.includes({user_id: userId})
             ) {
                 console.log("User already in group:", userId);
                 return res.status(409).json({

@@ -64,6 +64,7 @@ function TagEntries() {
                                 <EntryPageTitle>
                                     {tagName}
                                 </EntryPageTitle>
+                                <div></div>
                             </HeaderRow>
                         </HeaderContainer>
 

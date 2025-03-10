@@ -8,74 +8,99 @@ import React, {
     useLayoutEffect
     // useEffect
 } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
 import { ThemeProvider } from "styled-components";
 
-import { FiChevronLeft } from "react-icons/fi";
-
 import {
-    Container,
-    ContentContainer,
-    HeaderRow,
-    BackButton,
-    HeaderContainer,
     EntriesContainer,
-    EntryCard
-    // EntrySection,
-    // EntryText,
-    // EntryHeader,
-    // EntryDate
+    EntryName,
+    ListContainer,
+    MemberCard,
+    MemberName,
+    Remove
 } from "./group.styles";
-import { EntryPageTitle } from "../search/search.styles";
 
-function AdminView() {
-    const navigate = useNavigate();
-    const location = useLocation();
-    const groupUsers = location.state?.users || [];
+function AdminView({ groupUsers = [], groupId }) {
     const [theme, setTheme] = useState({ mode: "light-mode" });
 
     useLayoutEffect(() => {
         const currentTheme = localStorage.getItem("theme");
         setTheme({ mode: currentTheme || "light-mode" });
+        console.log(groupUsers);
     }, []);
+
+    const removeFromGroup = async (userToRemove, groupId) => {
+        try {
+            const response = await fetch(
+                `/api/groups/${groupId}/leave`,
+                {
+                    method: "DELETE",
+                    credentials: "include", // For JWT cookie
+                    body: JSON.stringify({
+                        userId: userToRemove
+                    })
+                }
+            );
+
+            if (response.ok) {
+                console.log(
+                    "Removed from group: ",
+                    userToRemove
+                );
+            } else {
+                const errorResp = await response.json();
+                console.error(
+                    "Failed to remove from group",
+                    errorResp
+                );
+            }
+        } catch (error) {
+            console.error("Error removing from group", error);
+        }
+    };
 
     return (
         <ThemeProvider theme={theme}>
-            <Container>
-                <ContentContainer>
-                    <HeaderContainer>
-                        <HeaderRow>
-                            <BackButton
-                                onClick={() =>
-                                    navigate("/groups")
-                                }
-                            >
-                                <FiChevronLeft />
-                            </BackButton>
-                            <EntryPageTitle>
-                                Admin
-                            </EntryPageTitle>
-                        </HeaderRow>
-                    </HeaderContainer>
+            <ListContainer>
+                <EntryName>Users</EntryName>
 
-                    {/* display all entries in the tag */}
-                    <EntriesContainer>
-                        {groupUsers?.length > 0 ? (
-                            groupUsers.map((user) => (
-                                <EntryCard key={user._id}>
-                                    <EntryPageTitle>
-                                        {user.first_name}
-                                    </EntryPageTitle>
-                                </EntryCard>
-                            ))
-                        ) : (
-                            <EntryPageTitle>
-                                No users found
-                            </EntryPageTitle>
-                        )}
-                    </EntriesContainer>
-                </ContentContainer>
-            </Container>
+                <EntriesContainer>
+                    {groupUsers?.length > 0 ? (
+                        groupUsers.map((user) => (
+                            <MemberCard key={user._id}>
+                                <MemberName>
+                                    {user.first_name}
+                                </MemberName>
+                                <Remove
+                                    onClick={(user) =>
+                                        removeFromGroup(
+                                            user._id,
+                                            groupId
+                                        )
+                                    }
+                                >
+                                    Remove
+                                </Remove>
+                            </MemberCard>
+                        ))
+                    ) : (
+                        <MemberName>No users found</MemberName>
+                    )}
+                    {/* <MemberCard>
+                        <MemberName>James</MemberName>
+                        <Remove
+                            onClick={(user) =>
+                                removeFromGroup()
+                            }
+                        >
+                            Remove
+                        </Remove>
+                    </MemberCard>
+                    <MemberCard>
+                        <MemberName>Emily</MemberName>
+                        <Remove>Remove</Remove>
+                    </MemberCard> */}
+                </EntriesContainer>
+            </ListContainer>
         </ThemeProvider>
     );
 }

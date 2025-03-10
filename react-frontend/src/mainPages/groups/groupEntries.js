@@ -25,6 +25,7 @@ import {
 } from "react-icons/fi";
 import { MdOutlinePeopleOutline } from "react-icons/md";
 import { ThemeProvider } from "styled-components";
+import AdminView from "./AdminView.js";
 
 import { membersDB, entriesDB } from "../../utils/db";
 import { API_BASE_URL } from "../../utils/config.js";
@@ -51,7 +52,8 @@ import {
     EntryDate,
     EntryReactions,
     Reaction,
-    ReactionCount
+    ReactionCount,
+    AdminDisplay
 } from "./group.styles";
 
 /*
@@ -65,6 +67,7 @@ function GroupEntries({ userId }) {
     const groupCode = location.state?.group_code;
     const [showToast, setShowToast] = useState(false);
     const [showCode, setShowCode] = useState(false);
+    const [showAdmin, setShowAdmin] = useState(false);
     const [entries, setEntries] = useState([]);
     const [theme, setTheme] = useState({ mode: "light-mode" });
     const [reactionCounts, setReactionCounts] = useState({});
@@ -77,6 +80,7 @@ function GroupEntries({ userId }) {
     useLayoutEffect(() => {
         const currentTheme = localStorage.getItem("theme");
         setTheme({ mode: currentTheme || "light-mode" });
+        console.log(groupUsers);
     }, []);
 
     // Get gradient for the group
@@ -254,7 +258,7 @@ function GroupEntries({ userId }) {
 
     // Fetch all reactions for entries when entries or groupUsers change
     useEffect(() => {
-        /**
+        /*
          * Fetch reactions for all entries
          * Aggregates reactions by type and by user
          */
@@ -410,20 +414,29 @@ function GroupEntries({ userId }) {
                             <EntryPageTitle gradient={gradient}>
                                 {decodeURIComponent(groupName)}
                             </EntryPageTitle>
-                            <CodeButton
-                                onClick={() => {
-                                    navigate(
-                                        `/groups/${groupId}/admin`,
-                                        {
-                                            state: {
-                                                users: groupUsers
-                                            }
-                                        }
-                                    );
-                                }}
+                            {/* *** */}
+                            {/* userId?.isAdmin */}
+                            {userId && (
+                                <CodeButton
+                                    onClick={() =>
+                                        setShowAdmin(!showAdmin)
+                                    }
+                                >
+                                    <MdOutlinePeopleOutline />
+                                </CodeButton>
+                            )}
+                            {/* *** for testing */}
+                            {/* <CodeButton
+                                onClick={() =>
+                                    setShowAdmin(!showAdmin)
+                                }
+                                // onClick={() =>
+                                //     console.log(groupUsers)
+                                // }
                             >
                                 <MdOutlinePeopleOutline />
-                            </CodeButton>
+                            </CodeButton> */}
+
                             <CodeButton
                                 onClick={() =>
                                     setShowCode(!showCode)
@@ -457,6 +470,13 @@ function GroupEntries({ userId }) {
                             Code copied to clipboard!
                         </Toast>
                     )}
+                    {/* *** */}
+                    <AdminDisplay isVisible={showAdmin}>
+                        <AdminView
+                            groupUsers={groupUsers}
+                            groupId={groupId}
+                        ></AdminView>
+                    </AdminDisplay>
 
                     {/* Map through the entries */}
                     <EntriesContainer>
