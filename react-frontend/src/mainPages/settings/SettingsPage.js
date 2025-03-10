@@ -12,7 +12,7 @@ import * as S from "./SettingsStyles";
 import { createGlobalStyle } from "styled-components";
 import { userDB, groupsDB, membersDB } from "../../utils/db";
 import { API_BASE_URL } from "../../utils/config.js";
-import { logoutUser } from "../../account/authService";
+import { logoutUser } from "../../onboarding/authService";
 
 export const GlobalStyle = createGlobalStyle`
     @keyframes spin {
@@ -305,6 +305,8 @@ function Settings({ setIsLoggedIn, userId }) {
         try {
             const result = await logoutUser();
             if (result.success) {
+                // Clear user name from localStorage
+                localStorage.removeItem("userName");
                 setIsLoggedIn(false);
             }
         } catch (error) {
