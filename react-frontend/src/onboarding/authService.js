@@ -3,7 +3,7 @@
  * Handles user account operations including login, registration, and user verification
  */
 import { API_BASE_URL } from "../utils/config.js";
-import { clearDB } from "../utils/db";
+import { clearDB } from "../utils/db.js";
 
 const API_AUTH_URL = `${API_BASE_URL}/api`;
 

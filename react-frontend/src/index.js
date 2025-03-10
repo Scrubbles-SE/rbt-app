@@ -24,7 +24,7 @@ import "./index.css";
 PAGE IMPORTS
  */
 // Account Flow
-import AccountFlow from "./account/accountFlow.js";
+import AccountFlow from "./onboarding/accountFlow.js";
 
 // Main Tab Pages
 import HomePage from "./mainPages/home/HomePage.js";
@@ -231,7 +231,8 @@ AUTHENTICATION ROUTES
 const App = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [userId, setUserId] = useState(null);
-    // Add initializing state to prevent auth screen flash
+    const [onboardingComplete, setOnboardingComplete] =
+        useState(true); // Default true for existing users
     const [initializing, setInitializing] = useState(true);
 
     useEffect(() => {
@@ -240,13 +241,17 @@ const App = () => {
             localStorage.getItem("theme") || "light-mode";
         document.body.className = savedTheme;
 
-        // Check for auth token locally first
+        // Check for auth token and onboarding status locally first
         const hasToken = !!localStorage.getItem("authToken");
+        const hasCompletedOnboarding =
+            localStorage.getItem("onboardingComplete") ===
+            "true";
 
         // Set initial auth state based on local storage
         if (hasToken) {
             setIsLoggedIn(true);
             setUserId(localStorage.getItem("userId"));
+            setOnboardingComplete(hasCompletedOnboarding);
         }
 
         // Verify JWT token validity with server in background
@@ -264,6 +269,10 @@ const App = () => {
                     const data = await response.json();
                     setIsLoggedIn(true);
                     setUserId(data.userId);
+                    // If user exists in system, they've completed onboarding
+                    setOnboardingComplete(
+                        hasCompletedOnboarding
+                    );
                 } else {
                     // If cookies fail, try with localStorage token as fallback
                     // This helps with iOS devices where httpOnly cookies might not work properly
@@ -286,19 +295,27 @@ const App = () => {
                         if (fallbackResponse.ok) {
                             setIsLoggedIn(true);
                             setUserId(storedUserId);
+                            setOnboardingComplete(
+                                hasCompletedOnboarding
+                            );
                         } else {
                             // Token invalid, clear storage
                             localStorage.removeItem(
                                 "authToken"
                             );
                             localStorage.removeItem("userId");
+                            localStorage.removeItem(
+                                "onboardingComplete"
+                            );
                             setIsLoggedIn(false);
                             setUserId(null);
+                            setOnboardingComplete(false);
                         }
                     } else {
                         // No token in localStorage either
                         setIsLoggedIn(false);
                         setUserId(null);
+                        setOnboardingComplete(false);
                     }
                 }
             } catch (error) {
@@ -308,6 +325,7 @@ const App = () => {
                 );
                 setIsLoggedIn(false);
                 setUserId(null);
+                setOnboardingComplete(false);
             } finally {
                 // Mark initialization as complete
                 setInitializing(false);
@@ -329,12 +347,15 @@ const App = () => {
                     <Route
                         path="/account"
                         element={
-                            isLoggedIn ? (
+                            isLoggedIn && onboardingComplete ? (
                                 <Navigate to="/" replace />
                             ) : (
                                 <AccountFlow
                                     setIsLoggedIn={
                                         setIsLoggedIn
+                                    }
+                                    setOnboardingComplete={
+                                        setOnboardingComplete
                                     }
                                 />
                             )
@@ -344,14 +365,21 @@ const App = () => {
                         path="/*"
                         element={
                             isLoggedIn ? (
-                                <AppLayout>
-                                    <MainAppRoutes
-                                        setIsLoggedIn={
-                                            setIsLoggedIn
-                                        }
-                                        userId={userId}
+                                onboardingComplete ? (
+                                    <AppLayout>
+                                        <MainAppRoutes
+                                            setIsLoggedIn={
+                                                setIsLoggedIn
+                                            }
+                                            userId={userId}
+                                        />
+                                    </AppLayout>
+                                ) : (
+                                    <Navigate
+                                        to="/account"
+                                        replace
                                     />
-                                </AppLayout>
+                                )
                             ) : (
                                 <Navigate
                                     to="/account"

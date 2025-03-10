@@ -319,14 +319,19 @@ function HomePage({ userId }) {
     // Fetch all entry dates for calendar highlighting and streak calculation
     const fetchAllEntryDates = useCallback(async () => {
         try {
+            // First load from cache
             const cachedEntries =
                 await entriesDB.getAll(userId);
-            const cachedDates = cachedEntries.map((entry) =>
-                new Date(entry.date).toDateString()
-            );
-            setEntryDates(cachedDates);
-            calculateStreakCount(cachedDates);
+            if (cachedEntries && cachedEntries.length > 0) {
+                const cachedDates = cachedEntries.map((entry) =>
+                    new Date(entry.date).toDateString()
+                );
+                setEntryDates(cachedDates);
+                calculateStreakCount(cachedDates);
+                setIsLoading(false); // Set loading false after cache load
+            }
 
+            // Then fetch from server for latest data
             try {
                 const response = await fetch(
                     `${API_BASE_URL}/api/entries`,
@@ -361,8 +366,9 @@ function HomePage({ userId }) {
             console.log("Error fetching all entries:", error);
             // Ensure we at least have an empty array
             setEntryDates([]);
+            setStreakCount(0);
         } finally {
-            // Always set loading to false when done
+            // Always ensure loading is false
             setIsLoading(false);
         }
         // eslint-disable-next-line

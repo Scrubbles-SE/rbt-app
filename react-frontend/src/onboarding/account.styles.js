@@ -18,7 +18,7 @@ const gradientAnimation = keyframes`
 `;
 
 // Color palette used throughout account components
-const themeColors = {
+export const themeColors = {
     pink: {
         light: "#f5d8da",
         medium: "#de7792",
@@ -41,26 +41,19 @@ export const AccountContainer = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    min-height: 100vh;
     width: 100%;
     max-width: 480px;
     padding: 0;
-    background: linear-gradient(
-        -45deg,
-        #f5d8da,
-        #de7792,
-        #879e84,
-        #2d5441
-    );
-    background-size: 400% 400%;
-    animation: ${gradientAnimation} 15s ease infinite;
+    background: var(--background-color);
+    transition: background-color 0.3s ease;
 `;
 
 export const FormContainer = styled.div`
-    background-color: rgba(255, 255, 255, 0.95);
+    background: var(--card-background);
     padding: 95px 30px 20px;
     border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 10px 30px var(--hover-color);
     width: 100%;
     box-sizing: border-box;
     margin: 10px 30px;
@@ -68,8 +61,14 @@ export const FormContainer = styled.div`
     flex-direction: column;
     align-items: center;
     position: relative;
-    border: 1px solid rgba(214, 108, 132, 0.1);
+    border: 1px solid var(--border-color);
     backdrop-filter: blur(10px);
+    color: var(--text-primary);
+
+    @media (max-width: 480px) {
+        margin: 10px 15px;
+        padding: 85px 20px 20px;
+    }
 `;
 
 export const LogoImage = styled.img`
@@ -468,6 +467,227 @@ export const SuccessCheckmark = styled.div`
         }
         100% {
             transform: scale(1);
+        }
+    }
+`;
+
+export const ModalOverlay = styled.div`
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+    animation: fadeIn 0.3s ease-out;
+    padding: 0;
+    margin: 0;
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+`;
+
+export const ModalContent = styled.div`
+    background: white;
+    padding: 2.5rem 2rem;
+    border-radius: 24px;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 10px 50px rgba(0, 0, 0, 0.25);
+    animation: slideUp 0.3s ease-out;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    z-index: 1000;
+
+    @keyframes slideUp {
+        from {
+            transform: translate(-50%, -40%);
+            opacity: 0;
+        }
+        to {
+            transform: translate(-50%, -50%);
+            opacity: 1;
+        }
+    }
+`;
+
+export const CloseButton = styled.button`
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    font-size: 1.75rem;
+    line-height: 1;
+    cursor: pointer;
+    color: #666;
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    border-radius: 50%;
+
+    &:hover {
+        background: #f5f5f5;
+        color: #333;
+    }
+`;
+
+export const InstallInstructions = styled.div`
+    text-align: center;
+    color: ${themeColors.green.dark};
+    font-size: 1.5rem;
+    line-height: 1.4;
+    font-weight: 600;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: center;
+    padding: 0 1rem;
+
+    p {
+        margin: 0;
+        &.subtitle {
+            font-size: 1.1rem;
+            font-weight: 400;
+            color: #666;
+            max-width: 280px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        font-size: 1.35rem;
+
+        p.subtitle {
+            font-size: 1rem;
+        }
+    }
+`;
+
+export const InstallButton = styled(Button)`
+    background: ${themeColors.green.gradient};
+    font-size: 1.1rem;
+    padding: 1rem 2rem;
+    width: auto;
+    min-width: 200px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    transition: all 0.2s ease;
+    border-radius: 16px;
+    text-transform: none;
+
+    &:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(45, 84, 65, 0.2);
+    }
+
+    &:active:not(:disabled) {
+        transform: translateY(0);
+    }
+`;
+
+export const SecondaryButton = styled(Button)`
+    width: auto;
+    min-width: 150px;
+    margin: 0 auto;
+    background: transparent;
+    color: ${themeColors.green.dark};
+    border: 2px solid ${themeColors.green.dark};
+    box-shadow: none;
+
+    &:hover:not(:disabled) {
+        background: rgba(45, 84, 65, 0.1);
+    }
+`;
+
+export const ThemeGrid = styled.div`
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1.5rem;
+    margin: 1rem 0 auto;
+    width: 100%;
+`;
+
+export const ThemeOption = styled.div`
+    aspect-ratio: 1;
+    background: var(--card-background);
+    border-radius: 16px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    border: none;
+
+    &::before {
+        content: "";
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: ${(props) => props.color};
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s ease;
+    }
+
+    &::after {
+        content: "${(props) => props.name}";
+        color: var(--text-primary);
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+    }
+
+    ${(props) =>
+        props.selected &&
+        `
+        &::before {
+            transform: scale(1.2);
+        }
+        background: var(--hover-color);
+    `}
+
+    &:hover {
+        background: var(--hover-color);
+        &::before {
+            transform: scale(1.1);
+        }
+    }
+`;
+
+export const ThemeForm = styled(Form)`
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    gap: 2rem;
+
+    > button {
+        margin-top: auto;
+        background: var(--fill-color);
+
+        &:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px var(--hover-color);
         }
     }
 `;
