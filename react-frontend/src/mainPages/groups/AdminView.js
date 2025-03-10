@@ -27,7 +27,7 @@ function AdminView({ groupUsers = [], groupId }) {
     useLayoutEffect(() => {
         const currentTheme = localStorage.getItem("theme");
         setTheme({ mode: currentTheme || "light-mode" });
-        console.log(userObjects);
+        // console.log(userObjects);
         // eslint-disable-next-line
     }, []);
 
@@ -55,7 +55,6 @@ function AdminView({ groupUsers = [], groupId }) {
             users.push(userObject[0]);
         }
 
-        console.log(users);
         setUserObjects(users);
     };
 
@@ -101,16 +100,18 @@ function AdminView({ groupUsers = [], groupId }) {
                                 <MemberName>
                                     {user.first_name}
                                 </MemberName>
-                                <Remove
-                                    onClick={(user) =>
-                                        removeFromGroup(
-                                            user._id,
-                                            groupId
-                                        )
-                                    }
-                                >
-                                    Remove
-                                </Remove>
+                                {user.isAdmin && (
+                                    <Remove
+                                        onClick={(user) =>
+                                            removeFromGroup(
+                                                user._id,
+                                                groupId
+                                            )
+                                        }
+                                    >
+                                        Remove
+                                    </Remove>
+                                )}
                             </MemberCard>
                         ))
                     ) : (

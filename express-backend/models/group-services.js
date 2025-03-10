@@ -141,7 +141,15 @@ async function getAllUsers(groupId) {
         MemberSchema
     );
     try {
-        return await memberModel.find({ group_id: groupId });
+        const users = await memberModel.find(
+            { group_id: groupId },
+            "user_id isAdmin"
+        );
+        console.log("HERE");
+
+        console.log("Fetched users:", users);
+
+        return users;
     } catch (err) {
         console.log(err);
         return false;

@@ -732,11 +732,12 @@ app.get(
             const allUsers = await getAllUsers(groupId);
 
             if (allUsers) {
-                console.log("Retrieved members:", allUsers);
-                const finalUsers = allUsers.map(
-                    (user) => user.user_id
-                );
-                res.json(finalUsers);
+                // console.log("Retrieved members:", allUsers);
+                // const finalUsers = allUsers.map((user) => ({
+                //     user_id: user.user_id,
+                //     isAdmin: user.isAdmin
+                // }));
+                res.json(allUsers);
             } else {
                 return res
                     .status(404)

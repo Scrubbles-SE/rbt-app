@@ -106,7 +106,9 @@ function GroupEntries({ userId }) {
         }
 
         const members = await response.json();
+
         console.log(members);
+
         setGroupUsers(members);
     };
 
@@ -449,17 +451,6 @@ function GroupEntries({ userId }) {
                                     <MdOutlinePeopleOutline />
                                 </CodeButton>
                             )}
-                            {/* *** for testing */}
-                            {/* <CodeButton
-                                onClick={() =>
-                                    setShowAdmin(!showAdmin)
-                                }
-                                // onClick={() =>
-                                //     console.log(groupUsers)
-                                // }
-                            >
-                                <MdOutlinePeopleOutline />
-                            </CodeButton> */}
 
                             <CodeButton
                                 onClick={() =>
