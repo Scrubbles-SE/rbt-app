@@ -12,10 +12,7 @@ import * as S from "./SettingsStyles";
 import { createGlobalStyle } from "styled-components";
 import { userDB, groupsDB, membersDB } from "../../utils/db";
 import { API_BASE_URL } from "../../utils/config.js";
-import {
-    authenticatedFetch,
-    logoutUser
-} from "../../account/authService";
+import { logoutUser } from "../../account/authService";
 
 export const GlobalStyle = createGlobalStyle`
     @keyframes spin {
@@ -96,8 +93,11 @@ function Settings({ setIsLoggedIn, userId }) {
         const fetchUserDetails = async () => {
             setIsLoading(true);
             try {
-                const response = await authenticatedFetch(
-                    `${API_BASE_URL}/api/user/details`
+                const response = await fetch(
+                    `${API_BASE_URL}/api/user/details`,
+                    {
+                        credentials: "include"
+                    }
                 );
 
                 if (response.ok) {
@@ -156,7 +156,6 @@ function Settings({ setIsLoggedIn, userId }) {
                     headers: {
                         "Content-Type": "application/json"
                     },
-                    credentials: "include",
                     body: JSON.stringify(editedUser)
                 }
             );
@@ -350,8 +349,7 @@ function Settings({ setIsLoggedIn, userId }) {
             const response = await fetch(
                 `${API_BASE_URL}/api/groups/${groupId}/leave`,
                 {
-                    method: "DELETE",
-                    credentials: "include"
+                    method: "DELETE"
                 }
             );
 

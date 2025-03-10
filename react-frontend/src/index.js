@@ -12,6 +12,7 @@ import {
 } from "react-router-dom";
 import { API_BASE_URL } from "./utils/config.js";
 import { initDB } from "./utils/db";
+import { setupFetchOverride } from "./utils/fetchOverride";
 
 // Layout
 import AppLayout from "./layout/AppLayout";
@@ -36,6 +37,9 @@ import Settings from "./mainPages/settings/SettingsPage.js";
 import GroupEntries from "./mainPages/groups/groupEntries.js";
 import TagEntries from "./mainPages/search/TagEntries.js";
 import AdminView from "./mainPages/groups/AdminView.js";
+
+// Set up fetch override to handle authentication globally
+setupFetchOverride();
 
 /* 
 SERVICE WORKER & INDEXED-DB REGISTRATION
@@ -232,9 +236,25 @@ AUTHENTICATION ROUTES
 const App = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [userId, setUserId] = useState(null);
+    // Add initializing state to prevent auth screen flash
+    const [initializing, setInitializing] = useState(true);
 
     useEffect(() => {
-        // Verify JWT token validity with server
+        // Apply saved theme immediately on load
+        const savedTheme =
+            localStorage.getItem("theme") || "light-mode";
+        document.body.className = savedTheme;
+
+        // Check for auth token locally first
+        const hasToken = !!localStorage.getItem("authToken");
+
+        // Set initial auth state based on local storage
+        if (hasToken) {
+            setIsLoggedIn(true);
+            setUserId(localStorage.getItem("userId"));
+        }
+
+        // Verify JWT token validity with server in background
         const checkAuth = async () => {
             try {
                 // First try with cookies (normal flow)
@@ -293,6 +313,9 @@ const App = () => {
                 );
                 setIsLoggedIn(false);
                 setUserId(null);
+            } finally {
+                // Mark initialization as complete
+                setInitializing(false);
             }
         };
 
@@ -300,40 +323,51 @@ const App = () => {
     }, []);
 
     return (
-        <Routes>
-            <Route
-                path="/account"
-                element={
-                    isLoggedIn ? (
-                        // Redirect already logged in users to home
-                        <Navigate to="/" />
-                    ) : (
-                        <AccountFlow
-                            setIsLoggedIn={setIsLoggedIn}
-                            setUserId={setUserId}
-                        />
-                    )
-                }
-            />
-            <Route
-                path="/*"
-                element={
-                    isLoggedIn ? (
-                        // Protected routes - only accessible when authenticated
-                        <AppLayout>
-                            <MainAppRoutes
-                                setIsLoggedIn={setIsLoggedIn}
-                                setUserId={setUserId}
-                                userId={userId}
-                            />
-                        </AppLayout>
-                    ) : (
-                        // Redirect unauthenticated users to login
-                        <Navigate to="/account" />
-                    )
-                }
-            />
-        </Routes>
+        <>
+            {initializing ? (
+                // Show a simple full-screen div that matches the theme while loading
+                <div className="initializing-screen">
+                    <div className="loading-indicator"></div>
+                </div>
+            ) : (
+                <Routes>
+                    <Route
+                        path="/account"
+                        element={
+                            isLoggedIn ? (
+                                <Navigate to="/" replace />
+                            ) : (
+                                <AccountFlow
+                                    setIsLoggedIn={
+                                        setIsLoggedIn
+                                    }
+                                />
+                            )
+                        }
+                    />
+                    <Route
+                        path="/*"
+                        element={
+                            isLoggedIn ? (
+                                <AppLayout>
+                                    <MainAppRoutes
+                                        setIsLoggedIn={
+                                            setIsLoggedIn
+                                        }
+                                        userId={userId}
+                                    />
+                                </AppLayout>
+                            ) : (
+                                <Navigate
+                                    to="/account"
+                                    replace
+                                />
+                            )
+                        }
+                    />
+                </Routes>
+            )}
+        </>
     );
 };
 

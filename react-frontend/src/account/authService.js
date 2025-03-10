@@ -66,7 +66,6 @@ export const registerUser = async (userData) => {
                 headers: {
                     "Content-Type": "application/json"
                 },
-                credentials: "include",
                 body: JSON.stringify(userData)
             }
         );
@@ -104,7 +103,6 @@ export const loginUser = async (credentials) => {
             headers: {
                 "Content-Type": "application/json"
             },
-            credentials: "include",
             body: JSON.stringify(credentials)
         });
 
@@ -136,50 +134,6 @@ export const loginUser = async (credentials) => {
     }
 };
 
-// Utility function for authenticated API calls
-// Uses cookies by default but falls back to localStorage token if needed
-export const authenticatedFetch = async (url, options = {}) => {
-    try {
-        const defaultOptions = {
-            credentials: "include", // Include cookies by default
-            ...options
-        };
-
-        // Make initial request with cookies
-        console.log(`Fetching: ${url}`);
-        let response = await fetch(url, defaultOptions);
-
-        // If the request fails with 401 Unauthorized, try with Authorization header
-        if (response.status === 401) {
-            console.log(
-                "Cookie auth failed, trying with token"
-            );
-            const token = localStorage.getItem("authToken");
-            if (token) {
-                // Add Authorization header with token
-                const authOptions = {
-                    ...defaultOptions,
-                    headers: {
-                        ...defaultOptions.headers,
-                        Authorization: `Bearer ${token}`
-                    }
-                };
-
-                // Retry the request with the token
-                response = await fetch(url, authOptions);
-            }
-        }
-
-        return response;
-    } catch (error) {
-        console.error(
-            `Error in authenticatedFetch to ${url}:`,
-            error
-        );
-        throw error;
-    }
-};
-
 // Logout function that clears both cookie and localStorage
 export const logoutUser = async () => {
     try {
@@ -194,8 +148,7 @@ export const logoutUser = async () => {
         const response = await fetch(
             `${API_AUTH_URL}/auth/logout`,
             {
-                method: "POST",
-                credentials: "include"
+                method: "POST"
             }
         );
 
