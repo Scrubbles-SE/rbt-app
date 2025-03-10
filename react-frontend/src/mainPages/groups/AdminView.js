@@ -5,10 +5,11 @@
  */
 import React, {
     useState,
+    useEffect,
     useLayoutEffect
-    // useEffect
 } from "react";
 import { ThemeProvider } from "styled-components";
+import { API_BASE_URL } from "../../utils/config.js";
 
 import {
     EntriesContainer,
@@ -21,13 +22,42 @@ import {
 
 function AdminView({ groupUsers = [], groupId }) {
     const [theme, setTheme] = useState({ mode: "light-mode" });
+    const [userObjects, setUserObjects] = useState([]);
 
     useLayoutEffect(() => {
         const currentTheme = localStorage.getItem("theme");
         setTheme({ mode: currentTheme || "light-mode" });
-        console.log(groupUsers);
+        console.log(userObjects);
         // eslint-disable-next-line
     }, []);
+
+    useEffect(() => {
+        getUserObjects();
+    }, [groupUsers]);
+
+    const getUserObjects = async () => {
+        const users = [];
+
+        for (let i = 0; i < groupUsers.length; i++) {
+            const response = await fetch(
+                `${API_BASE_URL}/api/user/${groupUsers[i]}`,
+                {
+                    credentials: "include" // Important for sending cookies
+                }
+            );
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(
+                    data.message || "Failed to fetch groups"
+                );
+            }
+            const userObject = await response.json();
+            users.push(userObject[0]);
+        }
+
+        console.log(users);
+        setUserObjects(users);
+    };
 
     const removeFromGroup = async (userToRemove, groupId) => {
         try {
@@ -66,7 +96,7 @@ function AdminView({ groupUsers = [], groupId }) {
 
                 <EntriesContainer>
                     {groupUsers?.length > 0 ? (
-                        groupUsers.map((user) => (
+                        userObjects.map((user) => (
                             <MemberCard key={user._id}>
                                 <MemberName>
                                     {user.first_name}
@@ -86,20 +116,6 @@ function AdminView({ groupUsers = [], groupId }) {
                     ) : (
                         <MemberName>No users found</MemberName>
                     )}
-                    {/* <MemberCard>
-                        <MemberName>James</MemberName>
-                        <Remove
-                            onClick={(user) =>
-                                removeFromGroup()
-                            }
-                        >
-                            Remove
-                        </Remove>
-                    </MemberCard>
-                    <MemberCard>
-                        <MemberName>Emily</MemberName>
-                        <Remove>Remove</Remove>
-                    </MemberCard> */}
                 </EntriesContainer>
             </ListContainer>
         </ThemeProvider>
