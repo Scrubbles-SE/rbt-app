@@ -1,21 +1,10 @@
-/*
-Styled components for the authentication and account flow
-*/
-
 // Libraries
-import styled, { keyframes } from "styled-components";
+import styled from "styled-components";
 
 /**
  * Theme and animation definitions for the account flow
  * Contains styled components for login/registration forms
  */
-
-// Animation constants
-const gradientAnimation = keyframes`
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-`;
 
 // Color palette used throughout account components
 export const themeColors = {
