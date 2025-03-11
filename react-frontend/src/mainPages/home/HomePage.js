@@ -4,7 +4,7 @@
  */
 import React, { useState, useEffect, useCallback } from "react";
 import { useSwipeable } from "react-swipeable";
-import { entriesDB, userDB, tagsDB } from "../../utils/db";
+import { entriesDB, userDB, tagsDB, groupsDB, membersDB } from "../../utils/db";
 import { API_BASE_URL } from "../../utils/config.js";
 
 // Styles
@@ -46,6 +46,7 @@ function HomePage({ userId }) {
         userDB.getUserName()
     );
     const [tagNames, setTagNames] = useState({});
+    const [groupNotification, setGroupNotification] = useState("");
 
     // Handle calendar month swipe navigation
     const handleSwipe = (direction) => {
@@ -161,7 +162,14 @@ function HomePage({ userId }) {
                         setRecentEntry(
                             sortedEntries[0] || null
                         );
-                        await entriesDB.add(sortedEntries[0]);
+                        const existingEntries = await entriesDB.getAllOverall();
+                        const alreadyExists = existingEntries.some(
+                            (entry) => entry._id === sortedEntries[0]._id
+                        );
+
+                        if(!alreadyExists) {
+                            await entriesDB.add(sortedEntries[0]);
+                        }
                     }
                 }
             } catch (networkError) {
@@ -437,6 +445,104 @@ function HomePage({ userId }) {
         setStreakCount(streak);
     };
 
+    // new groups notification function
+    const checkGroupPosts = useCallback(async () => {
+        try {
+            console.log("userID: " + userId)
+
+            // get user groups 
+            const groupMemberships = await membersDB.getGroupIds(userId); // 
+            console.log("Fetched all group memberships in DB:", groupMemberships);
+
+            const groupIds = groupMemberships.map((membership) => membership.group_id);
+            console.log("Extracted group IDs:", groupIds);
+
+            // if no groups
+            if (groupIds.length === 0) {
+                setGroupNotification("You're not in any groups yet.");
+                return;
+            }
+
+            // fetch entries from indexeddb
+            
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            let newPosts = [];
+
+            const cachedEntries = await entriesDB.getAllOverall();
+            console.log("Cached entries:", cachedEntries);
+
+            newPosts = cachedEntries.filter(
+                (entry) =>
+                    entry.public && 
+                    entry.group_id && 
+                    new Date(entry.date).toDateString() === today.toDateString() &&
+                    groupIds.includes(entry.group_id)
+            );
+
+            console.log("New posts from IndexedDB:", newPosts);
+
+            // if online fetch new data
+            try {
+                const response = await fetch(
+                    `${API_BASE_URL}/api/entries`,
+                    {
+                        credentials: "include"
+                    }
+                );
+
+                if (response.ok) {
+                    const serverEntries = await response.json();
+                    console.log("Fetched entries from API:", serverEntries);
+
+                    // filter today's public posts from groups
+                    const freshEntries = serverEntries.filter(
+                        (entry) => 
+                            entry.public && 
+                            entry.group_id &&
+                            new Date(entry.date).toDateString() === today.toDateString() &&
+                            groupIds.includes(entry.group_id)
+                    );
+
+                    console.log("New posts from API:", freshEntries);
+
+                    // remove dupicates 
+                    const uniqueEntries = [...newPosts, ...freshEntries].reduce(
+                        (acc, entry) => {
+                            if (!acc.some(e => e._id === entry._id)) {
+                                acc.push(entry);
+                            }
+                            return acc;
+                        },
+                        []
+                    );
+
+                    newPosts = uniqueEntries;
+
+                    // update indexeddb w new data
+                    for (const entry of freshEntries) {
+                        const existingEntries = await entriesDB.getAllOverall();
+                        if (!existingEntries.some((e) => e._id === entry._id)) {
+                            await entriesDB.add(entry);
+                        }
+                    }
+                }
+            } catch (networkError) {
+                console.log("Network error fetching new group posts:", networkError);
+            }
+
+            // new posts message 
+            if (newPosts.length > 0) {
+                setGroupNotification("New posts have been made in your groups!");
+            } else {
+                setGroupNotification("No new posts in your groups today.");
+            }
+        } catch (error) {
+            console.error("Error checking group posts:", error);
+            setGroupNotification("Error loading group posts.");
+        }
+    }, [userId]); 
+
     // Initialize all data on component mount
     useEffect(() => {
         const initializeData = async () => {
@@ -444,6 +550,7 @@ function HomePage({ userId }) {
                 await fetchUserDetails();
                 await fetchMostRecentEntry();
                 await fetchAllEntryDates();
+                await checkGroupPosts(); // add to check for new group posts
             } catch (error) {
                 console.log("Error initializing data:", error);
                 // Ensure loading is set to false even if there's an error
@@ -456,7 +563,8 @@ function HomePage({ userId }) {
     }, [
         fetchUserDetails,
         fetchMostRecentEntry,
-        fetchAllEntryDates
+        fetchAllEntryDates,
+        checkGroupPosts // add 
     ]);
 
     // Handle date selection on calendar
@@ -522,6 +630,10 @@ function HomePage({ userId }) {
                         </h3>
                     </NoEntryMessage>
                 )}
+
+                <NoEntryMessage>
+                    <h3>{groupNotification}</h3>
+                </NoEntryMessage>
             </WelcomeSection>
 
             <Section>
