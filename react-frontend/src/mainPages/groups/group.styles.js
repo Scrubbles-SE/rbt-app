@@ -1021,3 +1021,89 @@ export const ReactionCount = styled.div`
         cursor: pointer;
     }
 `;
+// =======================
+// 💬 Modal Styles Section
+// =======================
+
+// Modal Overlay - Centers the modal and dims the background
+export const ModalOverlay = styled.div`
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center; /* Vertically center */
+    justify-content: center; /* Horizontally center */
+    z-index: 1000; /* Ensure modal is on top */
+`;
+
+// Modal Content - Container for the modal content
+export const ModalContent = styled.div`
+    background: var(--card-background);
+    padding: 1.5rem;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 320px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    /* Dark mode styles */
+    .dark-mode & {
+        color: rgb(232, 232, 232); /* Change text color to white in dark mode */
+    }
+`;
+
+// Modal Title - Styled for consistency
+export const ModalTitle = styled.h3`
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0 0 1rem 0;
+`;
+
+// Modal Buttons Wrapper - Organizes buttons
+export const ModalButtons = styled.div`
+    display: flex;
+    justify-content: center; /* Center buttons horizontally */
+    align-items: center; /* Align buttons vertically */
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+    width: 100%; /* Ensures full width to center properly */
+`;
+
+
+// Button Styles for Modal - "Confirm" and "Cancel" styles
+export const ModalButton = styled.button`
+    flex: 1;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    border: none;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    &.confirm {
+        background-color: #ff4757;
+        color: white;
+
+        &:hover {
+            background-color: #e74c3c;
+        }
+    }
+    ${(props) =>
+        props.variant === "confirm"
+            ? `
+        background: #ff4757;
+        color: white;
+        &:hover {
+            background: #e74c3c;
+        }
+    `
+            : `
+        background: var(--border-color);
+        color: var(--text-primary);
+        &:hover {
+            background: var(--text-secondary);
+            color: var(--card-background);
+        }
+    `}
+`;
