@@ -611,7 +611,7 @@ function HomePage({ userId }) {
             {isOffline}
             <WelcomeSection>
                 <WelcomeHeader>
-                    Welcome back, {userName || "User"}!
+                    Good to see you, {userName || "User"}!
                 </WelcomeHeader>
                 {streakCount > 0 && (
                     <StreakCounter>

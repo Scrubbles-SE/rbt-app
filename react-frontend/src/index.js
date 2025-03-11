@@ -350,14 +350,16 @@ const App = () => {
                             isLoggedIn && onboardingComplete ? (
                                 <Navigate to="/" replace />
                             ) : (
-                                <AccountFlow
-                                    setIsLoggedIn={
-                                        setIsLoggedIn
-                                    }
-                                    setOnboardingComplete={
-                                        setOnboardingComplete
-                                    }
-                                />
+                                <AppLayout isOnboarding={true}>
+                                    <AccountFlow
+                                        setIsLoggedIn={
+                                            setIsLoggedIn
+                                        }
+                                        setOnboardingComplete={
+                                            setOnboardingComplete
+                                        }
+                                    />
+                                </AppLayout>
                             )
                         }
                     />
