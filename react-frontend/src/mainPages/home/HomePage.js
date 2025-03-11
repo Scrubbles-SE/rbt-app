@@ -42,7 +42,9 @@ function HomePage({ userId }) {
     );
     const [isLoading, setIsLoading] = useState(true);
     const [isOffline, setIsOffline] = useState(false);
-    const [userName, setUserName] = useState("User");
+    const [userName, setUserName] = useState(
+        userDB.getUserName()
+    );
     const [tagNames, setTagNames] = useState({});
 
     // Handle calendar month swipe navigation
@@ -61,46 +63,73 @@ function HomePage({ userId }) {
         onSwipedRight: () => handleSwipe("right")
     });
 
-    // Fetch user details using offline-first approach
+    // Fetch user details using offline-first approach with localStorage priority
     const fetchUserDetails = useCallback(async () => {
         try {
-            // First try to get from IndexedDB
-            const users = await userDB.getAll();
-            if (users && users.length > 0) {
-                setUserName(users[0].name || "User");
+            // First check localStorage (already done in initial state)
+
+            // Then check IndexedDB if needed
+            if (userName === "User") {
+                const users = await userDB.getAll();
+                if (
+                    users &&
+                    users.length > 0 &&
+                    users[0].name
+                ) {
+                    setUserName(users[0].name);
+                    // Update localStorage
+                    localStorage.setItem(
+                        "userName",
+                        users[0].name
+                    );
+                }
             }
 
-            // Then fetch from API and update IndexedDB
-            try {
-                const response = await fetch(
-                    `${API_BASE_URL}/api/user/details`,
-                    {
-                        credentials: "include"
+            // Then fetch from API and update IndexedDB only if necessary
+            // Don't make the API call if we already have a valid user name
+            if (
+                userName === "User" ||
+                navigator.onLine === false
+            ) {
+                try {
+                    const response = await fetch(
+                        `${API_BASE_URL}/api/user/details`,
+                        {
+                            credentials: "include"
+                        }
+                    );
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.name) {
+                            setUserName(data.name);
+                            // Update localStorage
+                            localStorage.setItem(
+                                "userName",
+                                data.name
+                            );
+
+                            // Update user in IndexedDB
+                            await userDB.update({
+                                ...data,
+                                _id: userId || "current_user"
+                            });
+                        }
+                        setIsOffline(false);
                     }
-                );
-                if (response.ok) {
-                    const data = await response.json();
-                    setUserName(data.name || "User");
-                    // Update user in IndexedDB
-                    await userDB.update({
-                        ...data,
-                        _id: userId
-                    });
-                    setIsOffline(false);
+                } catch (networkError) {
+                    console.log(
+                        "Network error fetching user details:",
+                        networkError
+                    );
+                    setIsOffline(true);
                 }
-            } catch (networkError) {
-                console.log(
-                    "Network error fetching user details:",
-                    networkError
-                );
-                setIsOffline(true);
             }
         } catch (error) {
             console.log("Error fetching user details:", error);
             setIsOffline(true);
         }
         // eslint-disable-next-line
-    }, [userId]);
+    }, [userId, userName]);
 
     // Fetch most recent entry using offline-first approach
     const fetchMostRecentEntry = useCallback(async () => {
@@ -290,14 +319,19 @@ function HomePage({ userId }) {
     // Fetch all entry dates for calendar highlighting and streak calculation
     const fetchAllEntryDates = useCallback(async () => {
         try {
+            // First load from cache
             const cachedEntries =
                 await entriesDB.getAll(userId);
-            const cachedDates = cachedEntries.map((entry) =>
-                new Date(entry.date).toDateString()
-            );
-            setEntryDates(cachedDates);
-            calculateStreakCount(cachedDates);
+            if (cachedEntries && cachedEntries.length > 0) {
+                const cachedDates = cachedEntries.map((entry) =>
+                    new Date(entry.date).toDateString()
+                );
+                setEntryDates(cachedDates);
+                calculateStreakCount(cachedDates);
+                setIsLoading(false); // Set loading false after cache load
+            }
 
+            // Then fetch from server for latest data
             try {
                 const response = await fetch(
                     `${API_BASE_URL}/api/entries`,
@@ -332,8 +366,9 @@ function HomePage({ userId }) {
             console.log("Error fetching all entries:", error);
             // Ensure we at least have an empty array
             setEntryDates([]);
+            setStreakCount(0);
         } finally {
-            // Always set loading to false when done
+            // Always ensure loading is false
             setIsLoading(false);
         }
         // eslint-disable-next-line
@@ -468,7 +503,7 @@ function HomePage({ userId }) {
             {isOffline}
             <WelcomeSection>
                 <WelcomeHeader>
-                    Welcome back, {userName || "User"}!
+                    Good to see you, {userName || "User"}!
                 </WelcomeHeader>
                 {streakCount > 0 && (
                     <StreakCounter>

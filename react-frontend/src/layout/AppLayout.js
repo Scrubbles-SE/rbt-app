@@ -110,25 +110,41 @@ const DesktopLayout = styled.div`
  * Main application layout component that handles responsive design
  * Renders different layouts for mobile and desktop environments
  * For desktop, wraps the content in a phone-like container for consistent UX
+ * Can hide header and footer for onboarding flows
  */
-export const AppLayout = ({ children }) => {
+export const AppLayout = ({
+    children,
+    isOnboarding = false
+}) => {
     const isMobile = isMobileDevice();
 
     const content = isMobile ? (
         <MobileLayout>
-            <div className="header">
-                <Header />
-            </div>
-            <main className="main-content">{children}</main>
-            <div className="footer">
-                <Footer />
-            </div>
+            {!isOnboarding && (
+                <div className="header">
+                    <Header />
+                </div>
+            )}
+            <main
+                className={`main-content ${isOnboarding ? "onboarding-content" : ""}`}
+            >
+                {children}
+            </main>
+            {!isOnboarding && (
+                <div className="footer">
+                    <Footer />
+                </div>
+            )}
         </MobileLayout>
     ) : (
         <DesktopLayout>
-            <Header />
-            <main className="main-content">{children}</main>
-            <Footer />
+            {!isOnboarding && <Header />}
+            <main
+                className={`main-content ${isOnboarding ? "onboarding-content" : ""}`}
+            >
+                {children}
+            </main>
+            {!isOnboarding && <Footer />}
         </DesktopLayout>
     );
 

@@ -26,6 +26,7 @@ function AdminView({ groupUsers = [], groupId }) {
         const currentTheme = localStorage.getItem("theme");
         setTheme({ mode: currentTheme || "light-mode" });
         console.log(groupUsers);
+        // eslint-disable-next-line
     }, []);
 
     const removeFromGroup = async (userToRemove, groupId) => {

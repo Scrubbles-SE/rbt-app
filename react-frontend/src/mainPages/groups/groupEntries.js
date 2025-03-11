@@ -95,6 +95,7 @@ function GroupEntries({ userId }) {
         const currentTheme = localStorage.getItem("theme");
         setTheme({ mode: currentTheme || "light-mode" });
         console.log(groupUsers);
+        // eslint-disable-next-line
     }, []);
 
     // Get gradient for the group

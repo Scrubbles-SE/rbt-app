@@ -17,6 +17,7 @@
 
     --text-color: #2c3e50;
     --fill-color: #f2c4bb;
+    --fill-color-rgb: 242, 196, 187;
     --button-color: #eab3a9;
     --input-color: #e4e4e4;
     --past-background: white;
@@ -48,6 +49,7 @@ body.dark-mode {
 
     --text-color: #ffffff;
     --fill-color: #d58a94;
+    --fill-color-rgb: 213, 138, 148;
     --button-color: #c8808a;
     --input-color: #444444;
     --past-background: #444444;
@@ -86,6 +88,7 @@ body.blue-theme {
 
     --text-color: #2c3e50;
     --fill-color: #b8d3eb;
+    --fill-color-rgb: 184, 211, 235;
     --button-color: #89afca;
     --input-color: #e4e4e4;
     --past-background: white;
@@ -112,6 +115,7 @@ body.min-theme {
 
     --text-color: #2c3e50;
     --fill-color: #d3d3d3;
+    --fill-color-rgb: 211, 211, 211;
     --button-color: #d3d3d3;
     --input-color: #e4e4e4;
     --past-background: white;
@@ -138,6 +142,7 @@ body.green-theme {
 
     --text-color: #2c3e50;
     --fill-color: #ccd7c2;
+    --fill-color-rgb: 204, 215, 194;
     --button-color: #b8c2ae;
     --input-color: #e4e4e4;
     --past-background: white;
@@ -186,6 +191,17 @@ body {
     scrollbar-width: none; /* Firefox */
 }
 
+/* Adjust padding when in onboarding mode (no header/footer) */
+.onboarding-content {
+    padding: 0 !important;
+    overflow: hidden !important;
+}
+
+.main-content.onboarding-content {
+    padding: 0 !important;
+    overflow: hidden !important;
+}
+
 .main-content::-webkit-scrollbar {
     /* hide scrollbar */
     display: none; /* Chrome, Safari and Opera */
@@ -213,4 +229,40 @@ label {
     font-weight: 600;
     font-size: 16px;
     color: var(--text-color);
+}
+
+/* 
+Full screen styles for loading screen between auth and main app
+*/
+.initializing-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--background-color);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.3s ease;
+}
+
+/* Subtle loading indicator */
+.loading-indicator {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--border-color);
+    border-top: 3px solid var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
 }

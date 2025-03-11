@@ -112,14 +112,29 @@ export const userDB = {
 
     async update(user) {
         const db = await initDB();
+        // If user has a name, store it in localStorage for quick access
+        if (user && user.name) {
+            localStorage.setItem("userName", user.name);
+        }
         return db.put("users", user);
+    },
+
+    // Get user name from localStorage or fallback to IndexedDB
+    getUserName() {
+        // Try to get from localStorage first (synchronous, fast)
+        const cachedName = localStorage.getItem("userName");
+        if (cachedName) {
+            return cachedName;
+        }
+        // If not in localStorage, return a placeholder
+        // The actual component will update it from IndexedDB asynchronously
+        return "User";
     },
 
     async getAll() {
         const db = await initDB();
         const tx = db.transaction("users", "readonly");
-        const store = tx.store;
-        return store.getAll();
+        return tx.objectStore("users").getAll();
     }
 };
 
