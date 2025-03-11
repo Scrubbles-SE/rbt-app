@@ -1,5 +1,5 @@
 // example partial testing suite using Mockingoose
-import mongoose from "mongoose";
+import mongoose, { model } from "mongoose";
 import mockingoose from "mockingoose";
 import * as UserServices from "../models/user-services.js";
 
@@ -64,6 +64,10 @@ describe("User Service Tests", () => {
         expect(result.username).toBe(toBeAdded.username);
         expect(result.first_name).toBe(toBeAdded.first_name);
         expect(result).toHaveProperty("_id");
+
+
+
+
     });
 
     // tests adding user with empty groups array

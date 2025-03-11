@@ -20,9 +20,10 @@ import {
     Remove
 } from "./group.styles";
 
-function AdminView({ groupUsers = [], groupId }) {
+function AdminView({ groupUsers = [], groupId, selfId }) {
     const [theme, setTheme] = useState({ mode: "light-mode" });
     const [userObjects, setUserObjects] = useState([]);
+    const [selfAdmin, setSelfAdmin] = useState(false);
 
     useLayoutEffect(() => {
         const currentTheme = localStorage.getItem("theme");
@@ -37,18 +38,16 @@ function AdminView({ groupUsers = [], groupId }) {
 
     const getUserObjects = async () => {
         const users = [];
-        console.log(groupUsers);
 
         for (let i = 0; i < groupUsers.length; i++) {
             const response = await fetch(
-                `${API_BASE_URL}/api/user/${groupUsers[i].user_id}`,
+                `${API_BASE_URL}/api/user/${groupUsers[i].user_id}/${groupId}`,
                 {
                     credentials: "include" // Important for sending cookies
                 }
             );
             if (!response.ok) {
                 const data = await response.json();
-                console.log(data);
                 throw new Error(
                     data.message ||
                         "Failed to fetch group members"
@@ -56,7 +55,12 @@ function AdminView({ groupUsers = [], groupId }) {
             }
             const userObject = await response.json();
             users.push(userObject[0]);
+
+            if (userObject[0]._id === selfId && userObject[0].isAdmin) {
+                setSelfAdmin(true);
+            }
         }
+
 
         setUserObjects(users);
     };
@@ -103,7 +107,7 @@ function AdminView({ groupUsers = [], groupId }) {
                                 <MemberName>
                                     {user.first_name}
                                 </MemberName>
-                                {user.isAdmin && (
+                                {!user.isAdmin && selfAdmin && (
                                     <Remove
                                         onClick={(user) =>
                                             removeFromGroup(

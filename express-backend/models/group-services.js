@@ -170,6 +170,26 @@ async function removeMember(userId, groupId) {
     }
 }
 
+async function checkIfUserIsAdmin(userId, groupId) {
+    const memberModel = getDbConnection().model(
+        "members",
+        MemberSchema
+    )
+    try {
+
+        const response =  await memberModel.findOne({
+            user_id: userId,
+            group_id: groupId,
+        });
+        
+
+        return response.isAdmin === undefined? false: response.isAdmin;
+    } catch (err) {
+        console.log(err);
+        return false;
+    }
+}
+
 export {
     createGroup,
     findGroupByCode,
@@ -177,5 +197,6 @@ export {
     joinGroup,
     getAllGroups,
     getAllUsers,
-    removeMember
+    removeMember,
+    checkIfUserIsAdmin,
 };

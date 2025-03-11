@@ -303,7 +303,7 @@ function GroupEntries({ userId }) {
                         try {
                             const resp = await fetch(
                                 // Get most recent entry for each user
-                                `${API_BASE_URL}/users/${user}/recent`
+                                `${API_BASE_URL}/users/${user.user_id}/recent`
                             );
 
                             if (!resp.ok) {
@@ -490,6 +490,7 @@ function GroupEntries({ userId }) {
                         <AdminView
                             groupUsers={groupUsers}
                             groupId={groupId}
+                            selfId={userId}
                         ></AdminView>
                     </AdminDisplay>
 

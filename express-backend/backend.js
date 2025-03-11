@@ -37,7 +37,8 @@ import {
     findGroupById,
     getAllGroups,
     getAllUsers,
-    removeMember
+    removeMember,
+    checkIfUserIsAdmin
 } from "./models/group-services.js";
 
 // JWT Utils
@@ -1067,14 +1068,17 @@ app.get("/api/user/current", authMiddleware, (req, res) => {
 
 // Get a user by ID
 app.get(
-    "/api/user/:userId",
+    "/api/user/:userId/:groupId",
     authMiddleware,
     async (req, res) => {
         try {
             const userId = req.params.userId;
+            const groupId = req.params.groupId;
             const foundUser = await findUserById(userId);
-            console.log("Retrieved user:", foundUser);
-            res.json(foundUser);
+            const user = foundUser[0]._doc;
+            const updatedUser = { ...user, isAdmin: await checkIfUserIsAdmin(userId, groupId) };
+            console.log("Retrieved user:", updatedUser);
+            res.json([updatedUser]);
         } catch (err) {
             console.log(err);
             res.status(500).json({
