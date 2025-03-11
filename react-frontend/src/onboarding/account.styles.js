@@ -6,102 +6,121 @@ import styled from "styled-components";
  * Contains styled components for login/registration forms
  */
 
-// Color palette used throughout account components
-export const themeColors = {
-    pink: {
-        light: "#f5d8da",
-        medium: "#de7792",
-        gradient:
-            "linear-gradient(135deg, #D66C84 0%, #F0C5BC 100%)"
-    },
-    green: {
-        light: "#879e84",
-        dark: "#2d5441",
-        gradient:
-            "linear-gradient(135deg, #859880 0%, #2E5141 100%)"
-    }
-};
-
 /*
 STYLES 
 */
 
-export const AccountContainer = styled.div`
+// Modern full-screen container replacing AccountContainer and FormContainer
+export const OnboardingContainer = styled.div`
     display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
+    flex-direction: column;
     width: 100%;
-    max-width: 480px;
-    padding: 0;
+    height: 100%;
     background: var(--background-color);
     transition: background-color 0.3s ease;
+    overflow: hidden;
+    position: relative;
 `;
 
-export const FormContainer = styled.div`
-    background: var(--card-background);
-    padding: 95px 30px 20px;
-    border-radius: 20px;
-    box-shadow: 0 10px 30px var(--hover-color);
-    width: 100%;
-    box-sizing: border-box;
-    margin: 10px 30px;
+// Main layout divider for proper content positioning
+export const OnboardingLayout = styled.div`
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+    min-height: 100%;
+    padding-bottom: 0;
+    overflow: hidden;
+    position: relative;
+`;
+
+// Combined header and content section for upper portion of screen
+export const OnboardingMain = styled.div`
     display: flex;
     flex-direction: column;
     align-items: center;
-    position: relative;
-    border: 1px solid var(--border-color);
-    backdrop-filter: blur(10px);
-    color: var(--text-primary);
+    justify-content: center;
+    padding: 0px 24px;
+    flex: 1;
+    padding-bottom: 20px;
+`;
 
-    @media (max-width: 480px) {
-        margin: 10px 15px;
-        padding: 85px 20px 20px;
+// Footer section for action buttons
+export const OnboardingFooter = styled.div`
+    padding: 16px 24px;
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 30px;
+`;
+
+// Content area inside main section
+export const OnboardingContent = styled.div`
+    width: 100%;
+    max-width: 500px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top: 10px;
+`;
+
+// Logo and title section, grouped
+export const HeaderGroup = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 42px;
+`;
+
+// Improved logo display
+export const IconDisplay = styled.div`
+    width: 90px;
+    height: 90px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
     }
 `;
 
 export const LogoImage = styled.img`
-    width: 150px;
-    height: 150px;
-    position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    object-fit: cover;
-    border-radius: 50%;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-    background-color: white;
-    padding: 10px;
-    z-index: 1;
-
-    @media (max-width: 480px) {
-        width: 120px;
-        height: 120px;
-        padding: 8px;
-    }
+    border-radius: 18px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 `;
 
 export const Title = styled.h2`
-    color: ${themeColors.green.dark};
+    color: var(--text-primary);
     font-size: 32px;
-    margin-bottom: 30px;
+    margin-bottom: 16px;
     text-align: center;
-    font-weight: 800;
-    margin-top: 0px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    line-height: 1.1;
+    font-weight: 700;
+    line-height: 1.2;
+`;
+
+export const SubTitle = styled.div`
+    font-size: 18px;
+    color: var(--text-secondary);
+    font-weight: 500;
+    text-align: center;
+    margin-bottom: 32px;
+    line-height: 1.4;
+    max-width: 300px;
 `;
 
 export const Form = styled.form`
     display: flex;
     flex-direction: column;
     width: 100%;
+    gap: 16px;
 `;
 
 export const InputGroup = styled.div`
-    margin-bottom: 5px;
+    margin-bottom: 16px;
     position: relative;
     width: 100%;
 `;
@@ -109,51 +128,44 @@ export const InputGroup = styled.div`
 export const Label = styled.label`
     display: block;
     margin-bottom: 8px;
-    color: ${themeColors.green.dark};
-    font-size: 14px;
+    color: var(--text-primary);
+    font-size: 15px;
     font-weight: 600;
-    text-transform: uppercase;
     letter-spacing: 0.5px;
     width: 100%;
-
-    @media (max-width: 480px) {
-        font-size: 12px;
-        margin-bottom: 6px;
-    }
 `;
 
 export const Input = styled.input`
     width: 100%;
-    padding: 12px 15px;
-    background-color: #f8f9fa;
-    border: 2px solid #e9ecef;
+    padding: 14px 16px;
+    background-color: var(--card-background);
+    border: 2px solid var(--border-color);
     border-radius: 12px;
     font-size: 16px;
     transition: all 0.3s ease;
     box-sizing: border-box;
+    color: var(--text-primary);
 
     &:focus {
-        border-color: ${themeColors.pink.medium};
-        box-shadow: 0 0 0 3px rgba(222, 119, 146, 0.1);
+        border-color: var(--fill-color);
+        box-shadow: 0 0 0 3px var(--hover-color);
         outline: none;
-        background-color: white;
     }
 
     &:hover {
-        border-color: ${themeColors.pink.medium}90;
+        border-color: var(--fill-color);
     }
 
-    @media (max-width: 480px) {
-        padding: 10px 12px;
-        font-size: 14px;
-        border-radius: 8px;
+    &::placeholder {
+        color: var(--text-secondary);
+        opacity: 0.7;
     }
 `;
 
 export const PasswordStrengthContainer = styled.div`
     margin-top: 10px;
     height: 6px;
-    background-color: #eee;
+    background-color: var(--border-color);
     border-radius: 3px;
     overflow: hidden;
 `;
@@ -164,84 +176,62 @@ export const PasswordStrengthBar = styled.div`
         width 0.3s,
         background-color 0.3s;
     border-radius: 3px;
-    background: ${(props) => {
-        switch (props.strength) {
-            case 1:
-                return themeColors.pink.gradient;
-            case 2:
-                return themeColors.pink.gradient;
-            case 3:
-                return themeColors.green.gradient;
-            case 4:
-                return themeColors.green.gradient;
-            default:
-                return "#eee";
-        }
-    }};
 `;
 
 export const Button = styled.button`
-    background: ${themeColors.pink.gradient};
-    color: white;
+    background: var(--fill-color);
+    color: var(--text-primary);
     border: none;
-    padding: 14px;
-    border-radius: 12px;
+    padding: 16px;
+    border-radius: 14px;
     font-size: 16px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
     width: 100%;
     position: relative;
     overflow: hidden;
-
-    &::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(
-            rgba(255, 255, 255, 0.1),
-            rgba(255, 255, 255, 0)
-        );
-        opacity: 0;
-        transition: opacity 0.3s ease;
-    }
+    box-shadow: 0 4px 12px var(--hover-color);
 
     &:hover:not(:disabled) {
         transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(214, 108, 132, 0.2);
+        box-shadow: 0 8px 20px var(--hover-color);
+    }
 
-        &::before {
-            opacity: 1;
-        }
+    &:active:not(:disabled) {
+        transform: translateY(0);
     }
 
     &:disabled {
-        background: #e9ecef;
+        opacity: 0.5;
         cursor: not-allowed;
         transform: none;
         box-shadow: none;
     }
+`;
 
-    @media (max-width: 480px) {
-        padding: 12px;
-        font-size: 14px;
-        border-radius: 8px;
+export const SecondaryButton = styled(Button)`
+    background: transparent;
+    color: var(--text-primary);
+    border: 2px solid var(--fill-color);
+    box-shadow: none;
+    margin-top: 12px;
+
+    &:hover:not(:disabled) {
+        background: var(--hover-color);
+        box-shadow: none;
     }
 `;
 
 export const LinkText = styled.p`
     text-align: center;
-    margin-top: 0px;
+    margin-top: 16px;
     font-size: 14px;
-    color: #555;
+    color: var(--text-secondary);
 
     a {
-        color: #23a6d5;
+        color: var(--fill-color);
         text-decoration: none;
         font-weight: 600;
 
@@ -249,28 +239,24 @@ export const LinkText = styled.p`
             text-decoration: underline;
         }
     }
-
-    @media (max-width: 480px) {
-        font-size: 13px;
-        margin-top: 0px;
-    }
 `;
 
 export const AlertOverlay = styled.div`
-    position: fixed;
+    position: absolute;
     top: 20px;
     left: 50%;
     transform: translateX(-50%);
     z-index: 1000;
     padding: 16px 24px;
     border-radius: 12px;
-    background: ${themeColors.pink.gradient};
-    color: white;
-    box-shadow: 0 4px 20px rgba(214, 108, 132, 0.2);
+    background: var(--fill-color);
+    color: var(--text-primary);
+    box-shadow: 0 4px 20px var(--hover-color);
     display: flex;
     align-items: center;
     gap: 12px;
     animation: slideDown 0.3s ease-out;
+    max-width: 90%;
 
     @keyframes slideDown {
         from {
@@ -285,21 +271,20 @@ export const AlertOverlay = styled.div`
 `;
 
 export const AlertText = styled.span`
-    color: #333;
     font-size: 14px;
     font-weight: 500;
 `;
 
 export const UserName = styled.span`
-    font-family:
-        "Playfair Display", serif; // Elegant serif font
-    font-size: 48px;
+    font-family: var(--font-header);
+    font-size: 32px;
     font-weight: 700;
     font-style: italic;
     display: block;
-    color: ${themeColors.pink.medium};
+    color: var(--fill-color);
     position: relative;
-    margin-top: 8px;
+    margin-top: 4px;
+    margin-bottom: 8px;
     padding: 0 4px;
     transform-origin: center;
     animation: floatIn 1s ease-out;
@@ -322,7 +307,7 @@ export const UserName = styled.span`
         right: 0;
         bottom: -4px;
         height: 2px;
-        background: ${themeColors.pink.gradient};
+        background: var(--fill-color);
         transform: scaleX(0);
         animation: underlineExpand 0.8s ease-out forwards 0.3s;
     }
@@ -338,39 +323,11 @@ export const UserName = styled.span`
 `;
 
 export const NameInput = styled(Input)`
-    background: white !important;
-    border: 2px solid #ddd;
-    border-radius: 8px;
-    font-size: 16px;
-    transition: all 0.3s ease;
-    color: black !important;
-
-    &::placeholder {
-        color: #6c6565 !important;
-    }
-    &:focus {
-        border-color: #23a6d5;
-        box-shadow: 0 0 0 3px rgba(35, 166, 213, 0.1);
-    }
-
-    @media (max-width: 480px) {
-        padding: 10px 12px;
-        font-size: 14px;
-        border-radius: 6px;
-    }
-`;
-
-export const SubTitle = styled.div`
-    font-size: 0.45em;
-    color: ${themeColors.green.dark};
-    font-weight: 500;
-    display: block;
-    text-align: center;
-    margin-top: 4px;
+    background: var(--card-background);
 `;
 
 export const RequirementsText = styled.div`
-    color: #666;
+    color: var(--text-secondary);
     font-size: 13px;
     margin-top: 6px;
     font-style: italic;
@@ -407,18 +364,22 @@ export const Tooltip = styled.div`
 `;
 
 export const SuccessOverlay = styled.div`
-    position: fixed;
+    position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(255, 255, 255, 0.95);
+    background-color: var(--background-color);
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     z-index: 1000;
     animation: fadeIn 0.5s ease-out;
     backdrop-filter: blur(10px);
+    width: 100%;
+    height: 100%;
+    gap: 24px;
 
     @keyframes fadeIn {
         0% {
@@ -431,20 +392,25 @@ export const SuccessOverlay = styled.div`
 `;
 
 export const SuccessCheckmark = styled.div`
-    width: 80px;
-    height: 80px;
+    width: 90px;
+    height: 90px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: ${themeColors.green.gradient};
-    animation: scaleIn 0.3s ease-out;
-    box-shadow: 0 8px 20px rgba(45, 84, 65, 0.2);
+    background: var(--fill-color);
+    animation:
+        scaleIn 0.5s ease-out,
+        pulse 2s ease-in-out infinite 0.5s;
+    box-shadow: 0 8px 24px var(--hover-color);
+    position: relative;
 
     &::after {
         content: "✓";
-        color: white;
-        font-size: 40px;
+        color: var(--background-color);
+        font-size: 46px;
+        font-weight: bold;
+        animation: fadeInSlide 0.4s ease-out 0.2s both;
     }
 
     @keyframes scaleIn {
@@ -458,14 +424,48 @@ export const SuccessCheckmark = styled.div`
             transform: scale(1);
         }
     }
+
+    @keyframes fadeInSlide {
+        0% {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes pulse {
+        0% {
+            box-shadow: 0 0 0 0
+                rgba(var(--fill-color-rgb, 242, 196, 187), 0.7);
+        }
+        70% {
+            box-shadow: 0 0 0 15px
+                rgba(var(--fill-color-rgb, 242, 196, 187), 0);
+        }
+        100% {
+            box-shadow: 0 0 0 0
+                rgba(var(--fill-color-rgb, 242, 196, 187), 0);
+        }
+    }
+`;
+
+export const SuccessMessage = styled.div`
+    color: var(--text-primary);
+    font-size: 20px;
+    font-weight: 600;
+    opacity: 0;
+    animation: fadeIn 0.5s ease-out 0.6s forwards;
 `;
 
 export const ModalOverlay = styled.div`
-    position: fixed;
+    position: absolute;
     top: 0;
     left: 0;
-    width: 100vw;
-    height: 100vh;
+    width: 100%;
+    height: 100%;
     background-color: rgba(0, 0, 0, 0.85);
     display: flex;
     justify-content: center;
@@ -487,10 +487,10 @@ export const ModalOverlay = styled.div`
 `;
 
 export const ModalContent = styled.div`
-    background: white;
+    background: var(--card-background);
     padding: 2.5rem 2rem;
     border-radius: 24px;
-    position: fixed;
+    position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
@@ -525,7 +525,7 @@ export const CloseButton = styled.button`
     font-size: 1.75rem;
     line-height: 1;
     cursor: pointer;
-    color: #666;
+    color: var(--text-secondary);
     padding: 0.5rem;
     display: flex;
     align-items: center;
@@ -534,14 +534,14 @@ export const CloseButton = styled.button`
     border-radius: 50%;
 
     &:hover {
-        background: #f5f5f5;
-        color: #333;
+        background: var(--hover-color);
+        color: var(--text-primary);
     }
 `;
 
 export const InstallInstructions = styled.div`
     text-align: center;
-    color: ${themeColors.green.dark};
+    color: var(--text-primary);
     font-size: 1.5rem;
     line-height: 1.4;
     font-weight: 600;
@@ -556,22 +556,13 @@ export const InstallInstructions = styled.div`
         &.subtitle {
             font-size: 1.1rem;
             font-weight: 400;
-            color: #666;
+            color: var(--text-secondary);
             max-width: 280px;
-        }
-    }
-
-    @media (max-width: 480px) {
-        font-size: 1.35rem;
-
-        p.subtitle {
-            font-size: 1rem;
         }
     }
 `;
 
 export const InstallButton = styled(Button)`
-    background: ${themeColors.green.gradient};
     font-size: 1.1rem;
     padding: 1rem 2rem;
     width: auto;
@@ -581,102 +572,105 @@ export const InstallButton = styled(Button)`
     transition: all 0.2s ease;
     border-radius: 16px;
     text-transform: none;
-
-    &:hover:not(:disabled) {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(45, 84, 65, 0.2);
-    }
-
-    &:active:not(:disabled) {
-        transform: translateY(0);
-    }
 `;
 
-export const SecondaryButton = styled(Button)`
-    width: auto;
-    min-width: 150px;
-    margin: 0 auto;
-    background: transparent;
-    color: ${themeColors.green.dark};
-    border: 2px solid ${themeColors.green.dark};
-    box-shadow: none;
-
-    &:hover:not(:disabled) {
-        background: rgba(45, 84, 65, 0.1);
-    }
-`;
-
+// Modern theme selection components
 export const ThemeGrid = styled.div`
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 1.5rem;
-    margin: 1rem 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
     width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
 `;
 
 export const ThemeOption = styled.div`
-    aspect-ratio: 1;
-    background: var(--card-background);
-    border-radius: 16px;
-    padding: 1.5rem;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
-    justify-content: center;
-    gap: 1rem;
+    gap: 16px;
+    padding: 14px 16px;
+    border-radius: 14px;
+    background: var(--card-background);
     cursor: pointer;
     transition: all 0.2s ease;
+    border: 2px solid
+        ${(props) =>
+            props.selected
+                ? "var(--fill-color)"
+                : "transparent"};
+    box-shadow: ${(props) =>
+        props.selected
+            ? "0 4px 12px var(--hover-color)"
+            : "0 2px 6px var(--hover-color)"};
     position: relative;
-    border: none;
+
+    &:hover {
+        background: var(--hover-color);
+        transform: translateY(-2px);
+    }
 
     &::before {
         content: "";
-        width: 50px;
-        height: 50px;
+        width: 36px;
+        height: 36px;
         border-radius: 50%;
         background: ${(props) => props.color};
         box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
-        transition: transform 0.2s ease;
     }
 
     &::after {
         content: "${(props) => props.name}";
         color: var(--text-primary);
         font-weight: 600;
-        font-size: 0.9rem;
-        margin-top: 0.5rem;
-    }
-
-    ${(props) =>
-        props.selected &&
-        `
-        &::before {
-            transform: scale(1.2);
-        }
-        background: var(--hover-color);
-    `}
-
-    &:hover {
-        background: var(--hover-color);
-        &::before {
-            transform: scale(1.1);
-        }
+        font-size: 16px;
     }
 `;
 
-export const ThemeForm = styled(Form)`
+// Feature components
+export const FeatureGrid = styled.div`
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto 24px;
+`;
+
+export const FeatureItem = styled.div`
     display: flex;
     flex-direction: column;
-    height: 100%;
-    gap: 2rem;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 8px;
+    border-radius: 16px;
+    background-color: var(--card-background);
+    box-shadow: 0 2px 8px var(--hover-color);
+`;
 
-    > button {
-        margin-top: auto;
-        background: var(--fill-color);
+export const FeatureIcon = styled.div`
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    background: ${(props) => props.background};
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    margin-bottom: 4px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+`;
 
-        &:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px var(--hover-color);
-        }
-    }
+export const FeatureTitle = styled.div`
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--text-primary);
+    margin-bottom: 2px;
+`;
+
+export const FeatureDesc = styled.div`
+    font-size: 14px;
+    color: var(--text-secondary);
+    text-align: center;
+    line-height: 1.3;
 `;

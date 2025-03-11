@@ -8,15 +8,21 @@ import { initDB } from "../utils/db";
 
 // Styles
 import {
-    AccountContainer,
-    FormContainer,
+    OnboardingContainer,
+    OnboardingLayout,
+    OnboardingMain,
+    OnboardingContent,
+    OnboardingFooter,
+    HeaderGroup,
+    IconDisplay,
+    LogoImage,
     Title,
     Form,
     InputGroup,
     Label,
     Input,
     Button,
-    LogoImage,
+    SecondaryButton,
     AlertOverlay,
     AlertText,
     PasswordStrengthContainer,
@@ -28,15 +34,18 @@ import {
     SubTitle,
     SuccessOverlay,
     SuccessCheckmark,
-    themeColors,
+    SuccessMessage,
     ModalContent,
     CloseButton,
     InstallInstructions,
-    SecondaryButton,
     InstallButton,
     ThemeOption,
     ThemeGrid,
-    ThemeForm
+    FeatureItem,
+    FeatureIcon,
+    FeatureTitle,
+    FeatureDesc,
+    FeatureGrid
 } from "./account.styles";
 
 // Services
@@ -169,7 +178,7 @@ function AccountFlow({ setIsLoggedIn, setOnboardingComplete }) {
      * Checks if user exists to route to login or PWA install
      */
     const handleEmailSubmit = async (e) => {
-        e.preventDefault();
+        if (e) e.preventDefault();
         const result = await checkIfUserExists(email);
         if (result.exists) {
             setUserName(result.firstName);
@@ -184,7 +193,7 @@ function AccountFlow({ setIsLoggedIn, setOnboardingComplete }) {
      * Shows success animation on successful login before redirecting
      */
     const handleLoginSubmit = async (e) => {
-        e.preventDefault();
+        if (e) e.preventDefault();
         const result = await loginUser({ email, password });
         if (result.success) {
             await initDB();
@@ -207,7 +216,7 @@ function AccountFlow({ setIsLoggedIn, setOnboardingComplete }) {
      * Creates user account and moves to PWA install phase
      */
     const handleRegisterSubmit = async (e) => {
-        e.preventDefault();
+        if (e) e.preventDefault();
         const result = await registerUser({
             email,
             password,
@@ -269,288 +278,175 @@ function AccountFlow({ setIsLoggedIn, setOnboardingComplete }) {
 
     const handleThemeChange = (newTheme) => {
         setTheme(newTheme);
-        localStorage.setItem("theme", newTheme);
-        document.body.classList.remove(
-            "dark-mode",
-            "min-theme",
-            "blue-theme",
-            "green-theme"
-        );
-        document.body.classList.add(newTheme);
+        // Theme is applied through the useEffect hook
     };
 
-    // Initialize theme on mount
+    // Apply theme to the entire app, not just this component
     useEffect(() => {
-        const currentTheme =
-            localStorage.getItem("theme") || "light-mode";
-        setTheme(currentTheme);
+        // Remove any other themes
         document.body.classList.remove(
             "dark-mode",
             "min-theme",
             "blue-theme",
             "green-theme"
         );
-        document.body.classList.add(currentTheme);
-    }, []);
+
+        // Apply current theme
+        document.body.classList.add(theme);
+
+        // Save theme preference
+        localStorage.setItem("theme", theme);
+    }, [theme]);
 
     // Render Form Based on Stage
-    const renderForm = () => {
+    const renderContent = () => {
         switch (currentStage) {
             case STAGES.PWA_INSTALL:
                 return (
-                    <>
-                        <Form
-                            onSubmit={(e) => e.preventDefault()}
-                        >
-                            <div
-                                style={{
-                                    textAlign: "center",
-                                    marginBottom: "2rem",
-                                    color: themeColors.green
-                                        .dark,
-                                    fontSize: "1.1rem",
-                                    lineHeight: "1.5"
-                                }}
-                            >
-                                Thanks for checking out RBT!
-                                <br />
-                                It's even better as a PWA...
-                            </div>
-                            <Button
-                                type="button"
-                                onClick={handleInstallClick}
-                                style={{
-                                    marginBottom: "1rem",
-                                    background:
-                                        themeColors.green
-                                            .gradient
-                                }}
-                            >
-                                Install App
-                            </Button>
-                            <SecondaryButton
-                                type="button"
-                                onClick={() =>
-                                    setCurrentStage(
-                                        STAGES.EMAIL
-                                    )
-                                }
-                            >
-                                Maybe Later
-                            </SecondaryButton>
-                        </Form>
-
-                        {showInstallModal && (
-                            <ModalContent
-                                onClick={(e) =>
-                                    e.stopPropagation()
-                                }
-                            >
-                                <CloseButton
-                                    onClick={() =>
-                                        setShowInstallModal(
-                                            false
-                                        )
-                                    }
-                                >
-                                    ×
-                                </CloseButton>
-                                <InstallInstructions>
-                                    {isIOS ? (
-                                        <>
-                                            <p>
-                                                Quick Install
-                                                Guide
-                                            </p>
-                                            <p className="subtitle">
-                                                1. Tap the share
-                                                button below
-                                                <br />
-                                                2. Click "Add to
-                                                Home Screen"
-                                                <br />
-                                                3. Tap "Add" to
-                                                finish
-                                            </p>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <p>Install RBT</p>
-                                            <p className="subtitle">
-                                                Add to your home
-                                                screen for quick
-                                                access and a
-                                                better
-                                                experience
-                                            </p>
-                                        </>
-                                    )}
-                                </InstallInstructions>
-                                <InstallButton
-                                    onClick={
-                                        isIOS
-                                            ? handleIOSInstall
-                                            : handleAndroidInstall
-                                    }
-                                >
-                                    {isIOS
-                                        ? "Share to Start"
-                                        : "Install App"}
-                                </InstallButton>
-                            </ModalContent>
-                        )}
-                    </>
+                    <OnboardingContent>
+                        <SubTitle>
+                            Thanks for checking out RBT! It's
+                            even better as a PWA.
+                        </SubTitle>
+                    </OnboardingContent>
                 );
 
             case STAGES.EMAIL:
                 return (
-                    <Form onSubmit={handleEmailSubmit}>
-                        <InputGroup>
-                            <Label htmlFor="email">
-                                Enter your email:
-                            </Label>
-                            <Input
-                                type="email"
-                                id="email"
-                                placeholder="you@example.com"
-                                value={email}
-                                onChange={(e) =>
-                                    setEmail(e.target.value)
-                                }
-                                required
-                            />
-                        </InputGroup>
-                        <Button
-                            type="submit"
-                            disabled={!isFormValid}
+                    <OnboardingContent>
+                        <Form
+                            id="emailForm"
+                            onSubmit={(e) => {
+                                e.preventDefault();
+                                handleEmailSubmit(e);
+                            }}
                         >
-                            Continue
-                        </Button>
-                    </Form>
+                            <InputGroup>
+                                <Label htmlFor="email">
+                                    Enter your email:
+                                </Label>
+                                <Input
+                                    type="email"
+                                    id="email"
+                                    placeholder="you@example.com"
+                                    value={email}
+                                    onChange={(e) =>
+                                        setEmail(e.target.value)
+                                    }
+                                    required
+                                />
+                            </InputGroup>
+                        </Form>
+                    </OnboardingContent>
                 );
 
             case STAGES.LOGIN:
                 return (
-                    <Form onSubmit={handleLoginSubmit}>
-                        <InputGroup>
-                            <Label htmlFor="password">
-                                Password
-                            </Label>
-                            <Input
-                                type="password"
-                                id="password"
-                                placeholder="Enter your password"
-                                value={password}
-                                onChange={handlePasswordChange}
-                                required
-                            />
-                        </InputGroup>
-                        <Button
-                            type="submit"
-                            disabled={!isFormValid}
+                    <OnboardingContent>
+                        <Form
+                            id="loginForm"
+                            onSubmit={(e) => {
+                                e.preventDefault();
+                                handleLoginSubmit(e);
+                            }}
                         >
-                            Sign In
-                        </Button>
-                    </Form>
+                            <InputGroup>
+                                <Label htmlFor="password">
+                                    Password
+                                </Label>
+                                <Input
+                                    type="password"
+                                    id="password"
+                                    placeholder="Enter your password"
+                                    value={password}
+                                    onChange={
+                                        handlePasswordChange
+                                    }
+                                    required
+                                />
+                            </InputGroup>
+                        </Form>
+                    </OnboardingContent>
                 );
 
             case STAGES.CREATE:
                 return (
-                    <Form onSubmit={handleRegisterSubmit}>
-                        <InputGroup>
-                            <Label htmlFor="firstName">
-                                What's your name?
-                            </Label>
-                            <NameInput
-                                type="text"
-                                id="firstName"
-                                placeholder="Enter your first name"
-                                value={firstName}
-                                onChange={(e) =>
-                                    setFirstName(e.target.value)
-                                }
-                                required
-                            />
-                        </InputGroup>
-                        <InputGroup>
-                            <Label htmlFor="password">
-                                Create a secure password
-                            </Label>
-                            <Input
-                                type="password"
-                                id="password"
-                                placeholder="Create a password"
-                                value={password}
-                                onChange={handlePasswordChange}
-                                required
-                            />
-                            <PasswordStrengthContainer>
-                                <PasswordStrengthBar
-                                    style={{
-                                        width: `${passwordStrength * 25}%`,
-                                        backgroundColor:
-                                            getPasswordStrengthColor()
-                                    }}
-                                />
-                            </PasswordStrengthContainer>
-                            <RequirementsText>
-                                {getPasswordRequirements()}
-                            </RequirementsText>
-                        </InputGroup>
-                        <InputGroup>
-                            <Label htmlFor="confirmPassword">
-                                Confirm your password
-                            </Label>
-                            <Input
-                                type="password"
-                                id="confirmPassword"
-                                placeholder="Confirm your password"
-                                value={confirmPassword}
-                                onChange={(e) =>
-                                    setConfirmPassword(
-                                        e.target.value
-                                    )
-                                }
-                                required
-                            />
-                        </InputGroup>
-                        <div style={{ position: "relative" }}>
-                            <Button
-                                type="submit"
-                                disabled={!isFormValid}
-                                onMouseEnter={() => {
-                                    if (!isFormValid) {
-                                        setShowTooltip(true);
+                    <OnboardingContent>
+                        <Form
+                            id="registerForm"
+                            onSubmit={(e) => {
+                                e.preventDefault();
+                                handleRegisterSubmit(e);
+                            }}
+                        >
+                            <InputGroup>
+                                <Label htmlFor="firstName">
+                                    What's your name?
+                                </Label>
+                                <NameInput
+                                    type="text"
+                                    id="firstName"
+                                    placeholder="Enter your first name"
+                                    value={firstName}
+                                    onChange={(e) =>
+                                        setFirstName(
+                                            e.target.value
+                                        )
                                     }
-                                }}
-                                onMouseLeave={() =>
-                                    setShowTooltip(false)
-                                }
-                            >
-                                Create Account
-                            </Button>
-                            {showTooltip && !isFormValid && (
-                                <Tooltip>
-                                    {passwordStrength < 4
-                                        ? "Create a stronger password"
-                                        : password !==
-                                            confirmPassword
-                                          ? "Passwords don't match"
-                                          : "Please fill all fields"}
-                                </Tooltip>
-                            )}
-                        </div>
-                    </Form>
+                                    required
+                                />
+                            </InputGroup>
+                            <InputGroup>
+                                <Label htmlFor="password">
+                                    Create a secure password
+                                </Label>
+                                <Input
+                                    type="password"
+                                    id="password"
+                                    placeholder="Create a password"
+                                    value={password}
+                                    onChange={
+                                        handlePasswordChange
+                                    }
+                                    required
+                                />
+                                <PasswordStrengthContainer>
+                                    <PasswordStrengthBar
+                                        style={{
+                                            width: `${passwordStrength * 25}%`,
+                                            backgroundColor:
+                                                getPasswordStrengthColor()
+                                        }}
+                                    />
+                                </PasswordStrengthContainer>
+                                <RequirementsText>
+                                    {getPasswordRequirements()}
+                                </RequirementsText>
+                            </InputGroup>
+                            <InputGroup>
+                                <Label htmlFor="confirmPassword">
+                                    Confirm your password
+                                </Label>
+                                <Input
+                                    type="password"
+                                    id="confirmPassword"
+                                    placeholder="Confirm your password"
+                                    value={confirmPassword}
+                                    onChange={(e) =>
+                                        setConfirmPassword(
+                                            e.target.value
+                                        )
+                                    }
+                                    required
+                                />
+                            </InputGroup>
+                        </Form>
+                    </OnboardingContent>
                 );
 
             case STAGES.THEME:
                 return (
-                    <ThemeForm
-                        onSubmit={(e) => {
-                            e.preventDefault();
-                            setCurrentStage(STAGES.GET_STARTED);
-                        }}
-                    >
+                    <OnboardingContent>
                         <ThemeGrid>
                             <ThemeOption
                                 onClick={() =>
@@ -570,7 +466,7 @@ function AccountFlow({ setIsLoggedIn, setOnboardingComplete }) {
                                         "dark-mode"
                                     )
                                 }
-                                color="#000000"
+                                color="#2a2a2a"
                                 name="Dark"
                                 selected={theme === "dark-mode"}
                             />
@@ -580,7 +476,7 @@ function AccountFlow({ setIsLoggedIn, setOnboardingComplete }) {
                                         "blue-theme"
                                     )
                                 }
-                                color="#9bc4e2"
+                                color="#b8d3eb"
                                 name="Sky"
                                 selected={
                                     theme === "blue-theme"
@@ -602,215 +498,173 @@ function AccountFlow({ setIsLoggedIn, setOnboardingComplete }) {
                                         "green-theme"
                                     )
                                 }
-                                color="#afbf9f"
+                                color="#ccd7c2"
                                 name="Sage"
                                 selected={
                                     theme === "green-theme"
                                 }
                             />
                         </ThemeGrid>
-                        <Button type="submit">Continue</Button>
-                    </ThemeForm>
+                    </OnboardingContent>
                 );
 
             case STAGES.GET_STARTED:
                 return (
-                    <ThemeForm
-                        onSubmit={(e) => {
-                            e.preventDefault();
-                            completeOnboarding();
+                    <OnboardingContent>
+                        <SubTitle>
+                            Now you can reflect on your day, in
+                            a whole new way.
+                        </SubTitle>
+                        <FeatureGrid>
+                            <FeatureItem>
+                                <FeatureIcon background="linear-gradient(135deg, #f6becb, #f2c4bb)">
+                                    🌹
+                                </FeatureIcon>
+                                <FeatureTitle>
+                                    Rose
+                                </FeatureTitle>
+                                <FeatureDesc>
+                                    Highlight positive moments
+                                </FeatureDesc>
+                            </FeatureItem>
+                            <FeatureItem>
+                                <FeatureIcon background="linear-gradient(135deg, #d1e4d1, #abd5aa)">
+                                    🌱
+                                </FeatureIcon>
+                                <FeatureTitle>Bud</FeatureTitle>
+                                <FeatureDesc>
+                                    Record growth opportunities
+                                </FeatureDesc>
+                            </FeatureItem>
+                            <FeatureItem>
+                                <FeatureIcon background="linear-gradient(135deg, #c9e3f5, #a0cff0)">
+                                    🌿
+                                </FeatureIcon>
+                                <FeatureTitle>
+                                    Thorn
+                                </FeatureTitle>
+                                <FeatureDesc>
+                                    Document daily challenges
+                                </FeatureDesc>
+                            </FeatureItem>
+                        </FeatureGrid>
+                    </OnboardingContent>
+                );
+
+            default:
+                return null;
+        }
+    };
+
+    // Render buttons based on stage
+    const renderButtons = () => {
+        switch (currentStage) {
+            case STAGES.PWA_INSTALL:
+                return (
+                    <>
+                        <Button
+                            type="button"
+                            onClick={handleInstallClick}
+                        >
+                            Install App
+                        </Button>
+                        <SecondaryButton
+                            type="button"
+                            onClick={() =>
+                                setCurrentStage(STAGES.EMAIL)
+                            }
+                        >
+                            Maybe Later
+                        </SecondaryButton>
+                    </>
+                );
+
+            case STAGES.EMAIL:
+                return (
+                    <Button
+                        type="button"
+                        disabled={!isFormValid}
+                        onClick={handleEmailSubmit}
+                    >
+                        Continue
+                    </Button>
+                );
+
+            case STAGES.LOGIN:
+                return (
+                    <Button
+                        type="button"
+                        disabled={!isFormValid}
+                        onClick={handleLoginSubmit}
+                    >
+                        Sign In
+                    </Button>
+                );
+
+            case STAGES.CREATE:
+                return (
+                    <div
+                        style={{
+                            position: "relative",
+                            width: "100%"
                         }}
                     >
-                        <div
-                            style={{
-                                display: "flex",
-                                flexDirection: "column",
-                                alignItems: "center",
-                                gap: "2rem",
-                                flex: 1,
-                                marginBottom: "2rem"
-                            }}
-                        >
-                            <div
-                                style={{
-                                    fontSize: "1.2rem",
-                                    color: "var(--text-primary)",
-                                    textAlign: "center",
-                                    lineHeight: 1.6
-                                }}
-                            >
-                                <p
-                                    style={{
-                                        marginBottom: "1rem"
-                                    }}
-                                >
-                                    Your journal is ready for
-                                    your daily reflections
-                                </p>
-                                <div
-                                    style={{
-                                        display: "grid",
-                                        gridTemplateColumns:
-                                            "repeat(3, 1fr)",
-                                        gap: "1rem",
-                                        margin: "2rem 0"
-                                    }}
-                                >
-                                    <div
-                                        style={{
-                                            display: "flex",
-                                            flexDirection:
-                                                "column",
-                                            alignItems:
-                                                "center",
-                                            gap: "0.5rem"
-                                        }}
-                                    >
-                                        <div
-                                            style={{
-                                                width: "50px",
-                                                height: "50px",
-                                                borderRadius:
-                                                    "50%",
-                                                background:
-                                                    "#f2c4bb",
-                                                display: "flex",
-                                                alignItems:
-                                                    "center",
-                                                justifyContent:
-                                                    "center",
-                                                fontSize:
-                                                    "1.5rem"
-                                            }}
-                                        >
-                                            🌹
-                                        </div>
-                                        <span
-                                            style={{
-                                                color: "var(--text-primary)",
-                                                fontWeight: 500
-                                            }}
-                                        >
-                                            Rose
-                                        </span>
-                                        <span
-                                            style={{
-                                                fontSize:
-                                                    "0.9rem",
-                                                color: "var(--text-secondary)"
-                                            }}
-                                        >
-                                            Highlights
-                                        </span>
-                                    </div>
-                                    <div
-                                        style={{
-                                            display: "flex",
-                                            flexDirection:
-                                                "column",
-                                            alignItems:
-                                                "center",
-                                            gap: "0.5rem"
-                                        }}
-                                    >
-                                        <div
-                                            style={{
-                                                width: "50px",
-                                                height: "50px",
-                                                borderRadius:
-                                                    "50%",
-                                                background:
-                                                    "#afbf9f",
-                                                display: "flex",
-                                                alignItems:
-                                                    "center",
-                                                justifyContent:
-                                                    "center",
-                                                fontSize:
-                                                    "1.5rem"
-                                            }}
-                                        >
-                                            🌱
-                                        </div>
-                                        <span
-                                            style={{
-                                                color: "var(--text-primary)",
-                                                fontWeight: 500
-                                            }}
-                                        >
-                                            Bud
-                                        </span>
-                                        <span
-                                            style={{
-                                                fontSize:
-                                                    "0.9rem",
-                                                color: "var(--text-secondary)"
-                                            }}
-                                        >
-                                            Potential
-                                        </span>
-                                    </div>
-                                    <div
-                                        style={{
-                                            display: "flex",
-                                            flexDirection:
-                                                "column",
-                                            alignItems:
-                                                "center",
-                                            gap: "0.5rem"
-                                        }}
-                                    >
-                                        <div
-                                            style={{
-                                                width: "50px",
-                                                height: "50px",
-                                                borderRadius:
-                                                    "50%",
-                                                background:
-                                                    "#9bc4e2",
-                                                display: "flex",
-                                                alignItems:
-                                                    "center",
-                                                justifyContent:
-                                                    "center",
-                                                fontSize:
-                                                    "1.5rem"
-                                            }}
-                                        >
-                                            🌿
-                                        </div>
-                                        <span
-                                            style={{
-                                                color: "var(--text-primary)",
-                                                fontWeight: 500
-                                            }}
-                                        >
-                                            Thorn
-                                        </span>
-                                        <span
-                                            style={{
-                                                fontSize:
-                                                    "0.9rem",
-                                                color: "var(--text-secondary)"
-                                            }}
-                                        >
-                                            Challenges
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                         <Button
-                            type="submit"
-                            style={{
-                                background: "var(--fill-color)",
-                                fontSize: "1.1rem",
-                                padding: "1.2rem"
+                            type="button"
+                            disabled={!isFormValid}
+                            onClick={handleRegisterSubmit}
+                            onMouseEnter={() => {
+                                if (!isFormValid) {
+                                    setShowTooltip(true);
+                                }
                             }}
+                            onMouseLeave={() =>
+                                setShowTooltip(false)
+                            }
                         >
-                            Begin Your Journey
+                            Create Account
                         </Button>
-                    </ThemeForm>
+                        {showTooltip && !isFormValid && (
+                            <Tooltip>
+                                {passwordStrength < 4
+                                    ? "Create a stronger password"
+                                    : password !==
+                                        confirmPassword
+                                      ? "Passwords don't match"
+                                      : "Please fill all fields"}
+                            </Tooltip>
+                        )}
+                    </div>
+                );
+
+            case STAGES.THEME:
+                return (
+                    <Button
+                        onClick={() =>
+                            setCurrentStage(STAGES.GET_STARTED)
+                        }
+                    >
+                        Continue
+                    </Button>
+                );
+
+            case STAGES.GET_STARTED:
+                return (
+                    <Button
+                        onClick={completeOnboarding}
+                        style={{
+                            background:
+                                "linear-gradient(135deg, #859880, #2E5141)",
+                            fontSize: "18px",
+                            padding: "18px",
+                            color: "white",
+                            fontWeight: "700",
+                            boxShadow:
+                                "0 6px 16px rgba(45, 84, 65, 0.2)"
+                        }}
+                    >
+                        Begin Your Journey
+                    </Button>
                 );
 
             default:
@@ -824,7 +678,7 @@ function AccountFlow({ setIsLoggedIn, setOnboardingComplete }) {
             case STAGES.PWA_INSTALL:
                 return "Welcome to RBT";
             case STAGES.EMAIL:
-                return "Let's Get Started.";
+                return "Let's Get Started";
             case STAGES.LOGIN:
                 return (
                     <>
@@ -833,18 +687,11 @@ function AccountFlow({ setIsLoggedIn, setOnboardingComplete }) {
                     </>
                 );
             case STAGES.CREATE:
-                return (
-                    <>
-                        Welcome to RBT
-                        <SubTitle>
-                            Let's get you set up
-                        </SubTitle>
-                    </>
-                );
+                return "Create Your Account";
             case STAGES.THEME:
                 return "Choose Your Theme";
             case STAGES.GET_STARTED:
-                return "Ready to Begin";
+                return "Ready to Grow?";
             default:
                 return "";
         }
@@ -894,40 +741,91 @@ function AccountFlow({ setIsLoggedIn, setOnboardingComplete }) {
             {showSuccessAnimation && (
                 <SuccessOverlay>
                     <SuccessCheckmark />
+                    <SuccessMessage>
+                        Welcome to RBT
+                    </SuccessMessage>
                 </SuccessOverlay>
             )}
-            <AccountContainer>
-                <FormContainer>
-                    {currentStage !== STAGES.THEME && (
-                        <LogoImage
-                            src={RBDLogo}
-                            alt="RBD Logo"
-                        />
-                    )}
-                    <Title
-                        style={{
-                            color:
-                                theme === "dark-mode"
-                                    ? "#fff"
-                                    : themeColors.green.dark,
-                            marginTop:
-                                currentStage === STAGES.THEME
-                                    ? "1rem"
-                                    : "0"
-                        }}
+            <OnboardingContainer className="onboarding-content">
+                <OnboardingLayout>
+                    <OnboardingMain>
+                        <HeaderGroup>
+                            {currentStage !==
+                                STAGES.GET_STARTED && (
+                                <IconDisplay>
+                                    <LogoImage
+                                        src={RBDLogo}
+                                        alt="RBD Logo"
+                                    />
+                                </IconDisplay>
+                            )}
+                            <Title>{getTitle()}</Title>
+                        </HeaderGroup>
+
+                        {renderContent()}
+                    </OnboardingMain>
+
+                    <OnboardingFooter>
+                        {renderButtons()}
+                    </OnboardingFooter>
+                </OnboardingLayout>
+
+                {statusMessage && (
+                    <AlertOverlay>
+                        <AlertText>{statusMessage}</AlertText>
+                    </AlertOverlay>
+                )}
+
+                {showInstallModal && (
+                    <ModalContent
+                        onClick={(e) => e.stopPropagation()}
                     >
-                        {getTitle()}
-                    </Title>
-                    {renderForm()}
-                    {statusMessage && (
-                        <AlertOverlay>
-                            <AlertText>
-                                {statusMessage}
-                            </AlertText>
-                        </AlertOverlay>
-                    )}
-                </FormContainer>
-            </AccountContainer>
+                        <CloseButton
+                            onClick={() =>
+                                setShowInstallModal(false)
+                            }
+                        >
+                            ×
+                        </CloseButton>
+                        <InstallInstructions>
+                            {isIOS ? (
+                                <>
+                                    <p>Quick Install Guide</p>
+                                    <p className="subtitle">
+                                        1. Tap the share button
+                                        below
+                                        <br />
+                                        2. Click "Add to Home
+                                        Screen"
+                                        <br />
+                                        3. Tap "Add" to finish
+                                    </p>
+                                </>
+                            ) : (
+                                <>
+                                    <p>Install RBT</p>
+                                    <p className="subtitle">
+                                        Add to your home screen
+                                        for quick access and a
+                                        better experience
+                                    </p>
+                                </>
+                            )}
+                        </InstallInstructions>
+                        <InstallButton
+                            onClick={
+                                isIOS
+                                    ? handleIOSInstall
+                                    : handleAndroidInstall
+                            }
+                        >
+                            {isIOS
+                                ? "Share to Start"
+                                : "Install App"}
+                        </InstallButton>
+                    </ModalContent>
+                )}
+            </OnboardingContainer>
         </>
     );
 }
