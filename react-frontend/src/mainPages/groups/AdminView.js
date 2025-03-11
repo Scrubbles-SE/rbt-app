@@ -27,7 +27,6 @@ function AdminView({ groupUsers = [], groupId }) {
     useLayoutEffect(() => {
         const currentTheme = localStorage.getItem("theme");
         setTheme({ mode: currentTheme || "light-mode" });
-        // console.log(userObjects);
         // eslint-disable-next-line
     }, []);
 

@@ -12,6 +12,7 @@ import {
 } from "react-router-dom";
 import { API_BASE_URL } from "./utils/config.js";
 import { initDB } from "./utils/db";
+import { setupFetchOverride } from "./utils/fetchOverride";
 
 // Layout
 import AppLayout from "./layout/AppLayout";
@@ -23,7 +24,7 @@ import "./index.css";
 PAGE IMPORTS
  */
 // Account Flow
-import AccountFlow from "./account/accountFlow.js";
+import AccountFlow from "./onboarding/accountFlow.js";
 
 // Main Tab Pages
 import HomePage from "./mainPages/home/HomePage.js";
@@ -35,6 +36,9 @@ import Settings from "./mainPages/settings/SettingsPage.js";
 // Full Screen Pages
 import GroupEntries from "./mainPages/groups/groupEntries.js";
 import TagEntries from "./mainPages/search/TagEntries.js";
+
+// Set up fetch override to handle authentication globally
+setupFetchOverride();
 
 /* 
 SERVICE WORKER & INDEXED-DB REGISTRATION
@@ -227,9 +231,30 @@ AUTHENTICATION ROUTES
 const App = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [userId, setUserId] = useState(null);
+    const [onboardingComplete, setOnboardingComplete] =
+        useState(true); // Default true for existing users
+    const [initializing, setInitializing] = useState(true);
 
     useEffect(() => {
-        // Verify JWT token validity with server
+        // Apply saved theme immediately on load
+        const savedTheme =
+            localStorage.getItem("theme") || "light-mode";
+        document.body.className = savedTheme;
+
+        // Check for auth token and onboarding status locally first
+        const hasToken = !!localStorage.getItem("authToken");
+        const hasCompletedOnboarding =
+            localStorage.getItem("onboardingComplete") ===
+            "true";
+
+        // Set initial auth state based on local storage
+        if (hasToken) {
+            setIsLoggedIn(true);
+            setUserId(localStorage.getItem("userId"));
+            setOnboardingComplete(hasCompletedOnboarding);
+        }
+
+        // Verify JWT token validity with server in background
         const checkAuth = async () => {
             try {
                 // First try with cookies (normal flow)
@@ -244,6 +269,10 @@ const App = () => {
                     const data = await response.json();
                     setIsLoggedIn(true);
                     setUserId(data.userId);
+                    // If user exists in system, they've completed onboarding
+                    setOnboardingComplete(
+                        hasCompletedOnboarding
+                    );
                 } else {
                     // If cookies fail, try with localStorage token as fallback
                     // This helps with iOS devices where httpOnly cookies might not work properly
@@ -266,19 +295,27 @@ const App = () => {
                         if (fallbackResponse.ok) {
                             setIsLoggedIn(true);
                             setUserId(storedUserId);
+                            setOnboardingComplete(
+                                hasCompletedOnboarding
+                            );
                         } else {
                             // Token invalid, clear storage
                             localStorage.removeItem(
                                 "authToken"
                             );
                             localStorage.removeItem("userId");
+                            localStorage.removeItem(
+                                "onboardingComplete"
+                            );
                             setIsLoggedIn(false);
                             setUserId(null);
+                            setOnboardingComplete(false);
                         }
                     } else {
                         // No token in localStorage either
                         setIsLoggedIn(false);
                         setUserId(null);
+                        setOnboardingComplete(false);
                     }
                 }
             } catch (error) {
@@ -288,6 +325,10 @@ const App = () => {
                 );
                 setIsLoggedIn(false);
                 setUserId(null);
+                setOnboardingComplete(false);
+            } finally {
+                // Mark initialization as complete
+                setInitializing(false);
             }
         };
 
@@ -295,40 +336,63 @@ const App = () => {
     }, []);
 
     return (
-        <Routes>
-            <Route
-                path="/account"
-                element={
-                    isLoggedIn ? (
-                        // Redirect already logged in users to home
-                        <Navigate to="/" />
-                    ) : (
-                        <AccountFlow
-                            setIsLoggedIn={setIsLoggedIn}
-                            setUserId={setUserId}
-                        />
-                    )
-                }
-            />
-            <Route
-                path="/*"
-                element={
-                    isLoggedIn ? (
-                        // Protected routes - only accessible when authenticated
-                        <AppLayout>
-                            <MainAppRoutes
-                                setIsLoggedIn={setIsLoggedIn}
-                                setUserId={setUserId}
-                                userId={userId}
-                            />
-                        </AppLayout>
-                    ) : (
-                        // Redirect unauthenticated users to login
-                        <Navigate to="/account" />
-                    )
-                }
-            />
-        </Routes>
+        <>
+            {initializing ? (
+                // Show a simple full-screen div that matches the theme while loading
+                <div className="initializing-screen">
+                    <div className="loading-indicator"></div>
+                </div>
+            ) : (
+                <Routes>
+                    <Route
+                        path="/account"
+                        element={
+                            isLoggedIn && onboardingComplete ? (
+                                <Navigate to="/" replace />
+                            ) : (
+                                <AppLayout isOnboarding={true}>
+                                    <AccountFlow
+                                        setIsLoggedIn={
+                                            setIsLoggedIn
+                                        }
+                                        setOnboardingComplete={
+                                            setOnboardingComplete
+                                        }
+                                    />
+                                </AppLayout>
+                            )
+                        }
+                    />
+                    <Route
+                        path="/*"
+                        element={
+                            isLoggedIn ? (
+                                onboardingComplete ? (
+                                    <AppLayout>
+                                        <MainAppRoutes
+                                            setIsLoggedIn={
+                                                setIsLoggedIn
+                                            }
+                                            userId={userId}
+                                        />
+                                    </AppLayout>
+                                ) : (
+                                    <Navigate
+                                        to="/account"
+                                        replace
+                                    />
+                                )
+                            ) : (
+                                <Navigate
+                                    to="/account"
+                                    replace
+                                />
+                            )
+                        }
+                    />
+                </Routes>
+            )}
+        </>
     );
 };
 
