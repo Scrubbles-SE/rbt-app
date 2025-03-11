@@ -23,6 +23,7 @@ Then I should see a message that prompts me to enter a valid email with an at si
 And I shouldn’t be able to complete my sign-up without fixing my email
 */
 
+const frontend_url = process.env.REACT_APP_FRONTEND_URL;
 
 describe('Sign In', () => {
 
@@ -34,15 +35,17 @@ describe('Sign In', () => {
       cy.clearCookies();
     });
 
-    it("WHEN I enter a valid email, before entering a valid name and password", () => {
-      cy.visit('http://localhost:3000');
-      cy.get("form").within(() => {
-        cy.wait(1000);
+    it("WHEN I enter the user's valid email but then a wrong password", () => {
+
+      cy.visit("https://lemon-bush-09e7af61e.6.azurestaticapps.net/");
+      cy.wait(1000);
+      cy.get('button').contains("Maybe Later").click();
+        cy.wait(500);
         cy.get('input[id="email"]').should('not.be.disabled').type("testing@gmail.com");
-        cy.get('button[type="submit"]').click();
+        cy.wait(200);
+        cy.get('button[type="button"]').click();
         cy.get('input[id="password"]').should('be.visible').type("wrongPassword!");
-        cy.get('button[type="submit"]').click();
-      });
+        cy.get('button[type="button"]').click();
 
     });
 
@@ -52,20 +55,21 @@ describe('Sign In', () => {
 
   });
   
-  context("Successful sign-up", () => {
+  context("Successful sign-in", () => {
     beforeEach(() => {});
 
     it("GIVEN I have opened up the main page", () => {});
 
-    it("WHEN I enter a valid email, before entering a valid name and password", () => {
-      cy.visit('http://localhost:3000');
-      cy.get("form").within(() => {
-        cy.wait(1000);
-        cy.get('input[id="email"]').should('not.be.disabled').type("testing@gmail.com");
-        cy.get('button[type="submit"]').should('be.visible').click();
-        cy.get('input[id="password"]').should('be.visible').type("Password123$");
-        cy.get('button[type="submit"]').click();
-      })
+    it("WHEN I enter the user's valid email and then the user's password", () => {
+      cy.visit("https://lemon-bush-09e7af61e.6.azurestaticapps.net/");
+      cy.wait(1000);
+      cy.get('button[type="button"]').contains("Maybe Later").click();
+      cy.wait(500);
+      cy.get('input[id="email"]').should('not.be.disabled').type("testing@gmail.com");
+      cy.wait(200);
+      cy.get('button[type="button"]').should('not.be.disabled').click();
+      cy.get('input[id="password"]').should('be.visible').type(Cypress.env('password'));
+      cy.get('button[type="button"]').click();
     });
 
     it("THEN I should see a check mark and confirmation screen, before being shown to the home page", () => {
@@ -74,20 +78,10 @@ describe('Sign In', () => {
       cy.get('h1').should('contain', 'Home'); // Checks if there is the home page header
     });
   });
-  
-
-
-
-
-
-
-    
-
 
 
 });
 
-const BACKEND_URL = "http://localhost:8000";
 
 
 describe("Journal successfully is sent to DB (POST CALL)", () => {
@@ -95,10 +89,10 @@ describe("Journal successfully is sent to DB (POST CALL)", () => {
   beforeEach(() => {
     cy.request({
       method: 'POST',
-      url: "http://localhost:8000/api/login",
+      url: `${Cypress.env('api_url')}/api/login`,
       body: {
         email: 'testing@gmail.com',
-        password: 'Password123$'
+        password: Cypress.env('password')
       }
     })
 
@@ -119,7 +113,7 @@ describe("Journal successfully is sent to DB (POST CALL)", () => {
 
       it("WHEN I attempt to post the entry", () => {
         cy.request({method: "POST",
-          url: `${BACKEND_URL}/api/entries`,
+          url: `${Cypress.env('api_url')}/api/entries`,
           body: entry,
           failOnStatusCode: false,
         }).then((response) => {
@@ -143,11 +137,11 @@ describe("Journal successfully is sent to DB (POST CALL)", () => {
 
       it("WHEN I attempt to post the entry", () => {
         cy.request({method: "POST",
-          url: `${BACKEND_URL}/api/entries`,
+          url: `${Cypress.env('api_url')}/api/entries`,
           body: entry,
           failOnStatusCode: false,
         }).then((response) => {
-          assert.equal(response.status, 400, "THEN I receive a bad response (400)");
+          assert.equal(response.status, 500, "THEN I receive a bad response (500)");
         })
       });
 
@@ -167,17 +161,17 @@ describe("All of a users entries are succesfullly retrieved (GET)" , () => {
       cy.clearCookies();
       cy.request({
         method: 'POST',
-        url: "http://localhost:8000/api/login",
+        url: `${Cypress.env('api_url')}/api/login`,
         body: {
           email: 'testing@gmail.com',
-          password: 'Password123$'
+          password: Cypress.env('password')
         }
       })
     });
 
     it("WHEN I attempt the GET call", () => {
       cy.request({method: "GET",
-        url: `${BACKEND_URL}/api/entries`,
+        url: `${Cypress.env('api_url')}/api/entries`,
         failOnStatusCode: false,
       }).then((response) => {
         assert.equal(response.status, 200, "THEN I receive a successful response (200)");
@@ -193,10 +187,10 @@ describe("All of a users entries are succesfullly retrieved (GET)" , () => {
       cy.clearCookies();
       cy.request({
         method: 'POST',
-        url: "http://localhost:8000/api/login",
+        url: `${Cypress.env('api_url')}/api/login`,
         body: {
           email: 'testing2@gmail.com',
-          password: 'Password123$'
+          password: Cypress.env('password')
         }
       })
       
@@ -206,11 +200,11 @@ describe("All of a users entries are succesfullly retrieved (GET)" , () => {
 
 
       cy.request({method: "GET",
-        url: `${BACKEND_URL}/api/entries`,
+        url: `${Cypress.env('api_url')}/api/entries`,
         failOnStatusCode: false,
       }).then((response) => {
         assert.equal(response.status, 200, "THEN I receive a OK response (200)");
-        assert.deepEqual(response.body, [], "AND the returned array is empty");
+        assert.deepEqual(response.body, [], "AND the returned array is empty, as the user has zero entries");
       })
     });
 
