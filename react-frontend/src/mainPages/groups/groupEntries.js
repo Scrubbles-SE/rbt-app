@@ -53,7 +53,12 @@ import {
     EntryReactions,
     Reaction,
     ReactionCount,
-    AdminDisplay
+    AdminDisplay,
+    ModalOverlay,
+    ModalContent,
+    ModalTitle,
+    ModalButtons,
+    ModalButton
 } from "./group.styles";
 
 /*
@@ -73,6 +78,15 @@ function GroupEntries({ userId }) {
     const [reactionCounts, setReactionCounts] = useState({});
     const [reactionNumbers, setReactionNumbers] = useState({});
     const [groupUsers] = useState(location.state?.users || []);
+    const [modalOpen, setModalOpen] = useState(false);
+
+    const handleOpenModal = () => {
+        setModalOpen(true);
+    };
+    
+    const handleCloseModal = () => {
+        setModalOpen(false);
+    };
 
     /**
      * Set the theme from local storage on component mount
@@ -397,6 +411,32 @@ function GroupEntries({ userId }) {
         }
     }, [entries, groupUsers]);
 
+    const handleLeaveGroup = async () => {
+        try {
+            // Remove user from group on the server
+            const response = await fetch(
+                `${API_BASE_URL}/api/groups/${groupId}/leave`,
+                {
+                    method: "DELETE",
+                    credentials: "include"
+                }
+            );
+    
+            if (!response.ok) {
+                throw new Error("Failed to leave group");
+            }
+    
+            // Close modal and navigate to groups page
+            setModalOpen(false);
+            navigate("/groups");
+    
+        } catch (error) {
+            console.error("Error leaving group:", error);
+            setModalOpen(false);
+        }
+    };
+    
+
     return (
         <ThemeProvider theme={theme}>
             <Container>
@@ -559,7 +599,51 @@ function GroupEntries({ userId }) {
                                 </EntryReactions>
                             </EntryCard>
                         ))}
+                        <div style={{
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            width: "100%",  // Keep full width
+                            padding: "30px", // Ensures spacing without extra height
+                        }}>
+                            <CodeButton
+                                onClick={handleOpenModal}
+                                style={{
+                                    backgroundColor: "#ff4d4d",
+                                    color: "white",
+                                    padding: "7px 10px",
+                                    borderRadius: "7px",
+                                    fontWeight: "bold",
+                                    display: "block",
+                                    textAlign: "center"
+                                }}
+                            >
+                                Leave Group
+                            </CodeButton>
+                        </div>
                     </EntriesContainer>
+                    {modalOpen && (
+                    <ModalOverlay onClick={handleCloseModal}>
+                        <ModalContent onClick={(e) => e.stopPropagation()}>
+                            <ModalTitle>Leaving Group</ModalTitle>
+                            <p>Are you sure you want to leave?</p>
+                            <ModalButtons>
+                                <ModalButton
+                                    className="cancel"
+                                    onClick={handleCloseModal}
+                                >
+                                    Cancel
+                                </ModalButton>
+                                <ModalButton
+                                    className="confirm"
+                                    onClick={handleLeaveGroup}
+                                >
+                                    Leave
+                                </ModalButton>
+                            </ModalButtons>
+                        </ModalContent>
+                    </ModalOverlay>
+                )}
                 </ContentContainer>
             </Container>
         </ThemeProvider>
