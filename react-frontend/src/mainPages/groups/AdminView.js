@@ -37,10 +37,11 @@ function AdminView({ groupUsers = [], groupId }) {
 
     const getUserObjects = async () => {
         const users = [];
+        console.log(groupUsers);
 
         for (let i = 0; i < groupUsers.length; i++) {
             const response = await fetch(
-                `${API_BASE_URL}/api/user/${groupUsers[i]}`,
+                `${API_BASE_URL}/api/user/${groupUsers[i].user_id}`,
                 {
                     credentials: "include" // Important for sending cookies
                 }
