@@ -74,13 +74,13 @@ function HomePage({ userId }) {
                 if (
                     users &&
                     users.length > 0 &&
-                    users[0].name
+                    users[0].first_name
                 ) {
-                    setUserName(users[0].name);
+                    setUserName(users[0].first_name);
                     // Update localStorage
                     localStorage.setItem(
                         "userName",
-                        users[0].name
+                        users[0].first_name
                     );
                 }
             }

@@ -1071,25 +1071,6 @@ app.get("/api/user/current", authMiddleware, (req, res) => {
     res.json({ userId: req.userId });
 });
 
-// Get a user by ID
-app.get(
-    "/api/user/:userId",
-    authMiddleware,
-    async (req, res) => {
-        try {
-            const userId = req.params.userId;
-            const foundUser = await findUserById(userId);
-            console.log("Retrieved user:", foundUser);
-            res.json(foundUser);
-        } catch (err) {
-            console.log(err);
-            res.status(500).json({
-                error: "Error getting user"
-            });
-        }
-    }
-);
-
 // Get user details
 app.get(
     "/api/user/details",
@@ -1114,6 +1095,25 @@ app.get(
             );
             res.status(500).json({
                 message: "Error fetching user details"
+            });
+        }
+    }
+);
+
+// Get a user by ID
+app.get(
+    "/api/user/:userId",
+    authMiddleware,
+    async (req, res) => {
+        try {
+            const userId = req.params.userId;
+            const foundUser = await findUserById(userId);
+            console.log("Retrieved user:", foundUser);
+            res.json(foundUser);
+        } catch (err) {
+            console.log(err);
+            res.status(500).json({
+                error: "Error getting user"
             });
         }
     }

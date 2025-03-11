@@ -6,7 +6,7 @@ import { openDB } from "idb";
 
 // Database configuration
 const DB_NAME = "rbtApp";
-const DB_VERSION = 6;
+const DB_VERSION = 5;
 
 /**
  * Initializes and sets up the IndexedDB database schema
@@ -113,8 +113,8 @@ export const userDB = {
     async update(user) {
         const db = await initDB();
         // If user has a name, store it in localStorage for quick access
-        if (user && user.name) {
-            localStorage.setItem("userName", user.name);
+        if (user && user.first_name) {
+            localStorage.setItem("userName", user.first_name);
         }
         return db.put("users", user);
     },
