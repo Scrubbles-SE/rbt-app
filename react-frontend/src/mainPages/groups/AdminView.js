@@ -47,8 +47,10 @@ function AdminView({ groupUsers = [], groupId }) {
             );
             if (!response.ok) {
                 const data = await response.json();
+                console.log(data);
                 throw new Error(
-                    data.message || "Failed to fetch groups"
+                    data.message ||
+                        "Failed to fetch group members"
                 );
             }
             const userObject = await response.json();
