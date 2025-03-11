@@ -293,18 +293,7 @@ export const EntrySection = styled.div`
     padding: 16px 20px;
     margin-bottom: 16px;
     border-radius: 12px;
-    background: ${(props) => {
-        switch (props.type) {
-            case "rose":
-                return "rgba(255, 143, 177, 0.1)";
-            case "thorn":
-                return "rgba(184, 58, 58, 0.1)";
-            case "bud":
-                return "rgba(152, 206, 0, 0.1)";
-            default:
-                return "transparent";
-        }
-    }};
+    background: var(--journal-background);
 
     &::before {
         content: "${(props) => {
