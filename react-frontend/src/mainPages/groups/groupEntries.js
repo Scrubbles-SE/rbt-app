@@ -100,6 +100,7 @@ function GroupEntries({ userId }) {
 
     useEffect(() => {
         getUsers();
+        // eslint-disable-next-line
     }, []);
 
     // Get gradient for the group

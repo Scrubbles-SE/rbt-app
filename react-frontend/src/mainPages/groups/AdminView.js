@@ -32,6 +32,7 @@ function AdminView({ groupUsers = [], groupId }) {
 
     useEffect(() => {
         getUserObjects();
+        // eslint-disable-next-line
     }, [groupUsers]);
 
     const getUserObjects = async () => {
