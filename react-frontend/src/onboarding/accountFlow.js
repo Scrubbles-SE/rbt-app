@@ -321,7 +321,6 @@ function AccountFlow({ setIsLoggedIn, setOnboardingComplete }) {
                     });
             } else {
                 // Fallback to showing instructions
-                window.location.href = window.location.href;
                 setStatusMessage(
                     "Tap the share icon in your browser and select 'Add to Home Screen'"
                 );

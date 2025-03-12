@@ -173,6 +173,7 @@ function SearchPage({ userId }) {
             console.log("Waiting for userId to be available");
             setIsLoading(false);
         }
+        // eslint-disable-next-line
     }, [userId]);
 
     // Navigate to tag detail view and preload entries
