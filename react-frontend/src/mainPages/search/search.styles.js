@@ -374,3 +374,77 @@ export const EntryNumber = styled.h4`
     text-align: right;
     padding-right: 0.5rem;
 `;
+
+export const SearchBarContainer = styled.div`
+    width: 100%;
+    margin-bottom: 1.5rem;
+    position: relative;
+`;
+
+export const SearchInput = styled.input`
+    width: 100%;
+    padding: 1rem 1rem 1rem 3rem;
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    background-color: var(--card-background);
+    color: var(--text-primary);
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+
+    &:focus {
+        outline: none;
+        border-color: var(--fill-color);
+        box-shadow: 0 4px 12px rgba(var(--fill-color-rgb), 0.25);
+    }
+
+    &::placeholder {
+        color: var(--text-secondary);
+        opacity: 0.8;
+    }
+`;
+
+export const SearchIcon = styled.div`
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+`;
+
+export const NoResultsContainer = styled.div`
+    text-align: center;
+    padding: 2rem 1rem;
+    color: var(--text-secondary);
+`;
+
+export const NoResultsIcon = styled.div`
+    font-size: 4rem;
+    color: var(--fill-color);
+    margin-bottom: 1rem;
+    opacity: 0.8;
+    display: flex;
+    justify-content: center;
+
+    svg {
+        font-size: 5rem;
+    }
+`;
+
+export const NoResultsText = styled.h3`
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+`;
+
+export const NoResultsSubText = styled.p`
+    font-size: 1rem;
+    max-width: 300px;
+    margin: 0 auto;
+`;

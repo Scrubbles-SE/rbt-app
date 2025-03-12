@@ -30,12 +30,38 @@ import Modal from "react-modal";
 // Modal hard-fix
 Modal.setAppElement("#root");
 
+// Helper functions for streak cache
+const getStoredStreak = () => {
+    const storedStreak = localStorage.getItem("streakCount");
+    const lastUpdate = localStorage.getItem("streakLastUpdate");
+
+    // If we have a stored streak and it was updated today, use it
+    if (storedStreak && lastUpdate) {
+        const today = new Date().toDateString();
+        // Only use cached streak if it was updated today
+        if (lastUpdate === today) {
+            return parseInt(storedStreak, 10);
+        }
+    }
+    return null;
+};
+
+const storeStreak = (count) => {
+    localStorage.setItem("streakCount", count.toString());
+    localStorage.setItem(
+        "streakLastUpdate",
+        new Date().toDateString()
+    );
+};
+
 function HomePage({ userId }) {
     const [date, setDate] = useState(new Date());
     const [selectedEntry, setSelectedEntry] = useState(null);
     const [recentEntry, setRecentEntry] = useState(null);
     const [entryDates, setEntryDates] = useState([]);
-    const [streakCount, setStreakCount] = useState(0);
+    const [streakCount, setStreakCount] = useState(
+        getStoredStreak() || 0
+    );
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [activeStartDate, setActiveStartDate] = useState(
         new Date()
@@ -327,7 +353,12 @@ function HomePage({ userId }) {
                     new Date(entry.date).toDateString()
                 );
                 setEntryDates(cachedDates);
-                calculateStreakCount(cachedDates);
+
+                // Only recalculate streak if we don't have a valid cached streak
+                if (getStoredStreak() === null) {
+                    calculateStreakCount(cachedDates);
+                }
+
                 setIsLoading(false); // Set loading false after cache load
             }
 
@@ -348,6 +379,8 @@ function HomePage({ userId }) {
                     );
 
                     setEntryDates(datesWithEntries);
+
+                    // Always recalculate streak with fresh data from server
                     calculateStreakCount(datesWithEntries);
 
                     // Update the cache
@@ -367,6 +400,7 @@ function HomePage({ userId }) {
             // Ensure we at least have an empty array
             setEntryDates([]);
             setStreakCount(0);
+            storeStreak(0);
         } finally {
             // Always ensure loading is false
             setIsLoading(false);
@@ -379,6 +413,7 @@ function HomePage({ userId }) {
         // If no dates, set streak to 0
         if (!dates || dates.length === 0) {
             setStreakCount(0);
+            storeStreak(0);
             return;
         }
 
@@ -401,6 +436,7 @@ function HomePage({ userId }) {
             sortedDates[0] < yesterday
         ) {
             setStreakCount(0);
+            storeStreak(0);
             return;
         }
 
@@ -435,6 +471,7 @@ function HomePage({ userId }) {
         }
 
         setStreakCount(streak);
+        storeStreak(streak);
     };
 
     // Initialize all data on component mount

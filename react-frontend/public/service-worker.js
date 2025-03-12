@@ -1,9 +1,9 @@
 /* eslint-disable no-restricted-globals */
-const CACHE_NAME = "rbt-cache-v2";
+const CACHE_NAME = "rbt-cache-v3";
 const API_CACHE = "rbt-api-cache";
 
 // Add version for better tracking
-const SW_VERSION = "v2.0";
+const SW_VERSION = "v3.0";
 console.log("Service Worker version:", SW_VERSION);
 
 // Assets that need to be available offline

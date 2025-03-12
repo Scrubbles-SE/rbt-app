@@ -45,7 +45,8 @@ import {
     FeatureIcon,
     FeatureTitle,
     FeatureDesc,
-    FeatureGrid
+    FeatureGrid,
+    FeatureContent
 } from "./account.styles";
 
 // Services
@@ -261,19 +262,80 @@ function AccountFlow({ setIsLoggedIn, setOnboardingComplete }) {
 
     const handleAndroidInstall = async () => {
         if (deferredPrompt) {
-            await deferredPrompt.prompt();
-            const { outcome } = await deferredPrompt.userChoice;
-            if (outcome === "accepted") {
-                setDeferredPrompt(null);
-                setShowInstallModal(false);
-                setCurrentStage(STAGES.EMAIL);
+            try {
+                // Prompt user to install
+                await deferredPrompt.prompt();
+                const { outcome } =
+                    await deferredPrompt.userChoice;
+
+                if (outcome === "accepted") {
+                    console.log(
+                        "User accepted the install prompt"
+                    );
+                    setDeferredPrompt(null);
+                    setShowInstallModal(false);
+                    setCurrentStage(STAGES.EMAIL);
+                } else {
+                    console.log(
+                        "User dismissed the install prompt"
+                    );
+                    setShowInstallModal(false);
+                }
+            } catch (error) {
+                console.error("Install prompt error:", error);
+                setStatusMessage(
+                    "Installation failed. Please try again."
+                );
+                setTimeout(() => setStatusMessage(""), 3000);
             }
+        } else {
+            // Fallback for when the deferredPrompt is not available
+            setStatusMessage(
+                "Please use your browser's install function or add to home screen option."
+            );
+            setTimeout(() => setStatusMessage(""), 5000);
+            setShowInstallModal(false);
         }
     };
 
     const handleIOSInstall = () => {
-        window.location.href =
-            'data:text/html;charset=utf-8,<html><head><meta name="viewport" content="width=device-width, initial-scale=1"></head><body style="margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; font-family: sans-serif; text-align: center; padding: 20px;"><div>Tap the share button below<br>↓<br>Then select "Add to Home Screen"</div></body></html>';
+        try {
+            // Modern approach - Use the Web Share API if available
+            if (navigator.share) {
+                navigator
+                    .share({
+                        title: "Install RBT App",
+                        url: window.location.href
+                    })
+                    .then(() => {
+                        setStatusMessage(
+                            "Look for 'Add to Home Screen' in the share menu"
+                        );
+                        setTimeout(
+                            () => setStatusMessage(""),
+                            5000
+                        );
+                    })
+                    .catch((error) => {
+                        console.error("Error sharing:", error);
+                    });
+            } else {
+                // Fallback to showing instructions
+                window.location.href = window.location.href;
+                setStatusMessage(
+                    "Tap the share icon in your browser and select 'Add to Home Screen'"
+                );
+                setTimeout(() => setStatusMessage(""), 5000);
+            }
+        } catch (error) {
+            console.error("Share error:", error);
+            // Final fallback
+            alert(
+                "To install: tap the share icon in your browser and select 'Add to Home Screen'"
+            );
+        }
+
+        setShowInstallModal(false);
     };
 
     const handleThemeChange = (newTheme) => {
@@ -516,36 +578,49 @@ function AccountFlow({ setIsLoggedIn, setOnboardingComplete }) {
                             a whole new way.
                         </SubTitle>
                         <FeatureGrid>
-                            <FeatureItem>
-                                <FeatureIcon background="linear-gradient(135deg, #f6becb, #f2c4bb)">
+                            <FeatureItem accentColor="var(--fill-color)">
+                                <FeatureIcon background="var(--fill-color)">
                                     🌹
                                 </FeatureIcon>
-                                <FeatureTitle>
-                                    Rose
-                                </FeatureTitle>
-                                <FeatureDesc>
-                                    Highlight positive moments
-                                </FeatureDesc>
+                                <FeatureContent>
+                                    <FeatureTitle>
+                                        Rose
+                                    </FeatureTitle>
+                                    <FeatureDesc>
+                                        Celebrate your daily
+                                        victories and positive
+                                        moments
+                                    </FeatureDesc>
+                                </FeatureContent>
                             </FeatureItem>
-                            <FeatureItem>
-                                <FeatureIcon background="linear-gradient(135deg, #d1e4d1, #abd5aa)">
+                            <FeatureItem accentColor="var(--button-color)">
+                                <FeatureIcon background="var(--button-color)">
                                     🌱
                                 </FeatureIcon>
-                                <FeatureTitle>Bud</FeatureTitle>
-                                <FeatureDesc>
-                                    Record growth opportunities
-                                </FeatureDesc>
+                                <FeatureContent>
+                                    <FeatureTitle>
+                                        Bud
+                                    </FeatureTitle>
+                                    <FeatureDesc>
+                                        Identify areas for
+                                        personal growth and
+                                        development
+                                    </FeatureDesc>
+                                </FeatureContent>
                             </FeatureItem>
-                            <FeatureItem>
-                                <FeatureIcon background="linear-gradient(135deg, #c9e3f5, #a0cff0)">
+                            <FeatureItem accentColor="var(--journal-background)">
+                                <FeatureIcon background="var(--journal-background)">
                                     🌿
                                 </FeatureIcon>
-                                <FeatureTitle>
-                                    Thorn
-                                </FeatureTitle>
-                                <FeatureDesc>
-                                    Document daily challenges
-                                </FeatureDesc>
+                                <FeatureContent>
+                                    <FeatureTitle>
+                                        Thorn
+                                    </FeatureTitle>
+                                    <FeatureDesc>
+                                        Acknowledge difficulties
+                                        and learn from them
+                                    </FeatureDesc>
+                                </FeatureContent>
                             </FeatureItem>
                         </FeatureGrid>
                     </OnboardingContent>
@@ -653,14 +728,13 @@ function AccountFlow({ setIsLoggedIn, setOnboardingComplete }) {
                     <Button
                         onClick={completeOnboarding}
                         style={{
-                            background:
-                                "linear-gradient(135deg, #859880, #2E5141)",
+                            background: "var(--fill-color)",
                             fontSize: "18px",
                             padding: "18px",
-                            color: "white",
+                            color: "var(--text-primary)",
                             fontWeight: "700",
                             boxShadow:
-                                "0 6px 16px rgba(45, 84, 65, 0.2)"
+                                "0 6px 16px var(--hover-color)"
                         }}
                     >
                         Begin Your Journey
@@ -790,24 +864,30 @@ function AccountFlow({ setIsLoggedIn, setOnboardingComplete }) {
                         <InstallInstructions>
                             {isIOS ? (
                                 <>
-                                    <p>Quick Install Guide</p>
+                                    <p>Install RBT on iOS</p>
                                     <p className="subtitle">
-                                        1. Tap the share button
-                                        below
+                                        When the share sheet
+                                        opens:
                                         <br />
-                                        2. Click "Add to Home
-                                        Screen"
+                                        1. Tap the Share icon
                                         <br />
-                                        3. Tap "Add" to finish
+                                        2. Scroll to find "Add
+                                        to Home Screen"
+                                        <br />
+                                        3. Tap "Add" to complete
+                                        installation
                                     </p>
                                 </>
                             ) : (
                                 <>
-                                    <p>Install RBT</p>
+                                    <p>
+                                        Install RBT on Android
+                                    </p>
                                     <p className="subtitle">
                                         Add to your home screen
-                                        for quick access and a
-                                        better experience
+                                        for the best experience
+                                        with offline access and
+                                        faster loading.
                                     </p>
                                 </>
                             )}
@@ -818,9 +898,10 @@ function AccountFlow({ setIsLoggedIn, setOnboardingComplete }) {
                                     ? handleIOSInstall
                                     : handleAndroidInstall
                             }
+                            isIOS={isIOS}
                         >
                             {isIOS
-                                ? "Share to Start"
+                                ? "Open Share Menu"
                                 : "Install App"}
                         </InstallButton>
                     </ModalContent>

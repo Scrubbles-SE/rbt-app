@@ -6,15 +6,23 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { IoFolderOutline } from "react-icons/io5";
 import { MdTagFaces } from "react-icons/md";
+import { FaSearch } from "react-icons/fa";
+import { HiOutlineSearchCircle } from "react-icons/hi";
 import {
     Title,
     PageContainer,
     TagFolder,
-    Subtitle,
     TagContent,
     Folder,
     TagName,
-    EntryNumber
+    EntryNumber,
+    SearchBarContainer,
+    SearchInput,
+    SearchIcon,
+    NoResultsContainer,
+    NoResultsIcon,
+    NoResultsText,
+    NoResultsSubText
 } from "./search.styles";
 import { entriesDB, tagsDB } from "../../utils/db";
 import { API_BASE_URL } from "../../utils/config.js";
@@ -22,7 +30,14 @@ import { API_BASE_URL } from "../../utils/config.js";
 function SearchPage({ userId }) {
     const [tags, setTags] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [searchQuery, setSearchQuery] = useState("");
     const navigate = useNavigate();
+
+    const filteredTags = tags.filter((tag) =>
+        tag.tag_name
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase())
+    );
 
     // Fetch a single entry by ID with offline-first approach
     const fetchEntry = async (entryId) => {
@@ -76,15 +91,22 @@ function SearchPage({ userId }) {
 
     // Fetch all tags with associated entries using offline-first approach
     const fetchTags = async () => {
+        if (!userId) {
+            console.log(
+                "No userId provided, skipping tag fetch"
+            );
+            setIsLoading(false);
+            return;
+        }
+
         setIsLoading(true);
+        console.log("Fetching tags for userId:", userId);
+
+        let tagsFromServer = null;
+        let networkFailed = false;
 
         try {
-            const cachedTags = await tagsDB.getAll(userId);
-
-            if (cachedTags) {
-                setTags(cachedTags);
-            }
-
+            // Try to get tags from the server first
             try {
                 const response = await fetch(
                     `${API_BASE_URL}/api/entries/tags/${userId}`,
@@ -100,42 +122,57 @@ function SearchPage({ userId }) {
                     );
                 }
 
-                const tags = await response.json();
-                console.log("User's tags fetched:", tags);
-                setTags(tags || []);
+                tagsFromServer = await response.json();
+                console.log(
+                    "User's tags fetched from server:",
+                    tagsFromServer
+                );
 
                 // Update local cache with latest tag data
-                if (tags && tags.length > 0) {
-                    for (const tag of tags) {
+                if (
+                    tagsFromServer &&
+                    tagsFromServer.length > 0
+                ) {
+                    for (const tag of tagsFromServer) {
                         await tagsDB.update({
                             ...tag,
                             user_id: userId
                         });
                     }
                 }
+
+                // Set tags from server immediately
+                setTags(tagsFromServer || []);
             } catch (networkError) {
                 console.error(
-                    "Network tags request failed, using cached data:",
+                    "Network tags request failed, will use cached data:",
                     networkError
                 );
+                networkFailed = true;
+            }
+
+            // If network request failed, fall back to cached tags
+            if (networkFailed) {
+                const cachedTags = await tagsDB.getAll(userId);
+                console.log("Using cached tags:", cachedTags);
+                setTags(cachedTags || []);
             }
         } catch (error) {
             console.error("Error loading tags:", error);
             setTags([]);
-        }
-
-        setIsLoading(false);
-    };
-
-    // Combined effect that runs on both mount and userId changes
-    useEffect(() => {
-        if (userId) {
-            console.log("Fetching tags for userId:", userId);
-            fetchTags();
-        } else {
+        } finally {
             setIsLoading(false);
         }
-        // eslint-disable-next-line
+    };
+
+    // Effect to fetch tags when component mounts or userId changes
+    useEffect(() => {
+        if (userId) {
+            fetchTags();
+        } else {
+            console.log("Waiting for userId to be available");
+            setIsLoading(false);
+        }
     }, [userId]);
 
     // Navigate to tag detail view and preload entries
@@ -165,7 +202,22 @@ function SearchPage({ userId }) {
 
     return (
         <PageContainer>
-            {/* no tags view */}
+            {/* Search bar */}
+            <SearchBarContainer>
+                <SearchIcon>
+                    <FaSearch />
+                </SearchIcon>
+                <SearchInput
+                    type="text"
+                    placeholder="Search your tag folders"
+                    value={searchQuery}
+                    onChange={(e) =>
+                        setSearchQuery(e.target.value)
+                    }
+                />
+            </SearchBarContainer>
+
+            {/* Tags list or no tags/no results state */}
             {tags.length === 0 ? (
                 <div
                     style={{
@@ -193,11 +245,23 @@ function SearchPage({ userId }) {
                         and find them easier.
                     </p>
                 </div>
+            ) : filteredTags.length === 0 ? (
+                <NoResultsContainer>
+                    <NoResultsIcon>
+                        <HiOutlineSearchCircle />
+                    </NoResultsIcon>
+                    <NoResultsText>
+                        No Results Found
+                    </NoResultsText>
+                    <NoResultsSubText>
+                        No tag folders match your search query.
+                        Try a different search term.
+                    </NoResultsSubText>
+                </NoResultsContainer>
             ) : (
-                // display tags
+                // display filtered tags
                 <>
-                    <Subtitle>Your Tags</Subtitle>
-                    {tags.map((tag) => (
+                    {filteredTags.map((tag) => (
                         <TagFolder
                             key={tag._id}
                             onClick={() => navigateToTag(tag)}

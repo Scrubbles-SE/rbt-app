@@ -74,9 +74,9 @@ export const HeaderGroup = styled.div`
 
 // Improved logo display
 export const IconDisplay = styled.div`
-    width: 90px;
-    height: 90px;
-    margin-bottom: 20px;
+    width: 110px;
+    height: 110px;
+    margin-bottom: 15px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -277,11 +277,11 @@ export const AlertText = styled.span`
 
 export const UserName = styled.span`
     font-family: var(--font-header);
-    font-size: 32px;
-    font-weight: 700;
+    font-size: 44px;
+    font-weight: 800;
     font-style: italic;
     display: block;
-    color: var(--fill-color);
+    color: #ed7095;
     position: relative;
     margin-top: 4px;
     margin-bottom: 8px;
@@ -572,6 +572,23 @@ export const InstallButton = styled(Button)`
     transition: all 0.2s ease;
     border-radius: 16px;
     text-transform: none;
+    background: ${(props) =>
+        props.isIOS
+            ? "linear-gradient(135deg, #5ac8fa, #007aff)"
+            : "linear-gradient(135deg, #8bc34a, #4CAF50)"};
+    box-shadow: ${(props) =>
+        props.isIOS
+            ? "0 4px 12px rgba(0, 122, 255, 0.3)"
+            : "0 4px 12px rgba(76, 175, 80, 0.3)"};
+    color: white;
+
+    &:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: ${(props) =>
+            props.isIOS
+                ? "0 8px 20px rgba(0, 122, 255, 0.4)"
+                : "0 8px 20px rgba(76, 175, 80, 0.4)"};
+    }
 `;
 
 // Modern theme selection components
@@ -629,48 +646,112 @@ export const ThemeOption = styled.div`
 
 // Feature components
 export const FeatureGrid = styled.div`
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    display: flex;
+    flex-direction: column;
     gap: 16px;
     width: 100%;
-    max-width: 400px;
-    margin: 0 auto 24px;
+    max-width: 500px;
+    margin: 0 auto 32px;
+    padding: 0 16px;
 `;
 
 export const FeatureItem = styled.div`
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
-    gap: 12px;
-    padding: 12px 8px;
+    background: var(--card-background);
     border-radius: 16px;
-    background-color: var(--card-background);
-    box-shadow: 0 2px 8px var(--hover-color);
+    padding: 18px 20px;
+    box-shadow: 0 4px 12px var(--hover-color);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+
+    &:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px var(--hover-color);
+    }
+
+    &::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 6px;
+        height: 100%;
+        background: ${(props) =>
+            props.accentColor || "var(--fill-color)"};
+    }
+
+    &::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(
+            to right,
+            ${(props) =>
+                    `${props.accentColor || "var(--fill-color)"}10`}
+                0%,
+            transparent 30%
+        );
+        z-index: 0;
+        pointer-events: none;
+    }
+`;
+
+export const FeatureContent = styled.div`
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    z-index: 1;
 `;
 
 export const FeatureIcon = styled.div`
-    width: 64px;
-    height: 64px;
-    border-radius: 16px;
-    background: ${(props) => props.background};
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    background: ${(props) =>
+        props.background || "var(--fill-color)"};
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 28px;
-    margin-bottom: 4px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    margin-right: 20px;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px var(--hover-color);
+    position: relative;
+    z-index: 1;
+
+    &::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        border-radius: 50%;
+        background: radial-gradient(
+            circle at 30% 30%,
+            rgba(255, 255, 255, 0.4),
+            transparent 70%
+        );
+        z-index: 1;
+    }
 `;
 
 export const FeatureTitle = styled.div`
     font-weight: 700;
-    font-size: 16px;
+    font-size: 18px;
     color: var(--text-primary);
-    margin-bottom: 2px;
+    margin-bottom: 6px;
+    font-family: var(--font-header);
 `;
 
 export const FeatureDesc = styled.div`
     font-size: 14px;
     color: var(--text-secondary);
-    text-align: center;
-    line-height: 1.3;
+    line-height: 1.4;
 `;
