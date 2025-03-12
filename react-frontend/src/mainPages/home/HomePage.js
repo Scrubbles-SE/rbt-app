@@ -447,105 +447,124 @@ function HomePage({ userId }) {
 
     // new groups notification function
     const checkGroupPosts = useCallback(async () => {
+        if (!userId) {
+            console.log("checkGroupsPosts aborted: userId is null");
+            return;
+        }
         try {
-            console.log("userID: " + userId)
+            console.log("userID: ", userId);
 
             // get user groups 
             const groupMemberships = await membersDB.getGroupIds(userId); // 
-            console.log("Fetched all group memberships in DB:", groupMemberships);
+            console.log("Group Memberships:", groupMemberships);
 
-            const groupIds = groupMemberships.map((membership) => membership.group_id);
-            console.log("Extracted group IDs:", groupIds);
-
-            // if no groups
+            const groupIds = groupMemberships.map(membership => membership.group_id);
+            console.log("Extracted Group IDs:", groupIds);
             if (groupIds.length === 0) {
                 setGroupNotification("You're not in any groups yet.");
                 return;
             }
 
-            // fetch entries from indexeddb
-            
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            let newPosts = [];
-
-            const cachedEntries = await entriesDB.getAllOverall();
-            console.log("Cached entries:", cachedEntries);
-
-            newPosts = cachedEntries.filter(
-                (entry) =>
-                    entry.public && 
-                    entry.group_id && 
-                    new Date(entry.date).toDateString() === today.toDateString() &&
-                    groupIds.includes(entry.group_id)
-            );
-
-            console.log("New posts from IndexedDB:", newPosts);
-
-            // if online fetch new data
-            try {
-                const response = await fetch(
-                    `${API_BASE_URL}/api/entries`,
-                    {
-                        credentials: "include"
-                    }
-                );
-
-                if (response.ok) {
-                    const serverEntries = await response.json();
-                    console.log("Fetched entries from API:", serverEntries);
-
-                    // filter today's public posts from groups
-                    const freshEntries = serverEntries.filter(
-                        (entry) => 
-                            entry.public && 
-                            entry.group_id &&
-                            new Date(entry.date).toDateString() === today.toDateString() &&
-                            groupIds.includes(entry.group_id)
-                    );
-
-                    console.log("New posts from API:", freshEntries);
-
-                    // remove dupicates 
-                    const uniqueEntries = [...newPosts, ...freshEntries].reduce(
-                        (acc, entry) => {
-                            if (!acc.some(e => e._id === entry._id)) {
-                                acc.push(entry);
-                            }
-                            return acc;
-                        },
-                        []
-                    );
-
-                    newPosts = uniqueEntries;
-
-                    // update indexeddb w new data
-                    for (const entry of freshEntries) {
-                        const existingEntries = await entriesDB.getAllOverall();
-                        if (!existingEntries.some((e) => e._id === entry._id)) {
-                            await entriesDB.add(entry);
-                        }
-                    }
-                }
-            } catch (networkError) {
-                console.log("Network error fetching new group posts:", networkError);
+            let groupUserIds = [];
+            for (const groupId of groupIds) {
+                const members = await membersDB.getUserIds(groupId);
+                groupUserIds = [...groupUserIds, ...members.map(m => m.user_id)];
             }
 
-            // new posts message 
-            if (newPosts.length > 0) {
+            groupUserIds = [...new Set(groupUserIds)];
+            console.log("Extracted Group Member IDs:", groupUserIds);
+
+            let cachedGroupEntries = [];
+            for (let i = 0; i < groupUserIds.length; i++) {
+                const userEntry = await entriesDB.getMostRecentByUserId(groupUserIds[i]);
+                if (userEntry && userEntry.is_public && userEntry.group_id) {
+                    cachedGroupEntries.push(userEntry);
+                }
+            }
+            console.log("cashed group entries:", cachedGroupEntries);
+
+            let allGroupEntries = [];
+            for (const groupId of groupIds) {
+                try {
+                    const response = await fetch(
+                        `${API_BASE_URL}/api/groups/${groupId}/entries`,
+                        {
+                            credentials: "include"
+                        }
+                    );
+
+                    if (response.ok) {
+                        let groupEntries = await response.json();
+                        groupEntries = groupEntries.map(entry => ({
+                            ...entry,
+                            group_id: groupId
+                        }));
+                        console.log(`Fetched & Updated Entries for Group ${groupId}:`, groupEntries);
+                        allGroupEntries.push(...groupEntries);
+                    } else {
+                        console.warn(`No posts found for group ${groupId}`);
+                    }
+                } catch (error) {
+                        console.error(`Error fetching entries for group ${groupId}:`, error);
+                }
+            }
+            
+                
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            // filter today's public posts from groups
+            const freshEntries = allGroupEntries.filter(
+                (entry) => {
+                    console.log("Checking entry:", entry);
+
+                    if (!entry.group_id) {
+                        console.warn("Entry missing group_id:", entry);
+                    }
+                    const entryDate = new Date(entry.date);
+                    entryDate.setHours(0, 0, 0, 0);
+
+                    return (
+                        (entry.is_public || entry.public) &&
+                        entry.group_id &&
+                        entryDate.getTime() === today.getTime()
+                    );
+                }
+            );
+            console.log("New posts from API:", freshEntries);
+
+            const uniqueEntries = [...cachedGroupEntries, ...freshEntries].reduce((acc, entry) => {
+                if (!acc.some(e => e._id === entry._id)) {
+                    acc.push(entry);
+                }
+                return acc;
+            }, []);
+
+            for (const entry of freshEntries) {
+                const existingEntries = await entriesDB.getAllOverall();
+                if (!existingEntries.some(e => e._id === entry._id)) {
+                    await entriesDB.add({ ...entry, group_id: entry.group_id || null });
+                }
+            }
+
+            if (uniqueEntries.length > 0) {
                 setGroupNotification("New posts have been made in your groups!");
             } else {
                 setGroupNotification("No new posts in your groups today.");
             }
-        } catch (error) {
-            console.error("Error checking group posts:", error);
-            setGroupNotification("Error loading group posts.");
+    } catch (error) {
+        console.error("Error checking group posts:", error);
+        setGroupNotification("Error loading group posts.");
         }
     }, [userId]); 
 
     // Initialize all data on component mount
     useEffect(() => {
         const initializeData = async () => {
+            if (!userId) {
+                console.log("initializeData aborted: userId is null");
+                return;
+            }
             try {
                 await fetchUserDetails();
                 await fetchMostRecentEntry();
@@ -566,6 +585,8 @@ function HomePage({ userId }) {
         fetchAllEntryDates,
         checkGroupPosts // add 
     ]);
+
+
 
     // Handle date selection on calendar
     const handleDateChange = async (newDate) => {
