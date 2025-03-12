@@ -98,7 +98,13 @@ app.use(
             );
             return callback(null, true);
         },
-        credentials: true
+        credentials: true,
+        methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allowedHeaders: [
+            "Content-Type",
+            "Authorization",
+            "X-Requested-With"
+        ]
     })
 );
 app.use(express.json());
@@ -1112,6 +1118,25 @@ app.get(
             );
             res.status(500).json({
                 message: "Error fetching user details"
+            });
+        }
+    }
+);
+
+// Get a user by ID
+app.get(
+    "/api/user/:userId",
+    authMiddleware,
+    async (req, res) => {
+        try {
+            const userId = req.params.userId;
+            const foundUser = await findUserById(userId);
+            console.log("Retrieved user:", foundUser);
+            res.json(foundUser);
+        } catch (err) {
+            console.log(err);
+            res.status(500).json({
+                error: "Error getting user"
             });
         }
     }

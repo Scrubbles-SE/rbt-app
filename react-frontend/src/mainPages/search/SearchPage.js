@@ -19,26 +19,6 @@ import {
 import { entriesDB, tagsDB } from "../../utils/db";
 import { API_BASE_URL } from "../../utils/config.js";
 
-// import styled from "styled-components";
-
-// const SearchContainer = styled.div`
-//     display: flex;
-//     justify-content: center;
-//     align-items: center;
-//     height: 100%;
-// `;
-
-// const SearchText = styled.h1`
-//     font-size: 2rem;
-//     color: #2c3e50;
-// `;
-
-// function SearchPage() {
-//     return (
-//         <SearchContainer>
-//             <SearchText>Search Page</SearchText>
-//         </SearchContainer>
-
 function SearchPage({ userId }) {
     const [tags, setTags] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -101,7 +81,7 @@ function SearchPage({ userId }) {
         try {
             const cachedTags = await tagsDB.getAll(userId);
 
-            if (cachedTags && cachedTags.length > 0) {
+            if (cachedTags) {
                 setTags(cachedTags);
             }
 
@@ -121,12 +101,11 @@ function SearchPage({ userId }) {
                 }
 
                 const tags = await response.json();
+                console.log("User's tags fetched:", tags);
+                setTags(tags || []);
 
-                if (tags) {
-                    console.log("User's tags fetched:", tags);
-                    setTags(tags);
-
-                    // Update local cache with latest tag data
+                // Update local cache with latest tag data
+                if (tags && tags.length > 0) {
                     for (const tag of tags) {
                         await tagsDB.update({
                             ...tag,
@@ -142,14 +121,19 @@ function SearchPage({ userId }) {
             }
         } catch (error) {
             console.error("Error loading tags:", error);
+            setTags([]);
         }
 
         setIsLoading(false);
     };
 
+    // Combined effect that runs on both mount and userId changes
     useEffect(() => {
         if (userId) {
+            console.log("Fetching tags for userId:", userId);
             fetchTags();
+        } else {
+            setIsLoading(false);
         }
         // eslint-disable-next-line
     }, [userId]);

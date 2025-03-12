@@ -28,12 +28,12 @@ function AdminView({ groupUsers = [], groupId, selfId }) {
     useLayoutEffect(() => {
         const currentTheme = localStorage.getItem("theme");
         setTheme({ mode: currentTheme || "light-mode" });
-        // console.log(userObjects);
         // eslint-disable-next-line
     }, []);
 
     useEffect(() => {
         getUserObjects();
+        // eslint-disable-next-line
     }, [groupUsers]);
 
     const getUserObjects = async () => {
