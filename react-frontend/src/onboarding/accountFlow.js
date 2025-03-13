@@ -298,45 +298,6 @@ function AccountFlow({ setIsLoggedIn, setOnboardingComplete }) {
         }
     };
 
-    const handleIOSInstall = () => {
-        try {
-            // Modern approach - Use the Web Share API if available
-            if (navigator.share) {
-                navigator
-                    .share({
-                        title: "Install RBT App",
-                        url: window.location.href
-                    })
-                    .then(() => {
-                        setStatusMessage(
-                            "Look for 'Add to Home Screen' in the share menu"
-                        );
-                        setTimeout(
-                            () => setStatusMessage(""),
-                            5000
-                        );
-                    })
-                    .catch((error) => {
-                        console.error("Error sharing:", error);
-                    });
-            } else {
-                // Fallback to showing instructions
-                setStatusMessage(
-                    "Tap the share icon in your browser and select 'Add to Home Screen'"
-                );
-                setTimeout(() => setStatusMessage(""), 5000);
-            }
-        } catch (error) {
-            console.error("Share error:", error);
-            // Final fallback
-            alert(
-                "To install: tap the share icon in your browser and select 'Add to Home Screen'"
-            );
-        }
-
-        setShowInstallModal(false);
-    };
-
     const handleThemeChange = (newTheme) => {
         setTheme(newTheme);
         // Theme is applied through the useEffect hook
@@ -865,8 +826,6 @@ function AccountFlow({ setIsLoggedIn, setOnboardingComplete }) {
                                 <>
                                     <p>Install RBT on iOS</p>
                                     <p className="subtitle">
-                                        When the share sheet
-                                        opens:
                                         <br />
                                         1. Tap the Share icon
                                         <br />
@@ -891,18 +850,13 @@ function AccountFlow({ setIsLoggedIn, setOnboardingComplete }) {
                                 </>
                             )}
                         </InstallInstructions>
-                        <InstallButton
-                            onClick={
-                                isIOS
-                                    ? handleIOSInstall
-                                    : handleAndroidInstall
-                            }
-                            isIOS={isIOS}
-                        >
-                            {isIOS
-                                ? "Open Share Menu"
-                                : "Install App"}
-                        </InstallButton>
+                        {!isIOS && (
+                            <InstallButton
+                                onClick={handleAndroidInstall}
+                            >
+                                Install App
+                            </InstallButton>
+                        )}
                     </ModalContent>
                 )}
             </OnboardingContainer>
