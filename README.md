@@ -89,6 +89,35 @@ All files        |    100  |    100   |   100   |   100   |
 
 [To be filled in: other tests]
 
+#### Cypress E2E Testing
+
+To set up Cypress E2E testing, insert the environment keys into cypress.config.js (with the proper env values)
+
+```js
+const { defineConfig } = require("cypress");
+
+module.exports = defineConfig({
+  e2e: {
+    setupNodeEvents(on, config) {
+      // implement node event listeners here
+    },
+    testIsolation: false,
+    env: {
+    "api_url": "XXXXXXXX",
+    "password": "XXXXXXXX"
+    }
+  },
+});
+
+```
+
+
+To run Cypress E2E testing, type
+```bash
+npx cypress open
+```
+
+
 ### Tech Stack
 
 #### Core Technologies
