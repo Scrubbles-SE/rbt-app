@@ -3,6 +3,7 @@
 # dependencies
 /node_modules
 /.env
+/cypress.config.js
 /react-frontend/node_modules
 /react-frontend/build
 /express-backend/node_modules
