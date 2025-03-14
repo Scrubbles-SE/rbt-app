@@ -8,8 +8,4 @@ module.exports = defineConfig({
     testIsolation: false,
 
   },
-  env: {
-    "api_url": "https://rbt-backend.azurewebsites.net",
-    "password": "Password123$"
-}
 });
