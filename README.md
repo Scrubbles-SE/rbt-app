@@ -35,7 +35,7 @@ A mobile-first progressive web application for creating, saving, and sharing Ros
 ### Full Documentation
 
 Product specification available at:
-https://cpslo-my.sharepoint.com/:b:/g/personal/pjones15_calpoly_edu/EW_O0ofp7f9Cpm9mq8KCwU8BgxeyUlGi8LrXj0IQUS_bwA?e=JT287A
+https://docs.google.com/document/d/1Q9Pb7pFX5MPUqU08wkb596TnNUbwz5IgTGI1K2bUjIk/edit?usp=sharing
 
 ## Development
 
