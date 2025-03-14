@@ -28,14 +28,10 @@ A mobile-first progressive web application for creating, saving, and sharing Ros
 - Groups: Join or create a group to share your entries with others
 - Settings: Manage your account and groups
 
-### Branding
-
-[To be filled in: Logo, color scheme, and typography]
-
 ### Full Documentation
 
 Product specification available at:
-https://cpslo-my.sharepoint.com/:b:/g/personal/pjones15_calpoly_edu/EW_O0ofp7f9Cpm9mq8KCwU8BgxeyUlGi8LrXj0IQUS_bwA?e=JT287A
+https://docs.google.com/document/d/1Q9Pb7pFX5MPUqU08wkb596TnNUbwz5IgTGI1K2bUjIk/edit?usp=sharing
 
 ## Development
 
@@ -59,6 +55,12 @@ Our project utilizes a mono-repo strategy with separate directories for front an
     ```bash
     npm start
     ```
+In development it is important to enable the following settings:
+- Autoformat on save and focus change in VSCode
+- Formatter: Prettier
+  
+These settings will ensure all code is in the same format.
+Also, before pushing change, it is important to run "npm run lint" and "npm run build" and fix any linting errors.
 
 ### Testing
 
@@ -122,6 +124,7 @@ Our application is deployed using Azure services:
 
 **Frontend**
 
+Avaliable at: https://lemon-bush-09e7af61e.6.azurestaticapps.net
 - Deployed to Azure Static Web Apps
 - Triggered on push to main branch
 - Configures environment variables for backend API connection
@@ -129,6 +132,7 @@ Our application is deployed using Azure services:
 
 **Backend**
 
+Avaliable at: https://rbt-backend.azurewebsites.net
 - Deployed to Azure App Service
 - Packages and uploads backend code as a zip artifact
 - Sets up database connection and environment variables
