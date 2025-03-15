@@ -24,7 +24,7 @@ import {
     FiChevronLeft
 } from "react-icons/fi";
 import { MdOutlinePeopleOutline } from "react-icons/md";
-import { ThemeProvider } from "styled-components";
+import { ThemeProvider, styled } from "styled-components";
 import AdminView from "./AdminView.js";
 
 import { membersDB, entriesDB } from "../../utils/db";
@@ -61,6 +61,35 @@ import {
     ModalButton
 } from "./group.styles";
 
+// Custom styles for proper full-screen scrolling
+// Override the container styles for full-screen view
+const FullScreenContainer = styled(Container)`
+    height: 100vh;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+    overflow-y: auto;
+    background-color: var(--background-color);
+
+    @media (max-width: 768px) {
+        padding: 0;
+    }
+`;
+
+// Override the content container for proper scrolling
+const FullScreenContentContainer = styled(ContentContainer)`
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-height: 100%;
+    padding-bottom: 40px;
+    overflow-y: visible;
+`;
+
 /*
 RENDER
 */
@@ -79,6 +108,11 @@ function GroupEntries({ userId }) {
     const [reactionNumbers, setReactionNumbers] = useState({});
     const [groupUsers, setGroupUsers] = useState([]);
     const [modalOpen, setModalOpen] = useState(false);
+
+    // Scroll to top on mount
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
 
     const handleOpenModal = () => {
         setModalOpen(true);
@@ -100,6 +134,11 @@ function GroupEntries({ userId }) {
 
     useEffect(() => {
         getUsers();
+        // eslint-disable-next-line
+    }, []);
+
+    useEffect(() => {
+        fetchEntries();
         // eslint-disable-next-line
     }, []);
 
@@ -464,8 +503,8 @@ function GroupEntries({ userId }) {
 
     return (
         <ThemeProvider theme={theme}>
-            <Container>
-                <ContentContainer>
+            <FullScreenContainer>
+                <FullScreenContentContainer>
                     {/* Header */}
                     <HeaderContainer>
                         <HeaderRow>
@@ -676,8 +715,8 @@ function GroupEntries({ userId }) {
                             </ModalContent>
                         </ModalOverlay>
                     )}
-                </ContentContainer>
-            </Container>
+                </FullScreenContentContainer>
+            </FullScreenContainer>
         </ThemeProvider>
     );
 }

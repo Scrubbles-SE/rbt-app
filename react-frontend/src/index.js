@@ -210,16 +210,6 @@ const MainAppRoutes = ({ setIsLoggedIn, userId }) => {
                     />
                 }
             />
-
-            {/* Full Screen Routes */}
-            <Route
-                path="/groups/:groupId/:groupName"
-                element={<GroupEntries userId={userId} />}
-            />
-            <Route
-                path="/search/:tagId/:tagName"
-                element={<TagEntries />}
-            />
         </Routes>
     );
 };
@@ -363,6 +353,42 @@ const App = () => {
                             )
                         }
                     />
+
+                    {/* Full screen routes - rendered with isOnboarding to hide header/footer */}
+                    <Route
+                        path="/groups/:groupId/:groupName"
+                        element={
+                            isLoggedIn ? (
+                                <AppLayout isOnboarding={true}>
+                                    <GroupEntries
+                                        userId={userId}
+                                    />
+                                </AppLayout>
+                            ) : (
+                                <Navigate
+                                    to="/account"
+                                    replace
+                                />
+                            )
+                        }
+                    />
+                    <Route
+                        path="/search/:tagId/:tagName"
+                        element={
+                            isLoggedIn ? (
+                                <AppLayout isOnboarding={true}>
+                                    <TagEntries />
+                                </AppLayout>
+                            ) : (
+                                <Navigate
+                                    to="/account"
+                                    replace
+                                />
+                            )
+                        }
+                    />
+
+                    {/* Standard app routes with tabs */}
                     <Route
                         path="/*"
                         element={
