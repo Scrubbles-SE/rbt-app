@@ -3,9 +3,7 @@ import {
     userSchema,
     entrySchema,
     userEntriesSchema,
-    TagSchema,
-    MemberSchema,
-    GroupSchema
+    TagSchema
 } from "./user.js";
 
 import dotenv from "dotenv";
@@ -371,8 +369,6 @@ async function removeGroupFromUser(userId, groupId) {
         return false;
     }
 }
-
-
 
 export {
     addUser,
