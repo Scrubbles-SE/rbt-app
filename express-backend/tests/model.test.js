@@ -574,6 +574,63 @@ describe("Group Services", () => {
         expect(result).toBeDefined();
     });
 
+    // getAllGroups
+
+    test("Get all members of a group", async() => {
+        const memberObjects =
+            await GroupServices.getAllUsers("67d4ba5d5860f7296b55c1a2");
+
+        const expectedResult = [{"_id": "67d4bab95860f7296b55c1a3", "user_id": "67d304ee72b3353e97bd983a", "group_id": "67d4ba5d5860f7296b55c1a2"}];
+
+        expect(memberObjects["user_id"]).toBe(expectedResult["user_id"]);
+        expect(memberObjects["group_id"]).toBe(expectedResult["group_id"]);
+
+    });
+
+    test("Get all groups of a user", async() => {
+        const memberObjects = await GroupServices.getAllGroups("67d304ee72b3353e97bd983a");
+
+        const expectedResult = [{"_id": "67d4bab95860f7296b55c1a3", "user_id": "67d304ee72b3353e97bd983a", "group_id": "67d4ba5d5860f7296b55c1a2"}];
+        expect(memberObjects["user_id"]).toBe(expectedResult["user_id"]);
+        expect(memberObjects["group_id"]).toBe(expectedResult["group_id"]);
+
+    });
+
+
+    test("Remove user from group", async() => {
+        const groups =
+            await GroupServices.findGroupByCode("TEST123");
+        
+        
+        const result = await GroupServices.removeMember(testUserId, groups[0]._id);
+
+        const groupMembers = await GroupServices.getAllUsers(groups[0]._id);
+
+        const expectedResult = {"user_id: ": testUserId, "group_id": groups[0]._id};
+
+        expect(result["user_id"]).toEqual(testUserId);
+        expect(result["group_id"]).toEqual(groups[0]._id);
+
+        expect(groupMembers).not.toHaveProperty('user_id', testUserId);
+
+    });
+
+    test("Check if user is admin (is admin)", async() => {
+
+        const checkAdmin = await GroupServices.checkIfUserIsAdmin("67d304ee72b3353e97bd983a", "67d4ba5d5860f7296b55c1a2")
+        expect(checkAdmin).toEqual(true);
+
+    });
+
+    test("Check if user is admin (is not admin)", async() => {
+
+        const checkAdmin = await GroupServices.checkIfUserIsAdmin("67d4b77a826559af64e2bdea", "67d22dac66bca1749d04e04e")
+        expect(checkAdmin).toEqual(false);
+
+    });
+
+
+
     test("Join group error handling - invalid user", async () => {
         const result = await GroupServices.joinGroup(
             "invalid_id",
